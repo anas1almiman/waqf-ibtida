@@ -221,7 +221,10 @@ let curBg=-1;function setBg(v){const k=BGV[v];if(k==null||k===curBg)return;curBg
 const APP='وقف وابتداء';
 const APPSUB='مقاطع تامة المعنى لصلاتك';
 const PAGES=604;
-const PR={fajr:{n:'الفجر',lo:14,hi:21},maghrib:{n:'المغرب',lo:3,hi:5},isha:{n:'العشاء',lo:7,hi:10}};
+const PR={fajr:{n:'الفجر',lo:14,hi:16},maghrib:{n:'المغرب',lo:3,hi:4},isha:{n:'العشاء',lo:8,hi:9}};
+/* [الأفضل من، الأفضل إلى، يُقبل للمعنى إلى، الحد الأقصى] بالأسطر (داخلي) */
+const RANGES={jami:{fajr:[14,16,18,22],maghrib:[3,4,5,7],isha:[8,9,11,14]},hay:{fajr:[12,14,16,20],maghrib:[3,4,5,6],isha:[7,8,10,12]},road:{fajr:[10,12,14,17],maghrib:[2,3,4,5],isha:[5,7,8,10]}};
+function RG(p){return (RANGES[S&&S.role==='imam'?S.mosque:'hay']||RANGES.hay)[p]}
 const ORDER=['fajr','maghrib','isha'];
 const QISAR=93;
 const MUF={fajr:[50,77],isha:[78,92],maghrib:[93,114]};
@@ -279,11 +282,13 @@ const ENDPOS=D.P[NP-1][5];
 const STOP=new Set();const PIDX={};
 D.P.forEach((p,i)=>{STOP.add(p[0]+':'+p[2]);PIDX[p[0]+':'+p[2]]=i});
 function segLines(i,j){const r=D.R[i],k=j-i;return k>=0&&k<r.length?r[k]:Infinity}
-function inRange(p,n){return n>=PR[p].lo&&n<=PR[p].hi}
-function fits(p,i,j){const s=D.P[i][0];if(s===1)return false;const n=segLines(i,j);if(n===Infinity)return false;if(s>=QISAR)return p==='maghrib'&&i===j;return inRange(p,n)}
+function inRange(p,n){const r=RG(p);return n>=r[0]&&n<=r[1]}
+function inSoft(p,n){const r=RG(p);return n>=r[0]&&n<=r[2]}
+function inCap(p,n){const r=RG(p);return n>=Math.max(2,r[0]-2)&&n<=r[3]}
+function fits(p,i,j,soft){const s=D.P[i][0];if(s===1)return false;const n=segLines(i,j);if(n===Infinity)return false;if(s>=QISAR)return p==='maghrib'&&i===j;return soft?inSoft(p,n):inRange(p,n)}
 function fitName(n){for(const p of ORDER)if(inRange(p,n))return PR[p].n;return ''}
-const SEGS={fajr:[],maghrib:[],isha:[]};
-for(let i=0;i<NP;i++){const r=D.R[i];for(let k=0;k<r.length;k++)for(const p of ORDER)if(fits(p,i,i+k))SEGS[p].push([i,i+k])}
+let SEGS={fajr:[],maghrib:[],isha:[]},SOFT={fajr:[],maghrib:[],isha:[]};
+function buildSegs(){SEGS={fajr:[],maghrib:[],isha:[]};SOFT={fajr:[],maghrib:[],isha:[]};for(let i=0;i<NP;i++){const r=D.R[i];for(let k=0;k<r.length;k++)for(const p of ORDER){if(fits(p,i,i+k))SEGS[p].push([i,i+k]);else if(fits(p,i,i+k,true))SOFT[p].push([i,i+k])}}}
 const TOTL=D.P.reduce((a,p)=>a+p[3],0);
 const JUZL=new Array(31).fill(0);D.P.forEach(p=>{JUZL[p[6]]+=p[3]});
 function lines(s,a,b){const seen=new Set();for(let n=a;n<=b;n++){const pg=D.PG[s-1][n-1],ls=D.LS[s-1][n-1],le=D.LE[s-1][n-1];if(ls<=le){for(let l=ls;l<=le;l++)seen.add(pg*16+l)}else{for(let l=ls;l<16;l++)seen.add((pg-1)*16+l);for(let l=1;l<=le;l++)seen.add(pg*16+l)}}return seen.size}
@@ -311,6 +316,7 @@ function dump(){S.read=[...READ];S.nm=[...NM];return S}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(dump()))}catch(e){}}
 function save(){S.u=Date.now();saveLocal();pushRemote()}
 try{if(!load(JSON.parse(localStorage.getItem(KEY)||'null')))load(JSON.parse(localStorage.getItem('waqf-trial-v1')||'null'))}catch(e){}
+buildSegs();
 let ref=null,writing=false,dirty=false,sync='local';
 function unwrap(x){if(!x)return null;if(typeof x.data==='function')x=x.data();else if(x.exists===false)return null;else if(x.data&&typeof x.data==='object')x=x.data;if(!x||typeof x.json!=='string')return null;try{return JSON.parse(x.json)}catch(e){return null}}
 async function pushRemote(){if(!ref)return;if(writing){dirty=true;return}writing=true;try{await ref.set({json:JSON.stringify(dump()),u:S.u});sync='account'}catch(e){console.warn('sync',e)}writing=false;if(dirty){dirty=false;pushRemote()}}
@@ -322,7 +328,7 @@ async function initRemote(){
     const r=db.collection('data/users/'+id).doc('state');
     const got=await Promise.race([r.get(),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))]);
     const val=unwrap(got);ref=r;sync='account';
-    if(val&&(val.u||0)>S.u){load(val);saveLocal();render()}else if(!val||(val.u||0)<S.u){pushRemote()}
+    if(val&&(val.u||0)>S.u){load(val);buildSegs();saveLocal();render()}else if(!val||(val.u||0)<S.u){pushRemote()}
     if(view==='settings')render();
   }catch(e){console.warn('remote',e)}
 }
@@ -335,7 +341,7 @@ function allowed(p,sg){
   if(S.sunna[p]){const s=D.P[sg[0]][0];if(s<MUF[p][0]||s>MUF[p][1])return false}
   return true;
 }
-function pool(p){return SEGS[p].filter(sg=>avail(sg)&&allowed(p,sg))}
+function pool(p){const a=SEGS[p].filter(sg=>avail(sg)&&allowed(p,sg));if(a.length>=6)return a;return a.concat(SOFT[p].filter(sg=>avail(sg)&&allowed(p,sg)))}
 function pickB(A,L){
   let later=L.filter(B=>B[0]>A[1]);if(!later.length)return null;
   if(S.bmode==='other'){later=later.filter(B=>D.P[B[0]][0]>D.P[A[1]][0]);return later.length?rand(later):null}
@@ -348,7 +354,7 @@ function suggest(p,avoid){
   for(const A of order){if(avoid&&order.length>1&&same(A,avoid))continue;const B=pickB(A,L);if(B)return {a:A,b:B}}
   return null;
 }
-function valid(p,sg){return Array.isArray(sg)&&sg.length===2&&sg[0]<=sg[1]&&sg[1]<NP&&avail(sg)&&allowed(p,sg)&&fits(p,sg[0],sg[1])}
+function valid(p,sg){if(!(Array.isArray(sg)&&sg.length===2&&sg[0]<=sg[1]&&sg[1]<NP&&avail(sg)&&allowed(p,sg)))return false;const s=D.P[sg[0]][0];if(s>=QISAR)return fits(p,sg[0],sg[1]);return D.P[sg[1]][0]===s&&inCap(p,segLines(sg[0],sg[1]))}
 function current(p){const c=S.sug[p];if(c&&valid(p,c.a)&&valid(p,c.b)&&c.b[0]>c.a[1])return c;const n=suggest(p);S.sug[p]=n;save();return n}
 /* ================= view state ================= */
 let view='today',sub='new',prayer=defaultPrayer(),topicId=null,revSurah=2,revFilter='all',catSel='all',tq='',resetArmed=false,alts={},lastAdj=0,wAdj=0,stRole=null,showReciters=false;
@@ -684,10 +690,15 @@ function adjust(w,delta){
     if(S.noRepeat&&READ.has(j)){toast('ما بعده قرأته من قبل.');return}
     if(NM.has(j)){toast('ما بعده من «ما أحفظه».');return}
   }
-  if(!inRange(prayer,n)){const alt=fitName(n);toast((delta>0?'الوقف التام التالي بعيد؛ يصير المقطع أطول من '+PR[prayer].n:'لو قصّرت يصير المقطع أقصر من '+PR[prayer].n)+(alt?'، ويناسب '+alt+'.':'.'));return}
+  const rg=RG(prayer);let advice='';
+  if(n>rg[3]){toast('طويل جدًا على '+PR[prayer].n+'؛ الوقف التام التالي بعيد. الأنسب تختار مقطعًا آخر.');return}
+  if(n<Math.max(2,rg[0]-2)){toast('قصير جدًا على '+PR[prayer].n+'.');return}
+  if(n>rg[2])advice='صار أطول من المعتاد في '+PR[prayer].n+'؛ السنة والأفضل ألا يطول كثيرًا.';
+  else if(n>rg[1])advice='أطول قليلًا من الأفضل، ويُقبل لتمام المعنى.';
+  else if(n<rg[0])advice='أقصر قليلًا من الأفضل في '+PR[prayer].n+'.';
   if(w==='a'){const A2=[i,j];const follows=c.b[0]===c.a[1]+1;
     if(c.b[0]<=j||(S.bmode==='next'&&follows)){const B=pickB(A2,pool(prayer));if(!B){toast('ما بقي بعده مقطع يناسب الركعة الثانية.');return}c.a=A2;c.b=B;save();render();toast('تغيّرت الركعة الثانية لتكمل بعد الأولى.');return}}
-  c[w]=[i,j];save();render();
+  c[w]=[i,j];save();render();if(advice)toast(advice);
 }
 function markNM(sgs){sgs.forEach(sg=>{for(let x=sg[0];x<=sg[1];x++)NM.add(x)})}
 function notMem(w){const c=S.sug[prayer];if(!c)return;markNM([c[w]]);let n=null;if(w==='b'){const B=pickB(c.a,pool(prayer));if(B)n={a:c.a,b:B}}S.sug[prayer]=n||suggest(prayer);alts={};save();render();toast('ما راح نقترحه لك مرة ثانية؛ ترجعه من الإعدادات.')}
@@ -723,7 +734,7 @@ document.addEventListener('click',ev=>{
   case 'prayer':prayer=b.dataset.p;lastAdj=0;render();break;
   case 'role':stRole=k;S.role=k;render();break;
   case 'ropt':S[b.dataset.key]=b.dataset.key==='days'?+v:v;render();break;
-  case 'startgo':S.onb=true;S.sug={};alts={};stRole=null;save();view='today';render();window.scrollTo(0,0);break;
+  case 'startgo':buildSegs();S.onb=true;S.sug={};alts={};stRole=null;save();view='today';render();window.scrollTo(0,0);break;
   case 'read':{const c=S.sug[prayer];if(c)openReader({mode:'prayer',title:'صلاة '+PR[prayer].n,blocks:[{label:'الركعة الأولى',i:c.a[0],j:c.a[1]},{label:'الركعة الثانية',i:c.b[0],j:c.b[1]}]});break}
   case 'close':closeReader();break;
   case 'revmode':revMode=!revMode;revealN=0;drawReader();break;
@@ -755,7 +766,7 @@ document.addEventListener('click',ev=>{
   case 'tprayed':{const t=TOPICS.find(x=>x.id===topicId);if(!t)break;const cov=topicCovered(t);cov.forEach(x=>READ.add(x));S.hist.unshift({t:Date.now(),p:t.p,topic:t.id,cov:cov});save();closeReader();toast('تقبّل الله. سجّلتها في سجلك.');render();break}
   case 'undo':undo();break;
   case 'tg':{if(k.indexOf('.')>0){const [o,f]=k.split('.');S[o][f]=!S[o][f]}else S[k]=!S[k];if(k==='hifzOnly'&&S.hifzOnly&&!S.hifz.length){hifzDraft=null;view='hifz';toast('حدد محفوظك أولًا.')}S.sug={};alts={};save();render();break}
-  case 'setv':S[k]=k==='days'?+v:v;if(k==='days')wAdj=0;save();render();break;
+  case 'setv':S[k]=k==='days'?+v:v;if(k==='mosque'){buildSegs();S.sug={};alts={}}if(k==='days')wAdj=0;save();render();break;
   case 'bmode':S.bmode=v;S.sug={};alts={};save();render();toast(v==='other'?'الركعة الثانية من سورة أخرى، عشوائيًا.':v==='next'?'الركعة الثانية تكمل بعد الأولى.':'الركعة الثانية من أي موضع بعدها.');break;
   case 'reciters':showReciters=!showReciters;render();break;
   case 'reciter':S.reciter=v;showReciters=false;save();render();break;
