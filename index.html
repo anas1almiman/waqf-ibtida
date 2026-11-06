@@ -294,7 +294,7 @@ function isWhole(i,j){const s=D.P[i][0];return D.P[i][1]===1&&D.P[j][0]===s&&D.P
 function wordCount(i,j){let n=0;for(const [s,a] of ayatOf(i,j))n+=W(txt(s,a)).length;return n}
 /* ================= state ================= */
 const KEY='waqf-app-v2';
-function DEF(){return {v:2,onb:false,role:'imam',mosque:'hay',homeMode:'prayers',days:30,read:[],nm:[],hist:[],sug:{},cont:true,ordered:false,noRepeat:true,sunna:{fajr:false,maghrib:false,isha:false},hifzOnly:false,hifz:[],notify:true,theme:'auto',big:false,reciter:'الدوسري',wird:{pos:0,done:[],round:1},ram:{aud:'imam',plan:'A',idxA:0,idxB:1,tFirst:2,tLast:2,qLast:2,khatm:29,fard:{fajr:false,maghrib:false,isha:false},selfMode:'tens',count:2,tens:[1,2,3],sit:5,days:30,ok:false},rev:{},topics:{},share:{mosque:false,name:''},fs:26,last:null,u:0}}
+function DEF(){return {v:2,onb:false,role:'imam',mosque:'hay',homeMode:'prayers',days:30,read:[],nm:[],hist:[],sug:{},cont:true,bmode:'next',ordered:false,noRepeat:true,sunna:{fajr:false,maghrib:false,isha:false},hifzOnly:false,hifz:[],notify:true,theme:'auto',big:false,reciter:'الدوسري',wird:{pos:0,done:[],round:1},ram:{aud:'imam',plan:'A',idxA:0,idxB:1,tFirst:2,tLast:2,qLast:2,khatm:29,fard:{fajr:false,maghrib:false,isha:false},selfMode:'tens',count:2,tens:[1,2,3],sit:5,days:30,ok:false},rev:{},topics:{},share:{mosque:false,name:''},fs:26,last:null,u:0}}
 let S=DEF(),READ=new Set(),NM=new Set();
 function load(o){
   if(!o)return false;
@@ -303,6 +303,7 @@ function load(o){
   const d=DEF();S=Object.assign(d,o);
   ['sunna','wird','share'].forEach(k=>{S[k]=Object.assign(DEF()[k],o[k]||{})});
   S.ram=Object.assign(DEF().ram,o.ram||{});S.ram.fard=Object.assign(DEF().ram.fard,(o.ram||{}).fard||{});
+  if(!o.bmode)S.bmode=S.cont===false?'any':'next';
   READ=new Set(S.read||[]);NM=new Set(S.nm||[]);return true;
 }
 function dump(){S.read=[...READ];S.nm=[...NM];return S}
@@ -335,8 +336,9 @@ function allowed(p,sg){
 }
 function pool(p){return SEGS[p].filter(sg=>avail(sg)&&allowed(p,sg))}
 function pickB(A,L){
-  const later=L.filter(B=>B[0]>A[1]);if(!later.length)return null;
-  if(S.cont){const nx=later.filter(B=>B[0]===A[1]+1&&D.P[B[0]][0]===D.P[A[1]][0]);if(nx.length)return rand(nx);const f=Math.min.apply(null,later.map(B=>B[0]));return rand(later.filter(B=>B[0]===f))}
+  let later=L.filter(B=>B[0]>A[1]);if(!later.length)return null;
+  if(S.bmode==='other'){later=later.filter(B=>D.P[B[0]][0]>D.P[A[1]][0]);return later.length?rand(later):null}
+  if(S.bmode==='next'){const nx=later.filter(B=>B[0]===A[1]+1&&D.P[B[0]][0]===D.P[A[1]][0]);if(nx.length)return rand(nx);const f=Math.min.apply(null,later.map(B=>B[0]));return rand(later.filter(B=>B[0]===f))}
   return rand(later);
 }
 function suggest(p,avoid){
@@ -394,6 +396,7 @@ function vToday(){
   if(isWird())return vWird();
   let h=hd('مقطع اليوم',roleLink());
   h+=prayerSeg();
+  h+='<div class="chips" style="margin:-4px 0 12px"><span class="meta" style="align-self:center">الركعة الثانية:</span>'+BMODES.map(([v,l])=>'<button class="chip'+(S.bmode===v?' on':'')+'" data-act="bmode" data-v="'+v+'">'+l+'</button>').join('')+'</div>';
   if(S.last&&S.last.p===prayer&&Date.now()-S.last.t<6*3600e3)h+=doneCard();
   const c=current(prayer);
   if(!c)return h+emptyCard(prayer)+ramadanPromo();
@@ -499,6 +502,8 @@ function vStats(){
 function tgRow(t,s,k){const v=k.indexOf('.')>0?S[k.split('.')[0]][k.split('.')[1]]:S[k];return '<div class="card set"><p>'+t+(s?'<small>'+s+'</small>':'')+'</p><button class="tg'+(v?' on':'')+'" data-act="tg" data-k="'+k+'" aria-label="'+t+'"></button></div>'}
 function linkRow(t,s,v){return '<button class="card go" data-act="go" data-v="'+v+'"><span><b>'+t+'</b>'+(s?'<small>'+s+'</small>':'')+'</span></button>'}
 function segRow(t,k,opts){return '<div class="card"><p style="margin:0 0 8px">'+t+'</p><div class="seg" style="margin:0">'+opts.map(([v,l])=>'<button data-act="setv" data-k="'+k+'" data-v="'+v+'" class="'+(String(S[k])===String(v)?'on':'')+'">'+l+'</button>').join('')+'</div></div>'}
+const BMODES=[['next','تكمل بعد الأولى'],['other','من سورة أخرى'],['any','أي موضع بعدها']];
+function bmodeRow(){return '<div class="card"><p style="margin:0 0 8px">الركعة الثانية<small>دائمًا بعد الأولى في ترتيب المصحف</small></p><div class="seg" style="margin:0">'+BMODES.map(([v,l])=>'<button data-act="bmode" data-v="'+v+'" class="'+(S.bmode===v?'on':'')+'">'+l+'</button>').join('')+'</div></div>'}
 function hifzLabel(){const c=S.hifz.length;return c===30?'القرآن كاملًا':c===0?'لم تحدد شيئًا':pl(c,'جزء','جزآن','أجزاء','جزءًا')}
 function notifyPreview(){
   const p='maghrib';const c=S.sug[p]&&valid(p,S.sug[p].a)?S.sug[p]:current(p);
@@ -519,7 +524,7 @@ function vSettings(){
   h+='<div class="card"><p style="margin:0"><b>السنة في المفصل</b><small>تُنتقى المقاطع من القرآن كله. فعّل الخيار لصلاة معينة لتقرأ فيها من المفصل على السنة.</small></p>'+ORDER.map(p=>'<div class="tgl"><span>'+PR[p].n+' · '+MUFN[p]+'</span><button class="tg'+(S.sunna[p]?' on':'')+'" data-act="tg" data-k="sunna.'+p+'" aria-label="'+PR[p].n+'"></button></div>').join('')+'</div>';
   h+=tgRow('منع تكرار المقاطع','لا يُقترح عليك ما قرأته حتى تمر على المصحف كاملًا','noRepeat');
   h+=tgRow('ختمة مخططة','اختياري: تمشي المقاطع على ترتيب المصحف','ordered');
-  h+=tgRow('الركعة الثانية تكمل بعد الأولى','إذا أطفأتها: تأتي الثانية من موضع لاحق في المصحف','cont');
+  h+=bmodeRow();
   h+='<h2>التنبيه والعرض</h2>';
   h+='<div class="card"><div class="set"><p>التنبيه قبل الصلاة<small>يصلك مقطع الصلاة لتراجعه قبلها، حسب مواقيت مدينتك</small></p><button class="tg'+(S.notify?' on':'')+'" data-act="tg" data-k="notify" aria-label="التنبيه"></button></div>'+(S.notify&&!isWird()?notifyPreview():'')+'</div>';
   h+=segRow('الوضع الليلي','theme',[['auto','قبل الفجر تلقائيًا'],['dark','دائمًا'],['light','لا']]);
@@ -680,7 +685,7 @@ function adjust(w,delta){
   }
   if(!inRange(prayer,n)){const alt=fitName(n);toast((delta>0?'الوقف التام التالي بعيد؛ يصير المقطع أطول من '+PR[prayer].n:'لو قصّرت يصير المقطع أقصر من '+PR[prayer].n)+(alt?'، ويناسب '+alt+'.':'.'));return}
   if(w==='a'){const A2=[i,j];const follows=c.b[0]===c.a[1]+1;
-    if(c.b[0]<=j||(S.cont&&follows)){const B=pickB(A2,pool(prayer));if(!B){toast('ما بقي بعده مقطع يناسب الركعة الثانية.');return}c.a=A2;c.b=B;save();render();toast('تغيّرت الركعة الثانية لتكمل بعد الأولى.');return}}
+    if(c.b[0]<=j||(S.bmode==='next'&&follows)){const B=pickB(A2,pool(prayer));if(!B){toast('ما بقي بعده مقطع يناسب الركعة الثانية.');return}c.a=A2;c.b=B;save();render();toast('تغيّرت الركعة الثانية لتكمل بعد الأولى.');return}}
   c[w]=[i,j];save();render();
 }
 function markNM(sgs){sgs.forEach(sg=>{for(let x=sg[0];x<=sg[1];x++)NM.add(x)})}
@@ -750,6 +755,7 @@ document.addEventListener('click',ev=>{
   case 'undo':undo();break;
   case 'tg':{if(k.indexOf('.')>0){const [o,f]=k.split('.');S[o][f]=!S[o][f]}else S[k]=!S[k];if(k==='hifzOnly'&&S.hifzOnly&&!S.hifz.length){hifzDraft=null;view='hifz';toast('حدد محفوظك أولًا.')}S.sug={};alts={};save();render();break}
   case 'setv':S[k]=k==='days'?+v:v;if(k==='days')wAdj=0;save();render();break;
+  case 'bmode':S.bmode=v;S.sug={};alts={};save();render();toast(v==='other'?'الركعة الثانية من سورة أخرى، عشوائيًا.':v==='next'?'الركعة الثانية تكمل بعد الأولى.':'الركعة الثانية من أي موضع بعدها.');break;
   case 'reciters':showReciters=!showReciters;render();break;
   case 'reciter':S.reciter=v;showReciters=false;save();render();break;
   case 'reset':if(!resetArmed){resetArmed=true;render();return}resetArmed=false;READ.clear();S.hist=[];S.sug={};S.last=null;S.wird={pos:0,done:[],round:1};alts={};save();render();toast('بدأت من جديد.');break;
