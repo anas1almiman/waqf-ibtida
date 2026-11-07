@@ -517,6 +517,17 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .mini span{width:38px!important;height:38px!important;border-radius:12px!important}
 .mini svg{width:22px!important;height:22px!important}
 @media (max-height:740px){.hhero{min-height:calc(20vh + var(--sat))!important}.ptile{padding:7px 12px!important}.mini{padding:7px 0 6px!important}}
+
+/* v24: calm gold descriptions, more gilding */
+.ocard small{color:#C8AE6E!important;font-size:13.5px!important}
+.ocard.on small{color:#E3C982!important}
+.sect::before{content:'';width:7px;height:7px;transform:rotate(45deg);background:linear-gradient(135deg,#F3DC9A,#B8913C);box-shadow:0 0 0 2px rgba(201,162,79,.18);flex:none}
+.card.accent{box-shadow:var(--shadow),inset 0 0 0 1px rgba(226,190,110,.25),inset 0 0 0 4px var(--card),inset 0 0 0 5px rgba(226,190,110,.28)}
+.btn.primary{box-shadow:inset 0 0 0 1px rgba(233,200,117,.55),0 6px 16px rgba(14,74,58,.22)}
+.ptile .pi,.mini span{box-shadow:inset 0 0 0 1px rgba(233,200,117,.35)}
+.hero h1,.hh-next b{background:linear-gradient(180deg,#FFF3CF 0%,#F0D58E 45%,#C99B42 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;text-shadow:none!important;filter:drop-shadow(0 2px 1px rgba(0,0,0,.35))}
+.bar .bt,.topbar h2,.bar b{letter-spacing:.2px}
+.card .rk{color:var(--gold)}
 </style>
 </head>
 <body>
@@ -608,8 +619,8 @@ function MEDAL(id,o){o=o||{};const g='url(#'+id+')';let s='<svg viewBox="0 0 200
 function goldText(id,lines,o){o=o||{};const W=o.w||380,lh=o.lh||46,fs=o.fs||25,H=lines.length*lh+(o.pad||20);let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF1C2"/><stop offset=".45" stop-color="#E7C46D"/><stop offset=".7" stop-color="#B98A2E"/><stop offset="1" stop-color="#F0D387"/></linearGradient><linearGradient id="'+id+'s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#FFFDF0" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/><animateTransform attributeName="gradientTransform" type="translate" values="-1 0;1.4 0;1.4 0" keyTimes="0;.7;1" dur="3.4s" repeatCount="indefinite"/></linearGradient><filter id="'+id+'f" x="-5%" y="-20%" width="110%" height="150%"><feDropShadow dx="0" dy="2.4" stdDeviation="1.6" flood-color="#2A1B04" flood-opacity=".7"/></filter></defs>';
  lines.forEach((t,k)=>{const y=lh*(k+1)-(lh-fs)/2+4;const at='x="'+W/2+'" y="'+y+'" text-anchor="middle" font-family="'+(o.font||"'Amiri Quran','Amiri',serif")+'" font-size="'+fs+'"'+(o.bold?' font-weight="700"':'');s+='<text '+at+' fill="url(#'+id+')" filter="url(#'+id+'f)">'+t+'</text><text '+at+' fill="url(#'+id+'s)" style="mix-blend-mode:soft-light">'+t+'</text>'});
  return s+'</svg>'}
-const ROLES=[{k:'imam',t:'إمام مسجد',s:'مقاطع للصلوات الجهرية بمقدار يناسب جماعتك',ic:'mosque'},{k:'home',t:'المصلّي في بيته',s:'مقاطع لصلواتك، أو ختمة تقرؤها',ic:'home'},{k:'self',t:'ختمة خاصة',s:'وِرد يومي يبدأ وينتهي عند معنى تام',ic:'read'}];
-const ROLEQ={imam:{t:'ساعدنا أكثر بالتعرف على إمامتك',key:'mosque',o:[['jami','جامع',MOSQUEN.jami],['hay','مسجد داخل حي',MOSQUEN.hay],['road','مسجد محطة أو طريق عام',MOSQUEN.road]]},home:{t:'ساعدنا أكثر بالتعرف عليك',key:'homeMode',o:[['prayers','ترتيب مقاطع لصلواتي','ركعتان لكل صلاة جهرية'],['khatma','ترتيب لختمة قرآنية','وِرد يومي حتى تختم']]},self:{t:'خلال كم يوم تحب تختم؟',key:'days',o:[['7','سبعة أيام','نحو أربعة أجزاء ونصف يوميًا'],['15','خمسة عشر يومًا','جزءان يوميًا'],['30','ثلاثون يومًا','جزء يوميًا'],['60','ستون يومًا','نصف جزء يوميًا']]}};
+const ROLES=[{k:'imam',t:'إمامة الصلاة',s:'آيات مختارة تناسب القراءة في الصلوات الجهرية.',ic:'mosque'},{k:'home',t:'الصلاة منفردًا',s:'آيات تعين على تدبّر المعاني واستحضارها في الصلاة.',ic:'home'},{k:'self',t:'ختمة القرآن',s:'قراءة متتابعة تراعي مواضع الوقف واكتمال المعاني.',ic:'read'}];
+const ROLEQ={imam:{t:'اختر ما يناسب طبيعة إمامتك',key:'mosque',o:[['jami','الجامع','إطالة في الفجر، واعتدال في العشاء، وتخفيف في المغرب.'],['hay','مسجد الحي','قراءة متوسطة، تراعي أحوال جماعة المسجد.'],['road','مسجد الطريق والمحطة','قراءة يسيرة، تراعي أحوال المسافرين.']]},home:{t:'كيف تفضّل ترتيب قراءتك؟',key:'homeMode',o:[['prayers','القراءة بحسب الصلوات','توزيع الآيات على ركعتي كل صلاة جهرية.'],['khatma','القراءة بحسب الختمة','قراءة متتابعة للقرآن الكريم حتى إتمام الختمة.']]},self:{t:'ما المدة التي تناسبك لختم القرآن؟',key:'days',o:[['7','سبعة أيام','نحو أربعة أجزاء وربع يوميًا.'],['15','خمسة عشر يومًا','جزآن يوميًا.'],['30','ثلاثون يومًا','جزء يوميًا.'],['60','ستون يومًا','نصف جزء يوميًا.']]}};
 const CATS=[['all','الكل'],['calm','الطمأنينة والمواساة'],['sermons','المواعظ'],['adab','الآداب'],['dhikr','الذكر والشكر والدعاء'],['reflect','التأمل والتفكر'],['tawhid','عظمة الله وتدبيره'],['ibada','العبادات'],['ahkam','الأحكام والمعاملات'],['sira','السيرة والغزوات'],['akhira','اليوم الآخر'],['stories','القصص'],['occasions','المناسبات']];
 const TOPICS=[
  {id:'calm',title:'آيات الطمأنينة',cats:['calm'],catL:'الطمأنينة والمواساة',p:'maghrib',tags:'طمأنينة سكينة ذكر رحمة',status:'ok',
@@ -1212,16 +1223,17 @@ function vReview(){
   return x;
 }
 /* ---- onboarding (golden) ---- */
+function stFlow(){const role=stRole||S.role;return role==='home'?(S.homeMode==='khatma'?['role','q','days','loc']:['role','q','loc']):['role','q','loc']}
 function vStart(){
-  const role=stRole||S.role;const q=ROLEQ[role];const cur2=String(S[q.key]);
+  const role=stRole||S.role;const FL=stFlow();if(stStep>FL.length-1)stStep=FL.length-1;const sk=FL[stStep];const q=sk==='days'?ROLEQ.self:ROLEQ[role];const cur2=String(S[q.key]);
   let x='<div class="ob">';
   if(stStep>0)x+='<button class="link" style="text-align:right;padding:0 2px 6px;width:auto" data-act="stback">رجوع</button>';
   x+='<div class="emb">'+MEDAL('ob1')+'</div>'+(stStep===0?'<div style="width:100%;max-width:300px;margin:0 auto">'+'<div class="gw ob-nm" role="img" aria-label="وقف وابتداء"><div class="gm"></div></div><div class="gw ob-mt" role="img" aria-label="هدي الوقف، وهدى المعنى"><div class="gm"></div></div></div>':'');
-  x+='<div class="dots"><i class="'+(stStep===0?'on':'')+'"></i><i class="'+(stStep===1?'on':'')+'"></i><i class="'+(stStep===2?'on':'')+'"></i></div>';
-  if(stStep===0){
+  x+='<div class="dots">'+FL.map((s,k)=>'<i class="'+(stStep===k?'on':'')+'"></i>').join('')+'</div>';
+  if(sk==='role'){
     x+='<div class="stitle">ساعدنا بالتعرف عليك</div><div class="ocards">'+ROLES.map(r=>'<button class="ocard'+(r.k===role?' on':'')+'" data-act="role" data-k="'+r.k+'"><span class="ri">'+ICON[r.ic]+'</span><span><b>'+r.t+'</b><small>'+r.s+'</small></span></button>').join('')+'</div>';
     x+='<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button></div>';
-  }else if(stStep===1){
+  }else if(sk==='q'||sk==='days'){
     x+='<div class="stitle">'+q.t+'</div><div class="ocards">'+q.o.map(([v,l,s])=>'<button class="ocard'+(cur2===v?' on':'')+'" data-act="ropt" data-key="'+q.key+'" data-v="'+v+'"><span><b>'+l+'</b>'+(s?'<small>'+s+'</small>':'')+'</span></button>').join('')+'</div>';
     x+='<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button></div>';
   }else{
@@ -1586,7 +1598,7 @@ document.addEventListener('click',ev=>{
   case 'wirdnew':S.wird={pos:0,done:[],round:(S.wird.round||1)+1};save();render();break;
   case 'role':stRole=k;S.role=k;render();break;
   case 'ropt':S[b.dataset.key]=b.dataset.key==='days'?+v:v;render();break;
-  case 'stnext':stStep=Math.min(2,stStep+1);show(1,0);break;
+  case 'stnext':stStep=Math.min(stFlow().length-1,stStep+1);show(1,0);break;
   case 'stback':stStep=Math.max(0,stStep-1);show(-1,0);break;
   case 'startgo':buildSegs();S.onb=true;S.sug={};stRole=null;stStep=0;save();closeSheet();STACK=[{v:'home'}];try{history.replaceState({d:1},'')}catch(e){}show(1,0);break;
   }
