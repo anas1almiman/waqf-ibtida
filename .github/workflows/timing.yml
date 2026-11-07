@@ -2,7 +2,7 @@ name: timing
 on:
   push:
     branches: [audio-lab]
-    paths: ['.github/workflows/timing.yml', 'tools/align.py']
+    paths: ['.github/workflows/timing.yml', 'tools/*.py']
 permissions:
   contents: write
 jobs:
@@ -17,13 +17,14 @@ jobs:
     needs: ref
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - {name: v_burhaji, base: 'https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', ref: 282, truth: 340}
-          - {name: v_buaijan, base: 'https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/', ref: 282, truth: 58}
+          - {name: v_burhaji, base: 'https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', truth: 340}
+          - {name: v_buaijan, base: 'https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/', truth: 58}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: {name: refs, path: out/}
-      - run: sudo apt-get -qq install -y ffmpeg >/dev/null && pip -q install numpy
-      - run: python3 tools/align.py align ${{ matrix.name }} ${{ matrix.base }} ${{ matrix.ref }} ${{ matrix.truth }} 1,2,12,18,36,50,55,67,78,81,84,88,93,113
+      - run: sudo apt-get -qq install -y ffmpeg >/dev/null && pip -q install numpy numba librosa
+      - run: python3 tools/dtw.py ${{ matrix.name }} ${{ matrix.base }} https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/ 282 ${{ matrix.truth }} 1,2,12,18,36,50,55,67,78,81,84,88,93,113
