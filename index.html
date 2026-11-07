@@ -9,16 +9,16 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="وقف وابتداء">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=8">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=8">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=8">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=9">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=9">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=9">
 <title>وقف وابتداء</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Amiri+Quran&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F3EDE1;--card:#FFFCF6;--ink:#1D1913;--ink2:#3B342A;--muted:#7A6E5D;--em:#0E4A3A;--em1:#145B47;--em2:#E3ECE5;--gold:#94701F;--gold2:#C9A24F;--gold3:#ECDDB6;--line:#E5D9C1;--chip:#F7F0E2;--warn:#9B2C2C;--warn2:#F4E1DE;--paper:#FBF7EE;--barbg:rgba(243,237,225,.86);--shadow:0 18px 36px -26px rgba(70,48,10,.55);--qs:27px;--ease:cubic-bezier(.2,.8,.2,1);--gg:linear-gradient(135deg,#F8E6A8 0%,#DDB65C 30%,#B4862C 55%,#E9CB7D 80%,#A97C27 100%);--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom)}
-body.dark{--bg:#0A1511;--card:#10201A;--ink:#EEE6D4;--ink2:#D7CDB8;--muted:#A1957E;--em:#88CBB0;--em1:#1E6B54;--em2:#16302A;--gold:#D9B868;--gold2:#B8953E;--gold3:#3A3220;--line:#24372E;--chip:#13261F;--warn:#F09A9A;--warn2:#3A2424;--paper:#0D1A14;--barbg:rgba(10,21,17,.86);--shadow:0 18px 36px -26px rgba(0,0,0,.85)}
+:root{--bgrgb:243,237,225;--bg:#F3EDE1;--card:#FFFCF6;--ink:#1D1913;--ink2:#3B342A;--muted:#7A6E5D;--em:#0E4A3A;--em1:#145B47;--em2:#E3ECE5;--gold:#94701F;--gold2:#C9A24F;--gold3:#ECDDB6;--line:#E5D9C1;--chip:#F7F0E2;--warn:#9B2C2C;--warn2:#F4E1DE;--paper:#FBF7EE;--barbg:rgba(243,237,225,.86);--shadow:0 18px 36px -26px rgba(70,48,10,.55);--qs:27px;--ease:cubic-bezier(.2,.8,.2,1);--gg:linear-gradient(135deg,#F8E6A8 0%,#DDB65C 30%,#B4862C 55%,#E9CB7D 80%,#A97C27 100%);--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom)}
+body.dark{--bgrgb:10,21,17;--bg:#0A1511;--card:#10201A;--ink:#EEE6D4;--ink2:#D7CDB8;--muted:#A1957E;--em:#88CBB0;--em1:#1E6B54;--em2:#16302A;--gold:#D9B868;--gold2:#B8953E;--gold3:#3A3220;--line:#24372E;--chip:#13261F;--warn:#F09A9A;--warn2:#3A2424;--paper:#0D1A14;--barbg:rgba(10,21,17,.86);--shadow:0 18px 36px -26px rgba(0,0,0,.85)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
 html,body{margin:0;color:var(--ink);font-family:'Amiri','Traditional Arabic','Times New Roman',serif;font-size:17px}
@@ -126,7 +126,7 @@ body.dark .tag.gold{color:#E9CF8C}
 .danger{background:var(--card);color:var(--warn);border:1px solid var(--warn2)}
 .dangerf{background:var(--warn);color:#fff}
 .row2{display:flex;gap:10px}.row2 .btn{flex:1}
-.row3{display:flex;gap:8px}.row3 .btn{flex:1}
+.row3{display:flex;gap:8px}.row3>*{flex:1}.row3 .btn{flex:1}
 .link{display:block;width:100%;border:0;background:none;color:var(--em);font-size:15.5px;text-align:center;padding:12px 6px;text-decoration:underline;text-underline-offset:5px}
 .banner{border:1px solid var(--gold2);background:linear-gradient(180deg,var(--gold3),var(--card))}
 body.dark .banner{background:linear-gradient(180deg,#2A2416,var(--card))}
@@ -427,11 +427,35 @@ body.bookmode .bk,body.bookmode .ib{color:#E7C97F}
 .minis{grid-template-columns:repeat(5,1fr);gap:8px}
 .mini{font-size:14px;padding:12px 0 9px}
 .mini span{width:40px;height:40px}
+
+/* full-screen photo wash */
+#bgw{position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--bg)}
+#bgw i{position:absolute;inset:-12px;background:center/cover no-repeat;opacity:0;transition:opacity .9s ease;filter:saturate(.55) blur(1.5px)}
+#bgw i.on{opacity:.36}
+body.dark #bgw i.on{opacity:.22}
+body.reading #bgw i.on{opacity:.10}
+#bgw::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(var(--bgrgb),.05) 0%,rgba(var(--bgrgb),.35) 50%,rgba(var(--bgrgb),.6) 100%)}
+html.onb #bgw,html.bookmode #bgw{display:none}
+html{background:var(--bg)}html.dk{background:#0A1511}body{background:transparent!important}
+html.onb,html.onb body{background:radial-gradient(110% 70% at 50% 18%,#1A5843 0%,#0B2D22 48%,#04120D 100%) no-repeat #04120D!important}
+html.bookmode,html.bookmode body{background:#16100a!important}
+#bgw{background:transparent}
+/* gold hairlines («تكحيل») */
+.card{border-color:rgba(201,162,79,.28)}
+.card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;background:linear-gradient(140deg,rgba(226,190,110,.75),rgba(226,190,110,0) 32%,rgba(226,190,110,0) 68%,rgba(226,190,110,.6));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.sect{position:relative}
+.bar{box-shadow:0 1px 0 rgba(201,162,79,.35)}
+.hero::after,.hhero::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,#E9C875 20%,#FFF0C2 50%,#E9C875 80%,transparent);opacity:.9}
+.chipb{border-color:rgba(201,162,79,.55)!important}
+/* touch feedback */
+.card.go,.btn,.ptile,.chipb,.opt,.mini,.ib{transition:transform .16s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease,background-color .2s ease}
+.card.go:active,.btn:active,.ptile:active,.chipb:active,.opt:active,.mini:active{transform:scale(.972)}
+@media (prefers-reduced-motion:reduce){#bgw i{transition:none}}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"></div>
-<div class="wrap" id="app"></div>
+<div id="bgw" aria-hidden="true"><i></i><i></i></div><div class="wrap" id="app"></div>
 <div id="sheet" aria-hidden="true"><div class="scrim" data-act="closesheet"></div><div id="sheetbox"></div></div>
 <button class="fab" id="fab" data-act="play" aria-label="استماع" hidden></button>
 <div class="aprox" id="aprox" hidden><span>توقيت تقريبي</span><button data-act="nudge" data-d="-5" aria-label="رجوع خمس ثوانٍ">−٥ ث</button><button data-act="nudge" data-d="5" aria-label="تقدّم خمس ثوانٍ">+٥ ث</button></div>
@@ -457,7 +481,7 @@ const SAJ=new Set(['7:206','13:15','16:50','17:109','19:58','22:18','22:77','25:
 const MOSQUE={jami:'جامع',hay:'مسجد حي',road:'مسجد طريق'};
 const MOSQUEN={jami:'إطالة في الفجر، وتوسّط في العشاء، وتخفيف في المغرب.',hay:'أخفّ من الجامع قليلًا.',road:'أخفّ المقادير، مراعاةً لحال المسافرين.'};
 const ROLEN={imam:'إمام مسجد',home:'مصلٍّ في بيته',self:'ختمة خاصة'};
-const BOOKS={M:['الأشموني','منار الهدى في بيان الوقف والابتدا'],Q:['زكريا الأنصاري','المقصد لتلخيص ما في المرشد'],K:['أبو عمرو الداني','المكتفى في الوقف والابتدا']};
+const BOOKS={M:['الأشموني','منار الهدى في بيان الوقف والابتداء'],Q:['زكريا الأنصاري','المقصد لتلخيص ما في المرشد'],K:['أبو عمرو الداني','المكتفى في الوقف والابتداء']};
 const RUL={'تام':'وقف تام','كاف':'وقف كافٍ','حسن':'وقف حسن','جائز':'وقف جائز','صالح':'وقف صالح','مفهوم':'وقف مفهوم','ليس بوقف':'ليس بموضع وقف','قبيح':'وقف قبيح','أحسن':'وقف أحسن'};
 const BASIS={t:'تام عند الأشموني والأنصاري، وما بعده مستقل',r:'تام عند الأشموني أو الأنصاري، وروجع المعنى وما بعده',m:'مراجعة يدوية (سورة هود)',e:'آخر السورة',d:'تام أو كافٍ عند أحد المصادر، وروجع المعنى وما بعده',c:'افتتاح قصة أو خطاب جديد ظاهر، وروجع المعنى',f:'مطلع جزء أو موضوع جديد، وروجع المعنى',n:'أُضيف في مراجعة الابتداء: تام أو كافٍ عند أحد المصادر، وما بعده مطلع معنى مستقل',x:'أُضيف في مراجعة الابتداء: تام أو كافٍ عند مصدر وحسن عند آخر، وما بعده مطلع مشهد أو حكم جديد',j:'أُضيف اجتهادًا: لم يظهر نص الحكم في النسخ الممسوحة، والوقف تام المعنى وما بعده مطلع ظاهر'};
 const IB={t:'نص',r:'نص',d:'نص',n:'نص',m:'مراجعة يدوية',x:'نص مع خلاف',c:'اجتهاد',f:'اجتهاد',j:'اجتهاد',e:'—'};const IJT='cfjx';
@@ -739,9 +763,9 @@ function restore(){try{const o=JSON.parse(sessionStorage.getItem(VKEY)||'null');
 function show(dir,y){
   const app=$('app');
   if(dir&&!RM&&app.firstChild){const g=app.cloneNode(true);g.removeAttribute('id');g.classList.add('ghost');g.style.top=(-window.scrollY)+'px';document.body.appendChild(g);
-    try{g.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateX('+(dir>0?26:-26)+'px) scale(.985)'}],{duration:210,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'}).onfinish=()=>g.remove()}catch(e){g.remove()}}
+    try{g.animate([{opacity:1,transform:'none',filter:'none'},{opacity:0,transform:'translateX('+(dir>0?22:-22)+'px) scale(.965)',filter:'blur(1.5px)'}],{duration:300,easing:'cubic-bezier(.4,0,.9,.6)',fill:'forwards'}).onfinish=()=>g.remove()}catch(e){g.remove()}}
   ENTER=!!dir;render();ENTER=false;window.scrollTo(0,y||0);
-  if(dir&&!RM){try{app.animate([{opacity:0,transform:'translateX('+(dir>0?-36:36)+'px)'},{opacity:1,transform:'none'}],{duration:430,delay:70,fill:'backwards',easing:'cubic-bezier(.2,.8,.2,1)'})}catch(e){}}
+  if(dir&&!RM){try{const E='cubic-bezier(.22,1,.36,1)';app.animate([{opacity:0,transform:'translateX('+(dir>0?-30:30)+'px) scale(.985)'},{opacity:1,transform:'none'}],{duration:560,delay:60,fill:'backwards',easing:E});[...app.children].slice(0,9).forEach((c,k)=>{if(k)c.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:520,delay:110+k*50,fill:'backwards',easing:E})})}catch(e){}}
   persist();
 }
 function navPush(r){persist();auStop();STACK.push(r);try{history.pushState({d:STACK.length},'')}catch(e){}show(1,0)}
@@ -781,21 +805,24 @@ function rakCard(label,sg,w){
   if(S.hifzOnly&&S.hifz.length)tags.push(['من محفوظك','']);
   if(hasSajda(i,j))tags.push(['فيه سجدة تلاوة','gold']);
   return '<div class="card accent"><div class="cardtop"><span class="rk">'+label+'</span><span class="meta">الصفحة '+AR(D.P[i][4])+'</span></div><div class="cart">سورة '+D.N[s-1]+(isWhole(i,j)?'':' <small>'+ayRange(i,j)+'</small>')+'</div>'+(tags.length?'<div class="tags">'+tags.map(t=>'<span class="tag '+t[1]+'">'+t[0]+'</span>').join('')+'</div>':'')+startEnd(i,j)+
-  '<div class="rkf">'+dalilBtn(j,i)+tafBtn(i,j)+(w?'<button class="chipb plain" data-act="tools" data-w="'+w+'">'+ICON.tune+'تعديل</button>':'')+'</div></div>';
+  '<div class="rkf">'+dalilBtn(j,i)+tafBtn(i,j)+(w?'<button class="chipb plain" data-act="tools" data-w="'+w+'">'+ICON.tune+'تعديل المقدار</button>':'')+'</div></div>';
 }
 function miniSeg(sg){const [i,j]=sg;const s=D.P[i][0];return 'سورة '+D.N[s-1]+(isWhole(i,j)?' كاملة':'، '+ayRange(i,j))}
 function dateLine(d){d=d||new Date();const h=hijri(d);return weekday(d)+(h?' '+h.t:'')}
 /* ================= views ================= */
 const VIEWS={library:vLibrary,book:vBook,home:vHome,prayer:vPrayer,reader:vReader,topics:vTopics,topic:vTopic,record:vRecord,settings:vSettings,about:vAbout,hifz:vHifz,ramadan:vRamadan,review:vReview,wird:vWird};
+let BGW=-1,BGK=0;function bgwSet(v){if(typeof BGS==='undefined')return;let i=BGP[v];if(i==null)i=BGP.home;if(i===BGW)return;BGW=i;const L=document.querySelectorAll('#bgw i');if(!L.length)return;BGK^=1;L[BGK].style.backgroundImage='url('+BGS[i]+')';L[BGK].classList.add('on');L[BGK^1].classList.remove('on')}
 function render(){
   applyTheme();
   document.documentElement.classList.toggle('onb',!S.onb);
   if(!S.onb){document.body.classList.remove('bookmode');document.documentElement.classList.remove('bookmode');document.body.classList.remove('reading');$('app').innerHTML=vStart();fabSync();return}
   const r=cur();document.body.classList.toggle('reading',r.v==='reader');document.body.classList.toggle('bookmode',r.v==='book');document.documentElement.classList.toggle('bookmode',r.v==='book');
-  $('app').innerHTML=(VIEWS[r.v]||vHome)(r);barSync();fabSync();if(r.v==='book')bkMount();
+  $('app').innerHTML=(VIEWS[r.v]||vHome)(r);bgwSet(r.v);barSync();parallax();fabSync();if(r.v==='book')bkMount();
 }
+function parallax(){if(RM)return;const h=document.querySelector('#app .hero,#app .hhero');if(h)h.style.backgroundPosition='center calc(50% + '+Math.min(120,window.scrollY*0.32).toFixed(1)+'px)'}
+window.addEventListener('scroll',()=>{requestAnimationFrame(parallax)},{passive:true});
 function barSync(){const b=document.querySelector('#app .bar[data-ov]');if(b)b.classList.toggle('over',window.scrollY<150)}
-function applyTheme(){const h=new Date().getHours();const dark=S.theme==='dark'||(S.theme==='auto'&&h>=2&&h<6);document.body.classList.toggle('dark',dark);document.body.classList.toggle('big',!!S.big)}
+function applyTheme(){const h=new Date().getHours();const dark=S.theme==='dark'||(S.theme==='auto'&&h>=2&&h<6);document.body.classList.toggle('dark',dark);document.documentElement.classList.toggle('dk',dark);document.body.classList.toggle('big',!!S.big)}
 /* ---- home ---- */
 function vHome(){
   const np=nextPrayer();const t=S.loc?todayTimes(new Date()):null;const hj=hijri(new Date());
@@ -903,7 +930,7 @@ function vTopics(){
 function topicItems(){
   const q=tq.trim();const items=TOPICS.filter(t=>(catSel==='all'||t.cats.indexOf(catSel)>=0)&&(!q||(t.title+' '+t.tags+' '+allSurahs(t)).indexOf(q)>=0));
   if(!items.length)return '<div class="card empty">لا توجد مجموعة في هذا الموضوع بعد.</div>';
-  return items.map(t=>{const st=topicStatus(t);return '<button class="card accent go" data-act="topic" data-id="'+t.id+'"><span><span class="cardtop"><b style="font-size:18.5px;color:var(--em)">'+t.title+'</b></span><span class="meta">'+(t.sets?(t.sets.length===1?'موضع واحد':t.sets.length===2?'موضعان':AR(t.sets.length)+(t.sets.length<=10?' مواضع':' موضعًا'))+' · '+allSurahs(t).split(' ').slice(0,4).join('، '):PR[t.p].n+' · '+surahsOf(t))+'</span>'+(st==='ok'?'':'<span class="tags"><span class="tag gold">'+({pending:'بانتظار الاعتماد',edit:'يحتاج تعديل الوقف',rej:'مرفوضة'}[st])+'</span></span>')+'</span></button>'}).join('');
+  return items.map(t=>{const st=topicStatus(t);return '<button class="card accent go" data-act="topic" data-id="'+t.id+'"><span><span class="cardtop"><b style="font-size:18.5px;color:var(--em)">'+t.title+'</b></span><span class="meta">'+(t.sets?(t.sets.length===1?'موضع واحد':t.sets.length===2?'موضعان':AR(t.sets.length)+(t.sets.length<=10?' مواضع':' موضعًا'))+' · '+allSurahs(t).split(' ').slice(0,4).join('، '):PR[t.p].n+' · '+surahsOf(t))+'</span>'+(st==='ok'?'':'<span class="tags"><span class="tag gold">'+({pending:'بانتظار الاعتماد',edit:'يحتاج تعديل الوقف',rej:'بانتظار الاعتماد'}[st])+'</span></span>')+'</span></button>'}).join('');
 }
 function chk(ok,yes,no){return '<div class="chk '+(ok?'y':'n')+'">'+(ok?'✓ ':'⚠ ')+(ok?yes:no)+'</div>'}
 function vTopic(r){
@@ -915,7 +942,7 @@ function vTopic(r){
   if(t.review)x+='<div class="card banner"><b>ملاحظة المراجعة</b><p>'+t.review+'</p></div>';
   x+='<button class="btn primary" data-act="tread">'+ICON.read+'قراءة المجموعة</button><button class="btn goldb" data-act="tpray">الصلاة بها '+PR[T0.p].n+' اليوم</button>';
   const st=topicStatus(t);
-  x+='<div class="gtitle">اعتماد المجموعة</div><div class="card"><p class="meta" style="margin:0">الحالة: '+({ok:'معتمدة',pending:'بانتظار الاعتماد',edit:'يحتاج تعديل الوقف',rej:'مرفوضة'}[st])+'</p><div class="row3"><button class="btn sm '+(st==='ok'?'primary':'outline')+'" data-act="tst" data-v="ok">اعتماد</button><button class="btn sm '+(st==='edit'?'goldb':'outline')+'" data-act="tst" data-v="edit">تعديل</button><button class="btn sm '+(st==='rej'?'dangerf':'danger')+'" data-act="tst" data-v="rej">رفض</button></div></div>';
+  x+='<div class="gtitle">اعتماد المجموعة</div><div class="card"><p class="meta" style="margin:0">الحالة: '+({ok:'معتمدة',pending:'بانتظار الاعتماد',edit:'يحتاج تعديل الوقف',rej:'بانتظار الاعتماد'}[st])+'</p><div class="row3"><button class="btn sm '+(st==='ok'?'primary':'outline')+'" data-act="tst" data-v="ok">اعتماد</button><button class="btn sm '+(st==='edit'?'goldb':'outline')+'" data-act="tst" data-v="edit">تعديل</button></div></div>';
   return x;
 }
 /* ---- record ---- */
@@ -970,7 +997,7 @@ function vSettings(){
 function vAbout(){
   let x=topbar('عن التطبيق',{over:true})+hero('about','عن التطبيق',APP,'هَدْيُ الوقفِ، وهُدَى المعنى');
   const MUZ='<span class="qa">﴿'+W(txt(73,4)).slice(-3).join(' ')+'﴾</span>';
-  x+='<div class="card about accent">'+"<h3>مقدمة</h3><p>يُعدّ علم الوقف والابتداء من أجلّ العلوم المتصلة بكتاب الله تعالى، وأوثقها صلةً بفهم معانيه وتدبّر آياته؛ إذ به تُعرف مواضع تمام الكلام، ويتميّز ما يحسن الوقوف عليه والابتداء بما بعده، بما يحفظ المعاني القرآنية، ويصون سياقاتها من الإخلال.</p><p>وقد اعتنى علماء الأمة بهذا العلم عنايةً بالغة، وأفردوا له المصنفات، وبيّنوا أثره في حسن التلاوة وفهم الخطاب القرآني. ورُوي عن علي بن أبي طالب رضي الله عنه في تفسير قوله تعالى: "+MUZ+" <span class=\"ref\">[المزمل: ٤]</span> أنه قال: «الترتيل تجويد الحروف ومعرفة الوقوف».</p><p>ومن هذا المنطلق، جاءت فكرة تطبيق «وقف وابتداء»؛ ليصل بين التأصيل العلمي والتطبيق العملي، ويقرّب ثمرات هذا العلم إلى الأئمة والمصلين، بما يُعين على استحضار معاني القرآن الكريم في الصلاة، ويعزّز التدبّر والخشوع.</p><h3>عن التطبيق</h3><p>«وقف وابتداء» تطبيق قرآني يُعنى بتيسير اختيار المقاطع القرآنية تامّة المعنى، وفق أصول علم الوقف والابتداء ومراجعه العلمية، مع مراعاة السنّة النبوية في مقادير القراءة في الصلوات، وترابط الآيات واكتمال معانيها.</p><p>ويقدّم التطبيق مقاطع قرآنية محددة البداية والنهاية، في قالب رقمي ميسّر، يُعين الأئمة والمصلين على اختيار ما يتلونه في صلواتهم، مع مراعاة أحوال المصلين ومحفوظ القارئ.</p><h3>الفكرة</h3><p>تقديم مقاطع مختارة من القرآن الكريم، يُبتدأ فيها من موضع يستقلّ معناه، ويُوقف عند موضع يتمّ فيه الكلام، وفق ضوابط علمية مستمدة من أمهات كتب الوقف والابتداء؛ بما يحقق سلامة السياق وترابط المعاني، وييسّر القراءة في الصلوات، مع إمكانية متابعة الختمات القرآنية بصورة متتابعة ومنظّمة.</p><h3>الهدف</h3><p>تعزيز استحضار المعاني القرآنية في الصلاة، والإعانة على تدبّر آيات القرآن الكريم والخشوع عند تلاوتها وسماعها، من خلال تيسير اختيار مقاطع قرآنية متكاملة المعنى، وإحياء العناية بعلم الوقف والابتداء، وربط تطبيقاته العلمية بالممارسة اليومية في الصلاة.</p><p>كما يهدف التطبيق إلى إعانة الأئمة على إحياء السنن النبوية في مقادير القراءة، وتيسير إسماع جماعة المسجد كتاب الله تعالى في ختمات متتابعة، مع مراعاة أحوال المأمومين.</p><h3>السنّة النبوية في القراءة في الصلوات</h3><p>جاءت السنّة النبوية ببيان مقادير القراءة في الصلوات، وتنوّعها بحسب أوقاتها وأحوال المصلين؛ فكان من هديه ﷺ إطالة القراءة في الفجر، والتخفيف في المغرب، والتوسّط في العشاء، مع ورود التنويع في ذلك.</p><p>فقد ثبت أنه ﷺ قرأ في الفجر بسورة «ق»، وقرأ في المغرب بسورة «الطور»، وفي العشاء بسورة «التين»، كما أرشد الأئمة إلى مراعاة أحوال المأمومين بقوله ﷺ:</p><blockquote>«إذا صلّى أحدكم للناس فليخفّف، فإن منهم الضعيف والسقيم والكبير». <span class=\"ref\">متفق عليه.</span></blockquote><p>وانطلاقًا من هذه الهدايات النبوية، يراعي التطبيق مقادير القراءة المناسبة للصلوات، مع المحافظة على تمام المعنى القرآني، والجمع بين حسن الاقتداء ومراعاة أحوال المصلين.</p><h3>المرجعية العلمية والمنهجية</h3><p>يستند التطبيق في اختيار المقاطع وتحديد مواضع الوقف والابتداء إلى مراجع علمية أصيلة، من أبرزها:</p><h4>المراجع الأساسية:</h4><ul class=\"refs\"><li><span class=\"n\">١.</span> «منار الهدى في بيان الوقف والابتدا» للإمام الأشموني.</li><li><span class=\"n\">٢.</span> «المقصد لتلخيص ما في المرشد في الوقف والابتداء» لشيخ الإسلام زكريا الأنصاري.</li><li><span class=\"n\">٣.</span> «المكتفى في الوقف والابتدا» للإمام أبي عمرو الداني.</li></ul><h4>المراجع المساندة:</h4><ul class=\"refs\"><li><span class=\"n\">٤.</span> «إيضاح الوقف والابتداء» للإمام ابن الأنباري.</li><li><span class=\"n\">٥.</span> «القطع والائتناف» للإمام أبي جعفر النحاس.</li><li><span class=\"n\">٦.</span> «معالم الاهتداء إلى معرفة الوقف والابتداء» للشيخ محمود خليل الحصري.</li></ul><p>وتقوم المنهجية العلمية على مراعاة اكتمال المعنى عند الوقف، واستقلال المعنى عند الابتداء، وسلامة السياق القرآني، مع توثيق المستند العلمي للمواضع المختارة، وعرضها للمراجعة والاعتماد العلمي.</p><h3>اللجنة العلمية</h3><p>تُناط المراجعة العلمية للتطبيق بلجنة علمية متخصصة في الدراسات القرآنية وعلوم الوقف والابتداء، تضطلع بمراجعة المقاطع القرآنية المختارة، والتحقق من سلامة مواضع الوقف والابتداء، واعتمادها وفق المراجع العلمية والضوابط المنهجية المعتمدة.</p><h4>أعضاء اللجنة العلمية:</h4><ul class=\"comm\"><li><span class=\"n\">١.</span> فضيلة الشيخ الدكتور/ <i></i></li><li><span class=\"n\">٢.</span> فضيلة الشيخ الدكتور/ <i></i></li><li><span class=\"n\">٣.</span> فضيلة الشيخ الدكتور/ <i></i></li><li><span class=\"n\">٤.</span> فضيلة الشيخ الدكتور/ <i></i></li></ul><h3>الأثر المرجو</h3><p>يتطلع تطبيق «وقف وابتداء» إلى أن يكون مرجعًا رقميًا موثوقًا للأئمة والمصلين، يُقرّب علم الوقف والابتداء من واقع الصلاة، ويُعين على تلاوة القرآن الكريم في مقاطع تامّة المعنى، بما يعزّز التدبّر والخشوع.</p><p>فالغاية ليست مجرد تحديد موضع يبدأ منه القارئ وآخر ينتهي إليه، وإنما أن تكون الآيات المتلوّة وحدةً متكاملة المعنى، حاضرةً في القلب، موصلةً إلى التدبّر والخشوع.</p><p class=\"dua\">ونسأل الله تعالى أن يجعل هذا العمل خالصًا لوجهه الكريم، وأن ينفع به الأئمة والمصلين، وأن يجعله سببًا لمزيد من الإقبال على كتابه العزيز، تلاوةً وتدبّرًا وعملًا.</p><div class=\"abfoot\"><h4>مصادر البيانات</h4><p>النص القرآني من مصحف المدينة النبوية برواية حفص عن عاصم، الصادر عن مجمع الملك فهد لطباعة المصحف الشريف، ومعاني الكلمات في «تفسير الآيات» من «الميسر في غريب القرآن الكريم» الصادر عن المجمع، والتلاوات من مكتبتي EveryAyah وMP3Quran وأرشيف الإنترنت، والمواقيت على تقويم أم القرى.</p></div>";
+  x+='<div class="card about accent">'+"<h3>مقدمة</h3><p>يُعدّ علم الوقف والابتداء من أجلّ العلوم المتصلة بكتاب الله تعالى، وأوثقها صلةً بفهم معانيه وتدبّر آياته؛ إذ به تُعرف مواضع تمام الكلام، ويتميّز ما يحسن الوقوف عليه والابتداء بما بعده، بما يحفظ المعاني القرآنية، ويصون سياقاتها من الإخلال.</p><p>وقد اعتنى علماء الأمة بهذا العلم عنايةً بالغة، وأفردوا له المصنفات، وبيّنوا أثره في حسن التلاوة وفهم الخطاب القرآني. ورُوي عن علي بن أبي طالب رضي الله عنه في تفسير قوله تعالى: "+MUZ+" <span class=\"ref\">[المزمل: ٤]</span> أنه قال: «الترتيل تجويد الحروف ومعرفة الوقوف».</p><p>ومن هذا المنطلق، جاءت فكرة تطبيق «وقف وابتداء»؛ ليصل بين التأصيل العلمي والتطبيق العملي، ويقرّب ثمرات هذا العلم إلى الأئمة والمصلين، بما يُعين على استحضار معاني القرآن الكريم في الصلاة، ويعزّز التدبّر والخشوع.</p><h3>عن التطبيق</h3><p>«وقف وابتداء» تطبيق قرآني يُعنى بتيسير اختيار المقاطع القرآنية تامّة المعنى، وفق أصول علم الوقف والابتداء ومراجعه العلمية، مع مراعاة السنّة النبوية في مقادير القراءة في الصلوات، وترابط الآيات واكتمال معانيها.</p><p>ويقدّم التطبيق مقاطع قرآنية محددة البداية والنهاية، في قالب رقمي ميسّر، يُعين الأئمة والمصلين على اختيار ما يتلونه في صلواتهم، مع مراعاة أحوال المصلين ومحفوظ القارئ.</p><h3>الفكرة</h3><p>تقديم مقاطع مختارة من القرآن الكريم، يُبتدأ فيها من موضع يستقلّ معناه، ويُوقف عند موضع يتمّ فيه الكلام، وفق ضوابط علمية مستمدة من أمهات كتب الوقف والابتداء؛ بما يحقق سلامة السياق وترابط المعاني، وييسّر القراءة في الصلوات، مع إمكانية متابعة الختمات القرآنية بصورة متتابعة ومنظّمة.</p><h3>الهدف</h3><p>تعزيز استحضار المعاني القرآنية في الصلاة، والإعانة على تدبّر آيات القرآن الكريم والخشوع عند تلاوتها وسماعها، من خلال تيسير اختيار مقاطع قرآنية متكاملة المعنى، وإحياء العناية بعلم الوقف والابتداء، وربط تطبيقاته العلمية بالممارسة اليومية في الصلاة.</p><p>كما يهدف التطبيق إلى إعانة الأئمة على إحياء السنن النبوية في مقادير القراءة، وتيسير إسماع جماعة المسجد كتاب الله تعالى في ختمات متتابعة، مع مراعاة أحوال المأمومين.</p><h3>السنّة النبوية في القراءة في الصلوات</h3><p>جاءت السنّة النبوية ببيان مقادير القراءة في الصلوات، وتنوّعها بحسب أوقاتها وأحوال المصلين؛ فكان من هديه ﷺ إطالة القراءة في الفجر، والتخفيف في المغرب، والتوسّط في العشاء، مع ورود التنويع في ذلك.</p><p>فقد ثبت أنه ﷺ قرأ في الفجر بسورة «ق»، وقرأ في المغرب بسورة «الطور»، وفي العشاء بسورة «التين»، كما أرشد الأئمة إلى مراعاة أحوال المأمومين بقوله ﷺ:</p><blockquote>«إذا صلّى أحدكم للناس فليخفّف، فإن منهم الضعيف والسقيم والكبير». <span class=\"ref\">متفق عليه.</span></blockquote><p>وانطلاقًا من هذه الهدايات النبوية، يراعي التطبيق مقادير القراءة المناسبة للصلوات، مع المحافظة على تمام المعنى القرآني، والجمع بين حسن الاقتداء ومراعاة أحوال المصلين.</p><h3>المرجعية العلمية والمنهجية</h3><p>يستند التطبيق في اختيار المقاطع وتحديد مواضع الوقف والابتداء إلى مراجع علمية أصيلة، من أبرزها:</p><h4>المراجع الأساسية:</h4><ul class=\"refs\"><li><span class=\"n\">١.</span> «منار الهدى في بيان الوقف والابتداء» للإمام الأشموني.</li><li><span class=\"n\">٢.</span> «المقصد لتلخيص ما في المرشد في الوقف والابتداء» لشيخ الإسلام زكريا الأنصاري.</li><li><span class=\"n\">٣.</span> «المكتفى في الوقف والابتداء» للإمام أبي عمرو الداني.</li></ul><h4>المراجع المساندة:</h4><ul class=\"refs\"><li><span class=\"n\">٤.</span> «إيضاح الوقف والابتداء» للإمام ابن الأنباري.</li><li><span class=\"n\">٥.</span> «القطع والائتناف» للإمام أبي جعفر النحاس.</li><li><span class=\"n\">٦.</span> «معالم الاهتداء إلى معرفة الوقف والابتداء» للشيخ محمود خليل الحصري.</li></ul><p>وتقوم المنهجية العلمية على مراعاة اكتمال المعنى عند الوقف، واستقلال المعنى عند الابتداء، وسلامة السياق القرآني، مع توثيق المستند العلمي للمواضع المختارة، وعرضها للمراجعة والاعتماد العلمي.</p><h3>اللجنة العلمية</h3><p>تُناط المراجعة العلمية للتطبيق بلجنة علمية متخصصة في الدراسات القرآنية وعلوم الوقف والابتداء، تضطلع بمراجعة المقاطع القرآنية المختارة، والتحقق من سلامة مواضع الوقف والابتداء، واعتمادها وفق المراجع العلمية والضوابط المنهجية المعتمدة.</p><h4>أعضاء اللجنة العلمية:</h4><ul class=\"comm\"><li><span class=\"n\">١.</span> فضيلة الشيخ الدكتور/ <i></i></li><li><span class=\"n\">٢.</span> فضيلة الشيخ الدكتور/ <i></i></li><li><span class=\"n\">٣.</span> فضيلة الشيخ الدكتور/ <i></i></li><li><span class=\"n\">٤.</span> فضيلة الشيخ الدكتور/ <i></i></li></ul><h3>الأثر المرجو</h3><p>يتطلع تطبيق «وقف وابتداء» إلى أن يكون مرجعًا رقميًا موثوقًا للأئمة والمصلين، يُقرّب علم الوقف والابتداء من واقع الصلاة، ويُعين على تلاوة القرآن الكريم في مقاطع تامّة المعنى، بما يعزّز التدبّر والخشوع.</p><p>فالغاية ليست مجرد تحديد موضع يبدأ منه القارئ وآخر ينتهي إليه، وإنما أن تكون الآيات المتلوّة وحدةً متكاملة المعنى، حاضرةً في القلب، موصلةً إلى التدبّر والخشوع.</p><p class=\"dua\">ونسأل الله تعالى أن يجعل هذا العمل خالصًا لوجهه الكريم، وأن ينفع به الأئمة والمصلين، وأن يجعله سببًا لمزيد من الإقبال على كتابه العزيز، تلاوةً وتدبّرًا وعملًا.</p><div class=\"abfoot\"><h4>مصادر البيانات</h4><p>النص القرآني من مصحف المدينة النبوية برواية حفص عن عاصم، الصادر عن مجمع الملك فهد لطباعة المصحف الشريف، ومعاني الكلمات في «تفسير الآيات» من «الميسر في غريب القرآن الكريم» الصادر عن المجمع، والتلاوات من مكتبتي EveryAyah وMP3Quran وأرشيف الإنترنت، والمواقيت على تقويم أم القرى.</p></div>";
   return x+'<p class="meta">إصدار البيانات '+AR(D.meta.ver)+' · '+AR(D.meta.stops)+' موضع وقف · نسخة تجريبية، والمواضع قيد مراجعة اللجنة العلمية.</p></div>';
 }
 /* ---- hifz ---- */
@@ -1046,12 +1073,12 @@ function vReview(){
   x+='<p class="note">لكل موضع حكمه في الكتب، وأساس الابتداء بعده ونوعه. راجعت حتى الآن '+AR(all)+' موضعًا.</p>';
   const counts={};D.P.forEach(p=>{if(D.Q[p[0]-1].length!==p[2])counts[p[0]]=(counts[p[0]]||0)+1});
   x+='<button class="card go" data-act="surahpick"><span><span class="meta">السورة</span><b style="display:block;font-size:19px;color:var(--em)">'+AR(revSurah)+' · '+D.N[revSurah-1]+' <span class="meta">('+AR(counts[revSurah]||0)+' موضعًا)</span></b></span></button>';
-  x+='<div class="opts" style="margin-bottom:12px">'+[['all','الكل'],['ijt','اجتهاد'],['none','لم يُراجَع'],['ok','معتمد'],['edit','للتعديل'],['rej','مرفوض']].map(([k,l])=>'<button class="opt'+(revFilter===k?' on':'')+'" data-act="rvf" data-k="'+k+'">'+l+'</button>').join('')+'</div>';
+  x+='<div class="opts" style="margin-bottom:12px">'+[['all','الكل'],['ijt','اجتهاد'],['none','لم يُراجَع'],['ok','معتمد'],['edit','للتعديل']].map(([k,l])=>'<button class="opt'+(revFilter===k?' on':'')+'" data-act="rvf" data-k="'+k+'">'+l+'</button>').join('')+'</div>';
   let n=0;
   D.P.forEach((p,xx)=>{
     if(p[0]!==revSurah||D.Q[p[0]-1].length===p[2])return;
     const key=p[0]+':'+p[2];const rv=S.rev[key];const st=rv?rv.st:'none';const ev=evOf(xx);if(revFilter==='ijt'){if(IJT.indexOf(ev.code)<0)return}else if(revFilter!=='all'&&st!==revFilter)return;n++;
-    x+='<div class="card"><div class="cardtop"><b>بعد الآية '+AR(p[2])+'</b><span class="meta">الصفحة '+AR(D.PG[p[0]-1][p[2]-1])+'</span></div><div class="se"><span>الوقف</span><div class="q q2">… '+W(txt(p[0],p[2])).slice(-5).join(' ')+'</div><span>الابتداء</span><div class="q q2">'+W(txt(p[0],p[2]+1)).slice(0,5).join(' ')+' …</div></div><div class="src"><b>حكم الوقف:</b> '+srcText(ev)+'<br><b>الابتداء:</b> '+(IB[ev.code]||'—')+(ev.lab?' · '+ev.lab:'')+(p[7]?'<br><b>قرب آخر السورة:</b> يُبتدأ بما بعده، ولا يُختم المقطع هنا':'')+'</div><div class="row3"><button class="btn sm '+(st==='ok'?'primary':'outline')+'" data-act="rv" data-k="'+key+'" data-v="ok">اعتماد</button><button class="btn sm '+(st==='edit'?'goldb':'outline')+'" data-act="rv" data-k="'+key+'" data-v="edit">تعديل</button><button class="btn sm '+(st==='rej'?'dangerf':'danger')+'" data-act="rv" data-k="'+key+'" data-v="rej">رفض</button></div>'+((st==='edit'||st==='rej')?'<textarea class="note-in" data-k="'+key+'" placeholder="ملاحظتك: أين تقترح الوقف؟ ولماذا؟">'+esc(rv.note||'')+'</textarea>':'')+'</div>';
+    x+='<div class="card"><div class="cardtop"><b>بعد الآية '+AR(p[2])+'</b><span class="meta">الصفحة '+AR(D.PG[p[0]-1][p[2]-1])+'</span></div><div class="se"><span>الوقف</span><div class="q q2">… '+W(txt(p[0],p[2])).slice(-5).join(' ')+'</div><span>الابتداء</span><div class="q q2">'+W(txt(p[0],p[2]+1)).slice(0,5).join(' ')+' …</div></div><div class="src"><b>حكم الوقف:</b> '+srcText(ev)+'<br><b>الابتداء:</b> '+(IB[ev.code]||'—')+(ev.lab?' · '+ev.lab:'')+(p[7]?'<br><b>قرب آخر السورة:</b> يُبتدأ بما بعده، ولا يُختم المقطع هنا':'')+'</div><div class="row3"><button class="btn sm '+(st==='ok'?'primary':'outline')+'" data-act="rv" data-k="'+key+'" data-v="ok">اعتماد</button><button class="btn sm '+(st==='edit'?'goldb':'outline')+'" data-act="rv" data-k="'+key+'" data-v="edit">تعديل</button></div>'+((st==='edit'||st==='rej')?'<textarea class="note-in" data-k="'+key+'" placeholder="ملاحظتك: أين تقترح الوقف؟ ولماذا؟">'+esc(rv.note||'')+'</textarea>':'')+'</div>';
   });
   if(!n)x+='<div class="card empty">لا توجد مواضع هنا.</div>';
   if(all)x+='<button class="btn outline" data-act="revcopy">نسخ ملاحظاتي لإرسالها إلى اللجنة</button>';
@@ -1180,8 +1207,8 @@ let tt=null;function toast(m){const t=$('toast');t.textContent=m;t.classList.add
 async function copyText(t){try{await navigator.clipboard.writeText(t);toast('نُسخ النص.')}catch(e){toast('تعذّر النسخ تلقائيًا، فحدّد النص وانسخه.')}}
 /* ================= library & book reader ================= */
 const LIB=[
- {id:'manar',open:true,pages:448,dir:'books/manar/',start:5,col:['#0B3A2D','#17624B'],ct:'منار الهدى في بيان الوقف والابتدا',ca:'الأشموني · ومعه «المقصد» للأنصاري',short:'منار الهدى',t:'منار الهدى في بيان الوقف والابتدا',a:'أحمد بن محمد بن عبد الكريم الأشموني، ومعه «المقصد لتلخيص ما في المرشد» لشيخ الإسلام زكريا الأنصاري',ed:'مطبعة مصطفى البابي الحلبي، القاهرة، الطبعة الثانية ١٣٩٣هـ / ١٩٧٣م'},
- {id:'muktafa',open:false,col:['#4A1E12','#7A3520'],ct:'المكتفى في الوقف والابتدا',ca:'أبو عمرو الداني',t:'المكتفى في الوقف والابتدا',a:'أبو عمرو عثمان بن سعيد الداني (ت ٤٤٤هـ)',ed:'دراسة وتحقيق د. يوسف عبد الرحمن المرعشلي، مؤسسة الرسالة، الطبعة الثانية ١٤٠٧هـ / ١٩٨٧م'},
+ {id:'manar',open:true,pages:448,dir:'books/manar/',start:5,col:['#0B3A2D','#17624B'],ct:'منار الهدى في بيان الوقف والابتداء',ca:'الأشموني · ومعه «المقصد» للأنصاري',short:'منار الهدى',t:'منار الهدى في بيان الوقف والابتداء',a:'أحمد بن محمد بن عبد الكريم الأشموني، ومعه «المقصد لتلخيص ما في المرشد» لشيخ الإسلام زكريا الأنصاري',ed:'مطبعة مصطفى البابي الحلبي، القاهرة، الطبعة الثانية ١٣٩٣هـ / ١٩٧٣م'},
+ {id:'muktafa',open:false,col:['#4A1E12','#7A3520'],ct:'المكتفى في الوقف والابتداء',ca:'أبو عمرو الداني',t:'المكتفى في الوقف والابتداء',a:'أبو عمرو عثمان بن سعيد الداني (ت ٤٤٤هـ)',ed:'دراسة وتحقيق د. يوسف عبد الرحمن المرعشلي، مؤسسة الرسالة، الطبعة الثانية ١٤٠٧هـ / ١٩٨٧م'},
  {id:'maalim',open:false,col:['#1B2848','#2E4372'],ct:'معالم الاهتداء إلى معرفة الوقف والابتداء',ca:'محمود خليل الحصري',t:'معالم الاهتداء إلى معرفة الوقف والابتداء',a:'الشيخ محمود خليل الحصري',ed:'مكتبة السنة، القاهرة، الطبعة الأولى ١٤٢٣هـ / ٢٠٠٢م'}];
 function vLibrary(){
   let x=topbar('المكتبة',{over:true})+hero('library','كتب الوقف والابتداء','المكتبة','المصادر التي استُخرجت منها مواضع الوقف');
@@ -1416,7 +1443,7 @@ document.addEventListener('click',ev=>{
   case 'surahpick':surahSheet();break;
   case 'revs':revSurah=+v;closeSheet();render();window.scrollTo(0,0);break;
   case 'rv':{const c2=S.rev[k];S.rev[k]={st:v,note:c2&&c2.note||'',t:Date.now()};save();render();break}
-  case 'revcopy':{const L=Object.keys(S.rev).sort((x,y)=>{const [a1,b1]=x.split(':').map(Number),[a2,b2]=y.split(':').map(Number);return a1-a2||b1-b2}).map(key=>{const [s,a2]=key.split(':').map(Number);const r=S.rev[key];return D.N[s-1]+' '+a2+': '+({ok:'معتمد',edit:'تعديل',rej:'مرفوض'}[r.st])+(r.note?' — '+r.note:'')});copyText('مراجعة مواضع الوقف\n'+L.join('\n'));break}
+  case 'revcopy':{const L=Object.keys(S.rev).sort((x,y)=>{const [a1,b1]=x.split(':').map(Number),[a2,b2]=y.split(':').map(Number);return a1-a2||b1-b2}).map(key=>{const [s,a2]=key.split(':').map(Number);const r=S.rev[key];return D.N[s-1]+' '+a2+': '+({ok:'معتمد',edit:'تعديل',rej:'لم يُراجَع'}[r.st])+(r.note?' — '+r.note:'')});copyText('مراجعة مواضع الوقف\n'+L.join('\n'));break}
   case 'wread':{const w=wirdRange();if(w)openReader({mode:'wird',title:'ورد اليوم',blocks:[{i:w[0],j:w[1]}]});break}
   case 'wdone':{const w=wirdRange();if(!w)break;S.wird.done.unshift({t:Date.now(),i:w[0],j:w[1]});S.wird.pos=w[1]+1;wAdj=0;save();leaveReaderTo();toast(S.wird.pos>=NP?'أتممت الختمة، تقبّل الله منك.':'تقبّل الله منك، وأُعِدّ ورد الغد.');break}
   case 'wmore':{const w=wirdRange();if(w&&w[1]<NP-1){wAdj++;render()}break}
