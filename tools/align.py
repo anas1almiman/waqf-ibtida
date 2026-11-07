@@ -3,7 +3,7 @@
 import json, subprocess, sys, os, urllib.request, time
 import numpy as np
 
-def get(url, path=None, tries=4):
+def get(url, path=None, tries=12):
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers={'User-Agent': 'waqf-ibtida-timing/1.0'})
@@ -13,7 +13,7 @@ def get(url, path=None, tries=4):
                 open(path, 'wb').write(data)
             return data
         except Exception as e:
-            print('retry', url, e, flush=True); time.sleep(3 + 5 * i)
+            print('retry', url, e, flush=True); time.sleep(min(90, 5 + 10 * i))
     raise RuntimeError('failed ' + url)
 
 def mq_timing(read, s):
