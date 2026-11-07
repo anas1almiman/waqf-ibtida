@@ -638,6 +638,26 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .hsw{position:relative}
 .shint{position:absolute;left:6px;top:0;z-index:3;padding:4px 12px 2px;border-radius:999px;background:#0E2A21;color:#F3DFA8;border:1px solid #C9A24F;font:14px 'Amiri',serif;box-shadow:0 4px 14px rgba(0,0,0,.2);pointer-events:none;opacity:0;animation:shint 6.5s ease 1.2s forwards}
 @keyframes shint{0%{opacity:0;transform:translate(10px,-4px)}8%{opacity:1;transform:translate(0,-4px)}20%{transform:translate(-8px,-4px)}32%{transform:translate(0,-4px)}86%{opacity:1}100%{opacity:0;transform:translate(0,-4px)}}
+
+.oblab{color:#C8AE6E;font-size:13.5px;margin:0 4px 6px;text-align:right}
+.obopts+.obsum{margin-top:8px}
+.oblab+.obopts{margin-top:0}
+.grid30.obg+.oblab{margin-top:10px}
+.obchk{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:10px 14px;border-radius:16px;border:1px solid rgba(201,162,79,.3);background:rgba(255,255,255,.03);color:#F3E9CF;font:16px 'Amiri',serif;text-align:right}
+.obchk .ck{width:22px;height:22px;border-radius:7px;border:1.5px solid rgba(201,162,79,.6);flex:none;position:relative;transition:all .2s}
+.obchk.on .ck{background:var(--gg);border-color:transparent}
+.obchk.on .ck::after{content:'';position:absolute;left:7px;top:3px;width:6px;height:11px;border:solid #2A1E06;border-width:0 2.3px 2.3px 0;transform:rotate(45deg)}
+.remlab{font-size:14px;color:var(--muted);margin:0 2px 6px}
+.ob .remlab{color:#C8AE6E}
+
+.ob .grid30.obg .c{height:34px!important;font-size:15px}
+.ob .grid30.obg{gap:5px}
+.obsum{margin-top:8px!important}
+.obchk{margin-top:8px;padding:8px 14px}
+.xrow{padding:4px 0 6px!important}
+.xl{margin-bottom:4px!important}
+.remlab{margin-bottom:4px}
+@media (max-height:740px){.ob .grid30.obg .c{height:31px!important}}
 </style>
 </head>
 <body>
@@ -1431,21 +1451,21 @@ function recPreview(k,btn){const was=PV&&PV.k;pvStop();if(was===k)return;if(INAR
 function icsAdd(){const t=(S.remT||'21:00').split(':');const d=new Date();d.setHours(+t[0]||21,+t[1]||0,0,0);if(d<new Date())d.setDate(d.getDate()+1);const p2=n=>String(n).padStart(2,'0');const loc=d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'T'+p2(d.getHours())+p2(d.getMinutes())+'00';const z=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');const W=isWird();const title=W?'وِردك من القرآن':'قراءتك في الصلاة';const url=location.href.split('#')[0].split('?')[0];
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//waqf-ibtida//AR','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:wird-'+Date.now()+'@waqf-ibtida','DTSTAMP:'+z,'DTSTART:'+loc,'DURATION:PT20M','RRULE:FREQ=DAILY','SUMMARY:'+title+' · '+APP,'DESCRIPTION:'+(W?'حان وقت وِردك اليومي.':'تهيّأ لقراءتك في الصلاة القادمة.'),'URL:'+url,'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+title,'TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
   try{const u=URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='wird.ics';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},5000);S.remOn=true;save();toast('افتح الملف ثم اختر «إضافة إلى التقويم».');if(SH==='rem')refreshSheet();else if(!S.onb)render()}catch(e){toast('تعذّر إنشاء التذكير على هذا الجهاز.')}}
-function remRow(){return '<div class="remrow"><input type="time" id="remt" value="'+esc(S.remT||'21:00')+'" aria-label="وقت التذكير"><button class="remb" data-act="ics">'+ICON.cal+'أضِف إلى التقويم</button></div>'}
+function remRow(){return '<div class="remlab">موعد التذكير:</div><div class="remrow"><input type="time" id="remt" value="'+esc(S.remT||'21:00')+'" aria-label="موعد التذكير"><button class="remb" data-act="ics">'+ICON.cal+'إضافة إلى التقويم</button></div>'}
 function remSheet(){const f=()=>shead('التذكير بالقراءة')+'<p class="note" style="text-align:right;margin:0 4px 12px">يُضاف تذكير يومي إلى تقويم جوالك في الوقت الذي تختاره، فيصلك ولو كان التطبيق مغلقًا.'+(S.remOn?'<br><b style="color:var(--gold)">أضفتَ تذكيرًا من قبل، ويمكنك حذفه أو تعديله من التقويم.</b>':'')+'</p>'+remRow();openSheet(f(),'rem',f)}
 function segB(key,opts){return '<div class="obseg">'+opts.map(([v,l])=>'<button class="'+(String(S[key])===String(v)||(v==='1'&&S[key]===true)||(v==='0'&&S[key]===false)?'on':'')+'" data-act="obset" data-key="'+key+'" data-v="'+v+'">'+l+'</button>').join('')+'</div>'}
-function obHifz(){if(!hifzDraft){hifzDraft=S.hifz.slice();hifzSDraft=(S.hifzS||[]).slice()}const c=hifzDraft.length,n=hifzSDraft.length;let x='<div class="stitle">ما مقدار ما تحفظ من القرآن؟</div><div class="ssub">حدّد الأجزاء أو السور، لنقترح عليك مما تحفظ.</div><div class="grid30 obg">';for(let j=1;j<=30;j++)x+='<button class="c'+(hifzDraft.indexOf(j)>=0?' sel':'')+'" data-act="hz" data-v="'+j+'" aria-label="الجزء '+AR(j)+'">'+AR(j)+'</button>';
-  x+='</div><div class="obopts"><button class="'+(c===30?'on':'')+'" data-act="hzp" data-v="all">القرآن كاملًا</button><button class="'+(c===2&&hifzDraft.indexOf(29)>=0&&hifzDraft.indexOf(30)>=0?'on':'')+'" data-act="hzp" data-v="2930">عمّ وتبارك</button><button class="'+(n?'on':'')+'" data-act="hzssheet">'+(n?pl(n,'سورة واحدة','سورتان','سور','سورة'):'اختيار السور')+'</button>'+(c||n?'<button data-act="hzp" data-v="none">مسح</button>':'')+'</div>';
-  x+='<div class="obsum">'+(c||n?'محفوظك: '+(c===30?'القرآن كاملًا':[c?pl(c,'جزء واحد','جزآن','أجزاء','جزءًا'):'',n&&c<30?pl(n,'سورة واحدة','سورتان','سور','سورة'):''].filter(Boolean).join(' و')):'لم تحدّد شيئًا بعد، فتُقترح المقاطع من القرآن كله.')+'</div>';
-  if(c||n)x+='<button class="obtog'+(obHzOnly?' on':'')+'" data-act="obhz"><span>اقترح لي من محفوظي فقط</span><i class="tg'+(obHzOnly?' on':'')+'"></i></button>';
+function obHifz(){if(!hifzDraft){hifzDraft=S.hifz.slice();hifzSDraft=(S.hifzS||[]).slice()}const c=hifzDraft.length,n=hifzSDraft.length;let x='<div class="stitle">ما الذي تحفظه من القرآن؟</div><div class="ssub">حدّد الأجزاء أو السور التي تحفظها؛ لنقترح عليك آيات منها.</div><div class="oblab">الأجزاء</div><div class="grid30 obg">';for(let j=1;j<=30;j++)x+='<button class="c'+(hifzDraft.indexOf(j)>=0?' sel':'')+'" data-act="hz" data-v="'+j+'" aria-label="الجزء '+AR(j)+'">'+AR(j)+'</button>';
+  x+='</div><div class="oblab">خيارات سريعة</div><div class="obopts"><button class="'+(c===30?'on':'')+'" data-act="hzp" data-v="all">القرآن كاملًا</button><button class="'+(c===2&&hifzDraft.indexOf(29)>=0&&hifzDraft.indexOf(30)>=0?'on':'')+'" data-act="hzp" data-v="2930">عمّ وتبارك</button><button class="'+(n?'on':'')+'" data-act="hzssheet">'+(n?pl(n,'سورة واحدة','سورتان','سور','سورة'):'اختيار السور')+'</button>'+(c||n?'<button data-act="hzp" data-v="none">مسح</button>':'')+'</div>';
+  x+='<div class="obsum">'+(c||n?'محفوظك: '+(c===30?'القرآن كاملًا':[c?pl(c,'جزء واحد','جزآن','أجزاء','جزءًا'):'',n&&c<30?pl(n,'سورة واحدة','سورتان','سور','سورة'):''].filter(Boolean).join(' و')):'يمكنك تجاوز هذه الخطوة، وستكون المقترحات من القرآن كاملًا.')+'</div>';
+  x+='<button class="obchk'+(obHzOnly?'':' on')+'" data-act="obhz"><i class="ck"></i><span>لا أريد تقييد المقترحات بمحفوظي</span></button>';
   return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button></div>'}
-function obRec(){let x='<div class="stitle">مَن قارئك المفضّل؟</div><div class="ssub">تستمع إلى الآيات بصوته، وجرّب صوته قبل أن تختار.</div><div class="reclist">'+RECITERS.map(r=>'<div class="rrow'+(r[0]===S.reciter?' on':'')+'" data-k="'+r[0]+'"><button class="rsel" data-act="obrec" data-k="'+r[0]+'"><i class="ck"></i>'+r[1]+'</button><button class="rplay" data-act="recprev" data-k="'+r[0]+'" aria-label="استماع إلى '+r[1]+'">'+ICON.play+'</button></div>').join('')+'</div>';return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button></div>'}
-function obExtra(){const W=isWird();let x='<div class="stitle">لمساتٌ تخصّك</div><div class="ssub">كلّها اختيارية، ويمكنك تعديلها متى شئت من الإعدادات.</div><div class="xbox">';
+function obRec(){let x='<div class="stitle">مَن قارئك المفضّل؟</div><div class="ssub">اختر القارئ الذي تفضّل الاستماع إلى الآيات بصوته، ويمكنك الاستماع إلى نموذج من تلاوته قبل الاختيار.</div><div class="reclist">'+RECITERS.map(r=>'<div class="rrow'+(r[0]===S.reciter?' on':'')+'" data-k="'+r[0]+'"><button class="rsel" data-act="obrec" data-k="'+r[0]+'"><i class="ck"></i>'+r[1]+'</button><button class="rplay" data-act="recprev" data-k="'+r[0]+'" aria-label="استماع إلى '+r[1]+'">'+ICON.play+'</button></div>').join('')+'</div>';return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button></div>'}
+function obExtra(){const W=isWird();let x='<div class="stitle">تفضيلات القراءة</div><div class="ssub">جميع الخيارات اختيارية، ويمكنك تعديلها لاحقًا من الإعدادات.</div><div class="xbox">';
   if(S.role==='home'&&!W)x+='<div class="xrow"><div class="xl">ما مقدار القراءة المناسب لك؟</div>'+segB('homeAmt',[['short','موجزة'],['mid','متوسطة'],['long','مطوّلة']])+'</div>';
-  if(!W)x+='<div class="xrow"><div class="xl">كيف تُقترح عليك المقاطع؟</div>'+segB('ordered',[['0','التنويع بين السور'],['1','على ترتيب المصحف']])+'</div>';
-  x+='<div class="xrow"><div class="xl">هل تودّ إظهار معاني المفردات تحت كل مقطع؟</div>'+segB('taf',[['1','نعم'],['0','لا']])+'</div>';
-  x+='<div class="xrow"><div class="xl">هل ترغب في التذكير '+(W?'بوردك':'بقراءتك')+'؟</div>'+remRow()+(S.remOn?'<div class="xok">أُضيف التذكير إلى تقويمك</div>':'')+'</div></div>';
-  return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button><button class="skipl" data-act="stnext">تخطى</button></div>'}
+  if(!W)x+='<div class="xrow"><div class="xl">كيف تفضّل ترتيب المقاطع؟</div>'+segB('ordered',[['0','التنويع بين السور'],['1','وفق ترتيب المصحف']])+'</div>';
+  x+='<div class="xrow"><div class="xl">هل ترغب في إظهار معاني الكلمات أسفل كل مقطع؟</div>'+segB('taf',[['1','نعم'],['0','لا']])+'</div>';
+  x+='<div class="xrow"><div class="xl">هل ترغب في التذكير بالقراءة؟</div>'+remRow()+(S.remOn?'<div class="xok">أُضيف التذكير إلى تقويمك</div>':'')+'</div></div>';
+  return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button><button class="skipl" data-act="stnext">تخطّي</button></div>'}
 let OBB=false;
 function obGo(dir,mut){
   if(OBB)return;const old=document.querySelector('#app .obb');const prev=stStep;
@@ -1884,9 +1904,9 @@ function splash(short){
   el.className='';
   const dust=Array.from({length:18},(_,i)=>'<i style="left:'+(8+Math.random()*84).toFixed(1)+'%;animation-delay:'+(Math.random()*5).toFixed(2)+'s;animation-duration:'+(4.5+Math.random()*3).toFixed(2)+'s"></i>').join('');
   el.innerHTML='<div class="sp-ph"></div><div class="sp-ov"></div><div class="sp-bg"></div><div class="rays"></div><div class="glow"></div><div class="vig"></div><div class="dust">'+dust+'</div><div class="medal3d"><div class="r"><div class="l0">'+MEDAL('sp0')+'</div><div class="l1">'+MEDAL('sp1')+'</div></div></div><div class="sp-cart"><svg class="fr" viewBox="0 0 392 282" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cfg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF0BE"/><stop offset=".4" stop-color="#D9AE55"/><stop offset=".7" stop-color="#A97A23"/><stop offset="1" stop-color="#EBCB7C"/></linearGradient></defs><g fill="none" stroke="url(#cfg)" stroke-linejoin="round"><path class="dr" pathLength="1" stroke-width="1.6" d="M30 6H362Q368 22 386 26V256Q368 260 362 276H30Q24 260 6 256V26Q24 22 30 6Z"/><path class="dr" pathLength="1" stroke-width=".8" stroke-opacity=".8" d="M36 14H356Q361 27 378 31V251Q361 255 356 268H36Q31 255 14 251V31Q31 27 36 14Z"/></g><g class="orn" fill="url(#cfg)"><path transform="translate(196 6)" d="M0-9L2.6-2.6 9 0 2.6 2.6 0 9-2.6 2.6-9 0-2.6-2.6Z"/><path transform="translate(196 276)" d="M0-9L2.6-2.6 9 0 2.6 2.6 0 9-2.6 2.6-9 0-2.6-2.6Z"/><path transform="translate(6 141)" d="M0-9L2.6-2.6 9 0 2.6 2.6 0 9-2.6 2.6-9 0-2.6-2.6Z"/><path transform="translate(386 141)" d="M0-9L2.6-2.6 9 0 2.6 2.6 0 9-2.6 2.6-9 0-2.6-2.6Z"/><circle cx="18" cy="18" r="2.2"/><circle cx="374" cy="18" r="2.2"/><circle cx="18" cy="264" r="2.2"/><circle cx="374" cy="264" r="2.2"/></g></svg><div class="gw ay"><div class="gm"></div></div></div><div class="sp-ref">سورة ص</div><div class="gw sp-nm"><div class="gm"></div></div><svg class="sp-dv" viewBox="0 0 190 16"><g fill="none" stroke="#D9B45A" stroke-width="1"><path class="dr" pathLength="1" d="M84 8H6"/><path class="dr" pathLength="1" d="M106 8H184"/></g><path class="orn" fill="#E8C877" d="M95 1.5L101.5 8 95 14.5 88.5 8Z"/><circle class="orn" cx="80" cy="8" r="1.6" fill="#E8C877"/><circle class="orn" cx="110" cy="8" r="1.6" fill="#E8C877"/></svg><div class="gw sp-mt"><div class="gm"></div></div><div class="sp-tap">المس الشاشة للدخول</div>';
-  el.classList.toggle('qq',!!short);el.setAttribute('aria-label','وقف وابتداء');
+  el.classList.toggle('q',!!short);el.setAttribute('aria-label','وقف وابتداء');
   let gone=false;const done=()=>{if(gone)return;gone=true;el.classList.add('gone');setTimeout(()=>{el.innerHTML='';el.style.display='none'},800)};
-  el.style.display='';el.onclick=done;setTimeout(done,short?2300:10000);
+  el.style.display='';el.onclick=done;setTimeout(done,short?6000:11000);
 }
 function splashSeenToday(){const t=String(dayKey());let k='';try{k=localStorage.getItem('waqf-spd')||''}catch(e){}if(k===t)return true;try{localStorage.setItem('waqf-spd',t)}catch(e){}return false}
 function prefetchData(){if(!navigator.onLine)return;try{ghLoad().catch(()=>{})}catch(e){}try{const rc=RC();if(rc[2]==='sf')tmLoad(rc[4]).catch(()=>{})}catch(e){}}
@@ -1896,7 +1916,7 @@ window.addEventListener('pageshow',e=>{if(e.persisted)splash(true)});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
 const restored=restore();
 if(restored&&STACK.length>1){try{history.replaceState({d:1},'');for(let d=2;d<=STACK.length;d++)history.pushState({d:d},'')}catch(e){}}else{try{history.replaceState({d:1},'')}catch(e){}}
-splash(splashSeenToday());
+splash(false);
 render();
 setTimeout(prefetchData,3500);
 if(restored){const y=cur().y||0;if(y)setTimeout(()=>window.scrollTo(0,y),40)}
