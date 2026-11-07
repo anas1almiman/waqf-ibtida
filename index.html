@@ -473,6 +473,35 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .card.go,.btn,.ptile,.chipb,.opt,.mini,.ib{transition:transform .16s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease,background-color .2s ease}
 .card.go:active,.btn:active,.ptile:active,.chipb:active,.opt:active,.mini:active{transform:scale(.972)}
 @media (prefers-reduced-motion:reduce){#bgw i{transition:none}}
+
+/* fit home and welcome on one screen */
+.hhero{min-height:calc(33vh + var(--sat))!important;padding:calc(12px + var(--sat)) 18px 20px!important;margin-bottom:2px!important}
+.hh-date{margin-top:8px!important;font-size:14px!important}
+.hh-next{padding-top:16px!important}
+.hh-next b{font-size:38px!important;line-height:1.2!important}
+.hh-next span{font-size:15px!important}
+.wrap>.sect{margin:18px 4px 9px!important}
+.ptiles{gap:9px!important}
+.ptile{padding:12px 14px 12px 12px!important;border-radius:20px!important}
+.ptile .pi{width:46px!important;height:46px!important;border-radius:14px!important}
+.ptile .pi svg{width:27px!important;height:27px!important}
+.ptile .pn b{font-size:21px!important}
+.minis{grid-template-columns:repeat(6,1fr)!important;gap:6px!important}
+.mini{padding:9px 0 7px!important;font-size:12.5px!important;gap:5px!important;border-radius:16px!important;white-space:nowrap}
+.mini span{width:36px!important;height:36px!important;border-radius:12px!important}
+.mini svg{width:21px!important;height:21px!important}
+.ob{min-height:calc(100vh - 24px - var(--sat) - var(--sab))!important;padding-bottom:8px!important}
+.ob .emb{width:92px!important;height:92px!important;margin:2px auto 2px!important}
+.ob-nm{width:min(62vw,236px)!important}
+.ob-mt{width:min(46vw,178px)!important;margin-top:4px!important}
+.dots{margin:10px 0 2px!important}
+.ob .stitle{margin:14px 0 10px!important;font-size:18px!important}
+.ocards{gap:8px!important}
+.ocard{padding:11px 13px!important;gap:12px!important}
+.ocard .ri{width:42px!important;height:42px!important;border-radius:13px!important}
+.ocard b{font-size:17.5px!important}.ocard small{font-size:13.5px!important;line-height:1.5!important}
+.ob .obtn{padding-top:12px!important}
+@media (max-height:700px){.hhero{min-height:calc(26vh + var(--sat))!important;padding-bottom:12px!important}.ptile{padding:8px 12px!important}.hh-next b{font-size:32px!important}.ptile{padding:7px 12px!important}.ob .emb{width:72px!important;height:72px!important}}
 </style>
 </head>
 <body>
