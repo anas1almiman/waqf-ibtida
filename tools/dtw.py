@@ -119,18 +119,39 @@ def envelope_from(y):
     pad = np.pad(db, (k // 2, k // 2), mode='edge')
     return np.median(np.lib.stride_tricks.sliding_window_view(pad, k), axis=1)
 
+def snap(out, y):
+    db = envelope_from(y); cand, t0, t1 = pauses(db, min_len=12)
+    o = [[a / 1000.0, b / 1000.0] for a, b in out]
+    for k in range(len(o)):
+        if k < len(o) - 1:
+            mid = (o[k][1] + o[k + 1][0]) / 2
+            near = [p for p in cand if abs((p[0] + p[1]) / 2 - mid) < 1.2]
+            if near:
+                p = max(near, key=lambda p: (p[1] - p[0]) - 0.5 * abs((p[0] + p[1]) / 2 - mid))
+                o[k][1] = p[0] + 0.06; o[k + 1][0] = max(o[k][1], p[1] - 0.08)
+    return [[int(round(a * 1000)), int(round(b * 1000))] for a, b in o]
+
 if __name__ == '__main__':
-    name, base, refbase, refread = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])
-    truth = int(sys.argv[5]); surahs = [int(x) for x in sys.argv[6].split(',')] if len(sys.argv) > 6 and sys.argv[6] != 'all' else range(1, 115)
-    ref = json.load(open('out/mq_%d.json' % refread))
+    name, base, refspec = sys.argv[1], sys.argv[2], sys.argv[3]
+    truth = int(sys.argv[4]); surahs = [int(x) for x in sys.argv[5].split(',')] if len(sys.argv) > 5 and sys.argv[5] != 'all' else range(1, 115)
+    refs = [(int(x.split('=')[0]), x.split('=', 1)[1]) for x in refspec.split(',')]
+    REF = {r: json.load(open('out/mq_%d.json' % r)) for r, _ in refs}
     tru = json.load(open('out/mq_%d.json' % truth)) if truth else None
     res = {}; errs = []
     os.makedirs('out', exist_ok=True)
     for s in surahs:
         t0 = time.time()
-        get(refbase + '%03d.mp3' % s, '/tmp/r.mp3'); get(base + '%03d.mp3' % s, '/tmp/a.mp3')
-        res[s] = align_dtw(load('/tmp/r.mp3'), ref[str(s)], load('/tmp/a.mp3'))
-        msg = '%d n %d %.0fs' % (s, len(res[s]), time.time() - t0)
+        get(base + '%03d.mp3' % s, '/tmp/a.mp3'); y = load('/tmp/a.mp3')
+        outs = []
+        for r, rb in refs:
+            try:
+                get(rb + '%03d.mp3' % s, '/tmp/r.mp3')
+                outs.append(np.array(align_dtw(load('/tmp/r.mp3'), REF[r][str(s)], y), dtype=float))
+            except Exception as e:
+                print('ref fail', r, s, e, flush=True)
+        med = np.median(np.stack(outs), axis=0)
+        res[s] = snap(med.astype(int).tolist(), y)
+        msg = '%d n %d refs %d %.0fs' % (s, len(res[s]), len(outs), time.time() - t0)
         if tru:
             e = errstats(res[s], tru[str(s)]); errs.extend(e.tolist())
             msg += ' median %d p90 %d within1s %.3f' % (np.median(e), np.percentile(e, 90), (e < 1000).mean())

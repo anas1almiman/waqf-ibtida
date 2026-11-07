@@ -13,18 +13,36 @@ jobs:
       - run: pip -q install numpy && python3 tools/align.py ref 282,58,340
       - uses: actions/upload-artifact@v4
         with: {name: refs, path: out/}
-  validate:
+  align:
     needs: ref
     runs-on: ubuntu-latest
+    timeout-minutes: 340
     strategy:
       fail-fast: false
       matrix:
         include:
-          - {name: v_burhaji, base: 'https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', truth: 340}
-          - {name: v_buaijan, base: 'https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/', truth: 58}
+          - {name: v_burhaji, base: 'https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', refs: '282=https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/,58=https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/', truth: 340, s: '1,2,12,18,36,50,55,67,78,81,84,88,93,113'}
+          - {name: v_buaijan, base: 'https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/', refs: '282=https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/,340=https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', truth: 58, s: '1,2,12,18,36,50,55,67,78,81,84,88,93,113'}
+          - {name: badr, base: 'https://cdn.mp3quran.net/audio/badr-turki/r1/', refs: '282=https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/,58=https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/,340=https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', truth: 0, s: all}
+          - {name: qarafi, base: 'https://cdn.mp3quran.net/audio/abdullah-qarafi/r1/', refs: '282=https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/,58=https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/,340=https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', truth: 0, s: all}
+          - {name: asfour, base: 'https://cdn.mp3quran.net/audio/nasser-asfour/r1/', refs: '282=https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/,58=https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/,340=https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', truth: 0, s: all}
+          - {name: miman, base: 'https://archive.org/download/alfirdwsiy1433_22_201812/', refs: '282=https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/,58=https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/,340=https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', truth: 0, s: all}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: {name: refs, path: out/}
       - run: sudo apt-get -qq install -y ffmpeg >/dev/null && pip -q install numpy numba librosa
-      - run: python3 tools/dtw.py ${{ matrix.name }} ${{ matrix.base }} https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/ 282 ${{ matrix.truth }} 1,2,12,18,36,50,55,67,78,81,84,88,93,113
+      - run: python3 tools/dtw.py ${{ matrix.name }} ${{ matrix.base }} '${{ matrix.refs }}' ${{ matrix.truth }} ${{ matrix.s }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: 'al-${{ matrix.name }}', path: 'out/al_*.json'}
+  publish:
+    needs: align
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {path: got/}
+      - run: |
+          mkdir pub && cp got/*/*.json pub/ 2>/dev/null; ls -la pub
+          cd pub && git init -q && git checkout -q -b timing-out && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm "timing outputs" && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" timing-out
