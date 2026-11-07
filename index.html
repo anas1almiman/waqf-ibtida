@@ -880,7 +880,7 @@ function vHome(){
   let x='<header class="hhero"'+bg('home')+'><div class="hh-top"><span class="brand"><span class="em">'+MEDAL('hb',{inner:false})+'</span>'+APP+'</span><button class="locchip" data-act="locsheet">'+ICON.pin+'<span>'+(S.loc?esc(S.loc.name):'حدّد موقعك')+'</span></button></div>';
   x+='<div class="hh-date">'+dateLine()+'</div>';
   if(isWird())x+='<div class="hh-next"><small>وِردك اليوم</small><b>الختمة</b><span>'+(S.wird.round>1?'الختمة '+AR(S.wird.round)+' · ':'')+'في '+AR(S.days)+' يومًا</span></div>';
-  else x+='<div class="hh-next"><small>الصلاة القادمة</small><b>'+PR[np.p].n+'</b><span>'+(np.t?clock(np.t)+' · '+until(np.t):'حدّد موقعك لتظهر المواقيت')+'</span>'+(planFor(np.day,np.p)?'<em class="hh-plan">في مخططك: '+planFor(np.day,np.p).title+'</em>':'')+'</div>';
+  else x+='<div class="hh-next"><small>الصلاة القادمة</small><b>'+PR[np.p].n+'</b><span>'+(np.t?clock(np.t)+' · '+until(np.t):'حدّد موقعك لتظهر المواقيت')+'</span>'+(planFor(np.day,np.p)?'<em class="hh-plan">في جدولك: '+planFor(np.day,np.p).title+'</em>':'')+'</div>';
   x+='</header>';
   if(isWird()){
     const w=wirdRange();
@@ -892,7 +892,7 @@ function vHome(){
       return '<button class="ptile'+(p===np.p?' next':'')+'" data-act="openp" data-p="'+p+'"><span class="pi">'+PICON[p]+'</span><span class="pn"><b>'+PR[p].n+(p===np.p?'<span class="pill">التالية</span>':'')+'</b>'+sub+'</span>'+(t?'<span class="pt">'+clock(t[p])+'</span>':'')+'</button>'}).join('')+'</div>';
   }
   if(hj&&(hj.m===9||(hj.m===8&&hj.d>=10)))x+='<button class="card banner go" style="margin-top:14px" data-act="nav" data-v="ramadan"><span><b>'+(hj.m===9?'ختمة رمضان':'يقترب شهر رمضان')+'</b><p>'+(hj.m===9?'الليلة '+AR(tonight()||hj.d)+' من رمضان':'أعدّ خطة الختمة قبل دخول الشهر')+'</p></span></button>';
-  x+=sect('المزيد')+'<div class="minis'+(ENTER?' stag':'')+'">'+[['topics','المختارات','star'],['plan','مخططي','cal'],['library','المكتبة','shelf'],['ramadan','رمضان','moon'],['record','السجل','book'],['settings','الإعدادات','gear']].map(([v,l,ic])=>'<button class="mini" data-act="nav" data-v="'+v+'"><span>'+ICON[ic]+'</span>'+l+'</button>').join('')+'</div>';
+  x+=sect('المزيد')+'<div class="minis'+(ENTER?' stag':'')+'">'+[['topics','المختارات','star'],['plan','جدولي','cal'],['library','المكتبة','shelf'],['ramadan','رمضان','moon'],['record','السجل','book'],['settings','الإعدادات','gear']].map(([v,l,ic])=>'<button class="mini" data-act="nav" data-v="'+v+'"><span>'+ICON[ic]+'</span>'+l+'</button>').join('')+'</div>';
   return x;
 }
 /* ---- prayer ---- */
@@ -904,11 +904,11 @@ function vPrayer(r){
   const friK=dayKey(np.day),isFri=p==='fajr'&&S.friday&&fridayFajr(np),useFri=isFri&&S.friOff!==friK;
   if(isFri)x+='<div class="card banner"><b>سنّة فجر الجمعة</b><p>كان النبي ﷺ يقرأ في فجر الجمعة سورة السجدة في الأولى، وسورة الإنسان في الثانية. رواه البخاري ومسلم.</p>'+(useFri?'':'<button class="btn sm primary" data-act="frion">القراءة بالسنّة</button>')+'</div>';
   if(useFri)return x+rakCard('الركعة الأولى',FRI.a,null)+rakCard('الركعة الثانية',FRI.b,null)+'<button class="btn primary" data-act="readfri">'+ICON.read+'قراءة السورتين</button><div class="row2"><button class="btn outline" data-act="frioff">مقطع من الختمة</button><button class="btn goldb" data-act="prayedfri">تمّت الصلاة بهما</button></div>';
-  {const pd=(p===np.p&&np.day)?np.day:new Date();const e=planFor(pd,p);if(e)x+='<div class="card accent pl-now"><div class="kick meta">من مخططك لهذه الصلاة</div><b>'+e.title+'</b>'+e.blocks.map(b=>'<span>'+(b.label?b.label+': ':'')+blkSum(b)+'</span>').join('')+'<div class="row2"><button class="btn primary" data-act="plread" data-k="'+S.plan.indexOf(e)+'">'+ICON.read+'قراءته</button><button class="btn outline" data-act="pldel" data-k="'+S.plan.indexOf(e)+'">إزالته من المخطط</button></div></div>'}
+  {const pd=(p===np.p&&np.day)?np.day:new Date();const e=planFor(pd,p);if(e)x+='<div class="card accent pl-now"><div class="kick meta">من جدولك لهذه الصلاة</div><b>'+e.title+'</b>'+e.blocks.map(b=>'<span>'+(b.label?b.label+': ':'')+blkSum(b)+'</span>').join('')+'<div class="row2"><button class="btn primary" data-act="plread" data-k="'+S.plan.indexOf(e)+'">'+ICON.read+'قراءته</button><button class="btn outline" data-act="pldel" data-k="'+S.plan.indexOf(e)+'">إزالته من الجدول</button></div></div>'}
   const c=current(p);
   if(!c)return x+emptyCard(p);
   x+=rakCard('الركعة الأولى',c.a,'a')+rakCard('الركعة الثانية',c.b,'b');
-  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى مخططك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت الصلاة به</button></div>';
+  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت الصلاة به</button></div>';
   return x+'<p class="note">يبدأ كل مقطع وينتهي عند وقف تام، ولا يتكرر حتى تتم الختمة.</p>';
 }
 function doneView(){
@@ -924,7 +924,7 @@ function emptyCard(p){
   return '<div class="card empty"><b>اكتملت المقاطع الجديدة لصلاة '+PR[p].n+(hz?' في محفوظك':'')+'</b><p>'+(hz?'أضف جزءًا إلى محفوظك، أو ابدأ دورة جديدة.':'تمّت بحمد الله، فابدأ دورة جديدة على ما قرأته.')+'</p>'+(hz?'<button class="btn outline" data-act="nav" data-v="hifz">إضافة إلى المحفوظ</button>':'')+'<button class="btn primary" data-act="newcycle">دورة جديدة</button></div>';
 }
 
-/* ---- planner: «مخططي» ---- */
+/* ---- planner: «جدولي» ---- */
 const PORD={fajr:0,maghrib:1,isha:2},PN2={fajr:'الفجر',maghrib:'المغرب',isha:'العشاء'};
 function dkAdd(n){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+n);return d}
 function relDay(k){const t=dayKey(new Date());for(let n=0;n<8;n++){if(dayKey(dkAdd(n))===k)return n===0?'اليوم':n===1?'غدًا':n===2?'بعد غد':dkAdd(n).toLocaleDateString('ar-SA',{weekday:'long'})}return ''}
@@ -937,16 +937,16 @@ function planPrayerOf(blocks){const rg=RANGES[S.role==='imam'?S.mosque:'hay'];co
 let PLD=null;
 function planOpen(title,blocks){const p=planPrayerOf(blocks);let day=0;try{const tt=S.loc?todayTimes(new Date()):null;if(!tt||new Date()>tt[p])day=1}catch(e){day=1}
   PLD={title:title,blocks:blocks.map(b=>Object.assign({},b)),p:p,rec:p,day:day};openSheet(plnSheet(),'pln',()=>plnSheet())}
-function plnSheet(){const P=PLD;let h=shead('أضِف إلى مخططك')+'<div class="pl-sum"><b>'+P.title+'</b>'+P.blocks.map(b=>'<span>'+(b.label?b.label+': ':'')+blkSum(b)+'</span>').join('')+'</div>';
+function plnSheet(){const P=PLD;let h=shead('أضِف إلى جدولك')+'<div class="pl-sum"><b>'+P.title+'</b>'+P.blocks.map(b=>'<span>'+(b.label?b.label+': ':'')+blkSum(b)+'</span>').join('')+'</div>';
   h+='<div class="pl-lab">اليوم</div><div class="pl-days">';for(let n=0;n<7;n++){const d=dkAdd(n);h+='<button class="opt'+(P.day===n?' on':'')+'" data-act="plday" data-k="'+n+'">'+(n===0?'اليوم':n===1?'غدًا':n===2?'بعد غد':d.toLocaleDateString('ar-SA',{weekday:'long'}))+'<small>'+d.toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-arab',{day:'numeric',month:'short'})+'</small></button>'}h+='</div>';
   h+='<div class="pl-lab">الصلاة</div><div class="pl-ps">'+['fajr','maghrib','isha'].map(p=>'<button class="opt'+(P.p===p?' on':'')+'" data-act="plp" data-p="'+p+'">'+PN2[p]+(P.rec===p?'<small>يناسبها المقدار</small>':'')+'</button>').join('')+'</div>';
-  const ex=planFor(dkAdd(P.day),P.p);if(ex)h+='<p class="meta pl-ex">في هذا الموضع من مخططك: '+ex.title+'، وسيحلّ محلّه.</p>';
-  return h+'<button class="btn goldb" data-act="plsave">'+ICON.check+'حفظ في المخطط</button>'}
-function planSave(){const P=PLD;const k=dayKey(dkAdd(P.day));S.plan=(S.plan||[]).filter(e=>!(e.d===k&&e.p===P.p));S.plan.push({d:k,p:P.p,title:P.title,blocks:P.blocks,t:Date.now()});S.plan.sort((a,b)=>a.d-b.d||PORD[a.p]-PORD[b.p]);save();closeSheet();toast('أُضيف إلى مخططك: '+PN2[P.p]+' '+(P.day===0?'اليوم':P.day===1?'غدًا':P.day===2?'بعد غد':dkAdd(P.day).toLocaleDateString('ar-SA',{weekday:'long'})));if(cur().v==='plan')render()}
+  const ex=planFor(dkAdd(P.day),P.p);if(ex)h+='<p class="meta pl-ex">في هذا الموضع من جدولك: '+ex.title+'، وسيحلّ محلّه.</p>';
+  return h+'<button class="btn goldb" data-act="plsave">'+ICON.check+'حفظ في الجدول</button>'}
+function planSave(){const P=PLD;const k=dayKey(dkAdd(P.day));S.plan=(S.plan||[]).filter(e=>!(e.d===k&&e.p===P.p));S.plan.push({d:k,p:P.p,title:P.title,blocks:P.blocks,t:Date.now()});S.plan.sort((a,b)=>a.d-b.d||PORD[a.p]-PORD[b.p]);save();closeSheet();toast('أُضيف إلى جدولك: '+PN2[P.p]+' '+(P.day===0?'اليوم':P.day===1?'غدًا':P.day===2?'بعد غد':dkAdd(P.day).toLocaleDateString('ar-SA',{weekday:'long'})));if(cur().v==='plan')render()}
 function vPlan(){if(planPrune())save();
-  let x=topbar('مخططي',{over:true})+hero('plan','قراءاتك للأيام القادمة','مخططي','مقاطع اخترتها لصلواتك القادمة');
+  let x=topbar('جدولي',{over:true})+hero('plan','قراءاتك للأيام القادمة','جدولي','مقاطع اخترتها لصلواتك القادمة');
   const L=S.plan||[];
-  if(!L.length)return x+'<div class="card empty pl-empty"><span class="pl-ic">'+ICON.cal+'</span><b>مخططك فارغ</b><p>إذا أعجبك مقطع وأردته لصلاة قادمة، اضغط «أضِف إلى مخططك» تحته، ثم اختر اليوم والصلاة.</p><button class="btn outline" data-act="nav" data-v="topics">'+ICON.star+'تصفّح المختارات</button></div>';
+  if(!L.length)return x+'<div class="card empty pl-empty"><span class="pl-ic">'+ICON.cal+'</span><b>جدولك فارغ</b><p>إذا أعجبك مقطع وأردته لصلاة قادمة، اضغط «أضِف إلى جدولك» تحته، ثم اختر اليوم والصلاة.</p><button class="btn outline" data-act="nav" data-v="topics">'+ICON.star+'تصفّح المختارات</button></div>';
   let last=null;
   L.forEach((e,k)=>{if(e.d!==last){last=e.d;const dd=dateOfKey(e.d);x+='<div class="pl-day"><b>'+(relDay(e.d)||dd.toLocaleDateString('ar-SA',{weekday:'long'}))+'</b><span>'+dd.toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-arab',{day:'numeric',month:'long'})+'</span></div>'}
     x+='<div class="card pl-item"><div class="pl-p">'+PN2[e.p]+'</div><div class="pl-body"><b>'+e.title+'</b>'+e.blocks.map(b=>'<span>'+blkSum(b)+'</span>').join('')+'</div><div class="pl-acts"><button class="ib" data-act="plread" data-k="'+k+'" aria-label="قراءة">'+ICON.read+'</button><button class="ib" data-act="pldel" data-k="'+k+'" aria-label="حذف">'+ICON.x+'</button></div></div>'});
@@ -1025,7 +1025,7 @@ function vTopic(r){
   const T0=TR(t);const TP=tPrayer(T0);const B0=TS(t).r;let x=topbar(t.title)+'<div style="height:12px"></div><div class="card accent"><div class="kick meta">'+t.catL+' · تناسب صلاة '+PR[TP].n+'</div><b style="font-size:21px;color:var(--em)">'+t.title+'</b><p>'+t.link+'</p>'+(t.lengthNote?'<p class="meta">'+t.lengthNote+'</p>':'')+(t.sets&&t.sets.length>1?'<div class="opts tsets">'+t.sets.map((s,k)=>'<button class="opt'+(s===T0?' on':'')+'" data-act="tset" data-k="'+k+'">'+s.t+'</button>').join('')+'</div>':'')+'</div>';
   T0.r.forEach((rr,k)=>{const s=rr[0],a=rr[1],b=rr[2];const n=lines(s,a,b);const okS=a===1||STOP.has(s+':'+(a-1)),okE=STOP.has(s+':'+b)||b===D.Q[s-1].length;const rg=RANGES[S.role==='imam'?S.mosque:'hay'][T0.p];const fp=n>=rg[0]&&n<=rg[2];
     x+='<div class="card"><div class="cardtop"><span class="rk">'+(k?'الركعة الثانية':'الركعة الأولى')+'</span><span class="meta">'+D.N[s-1]+' '+AR(a)+(b>a?'–'+AR(b):'')+'</span></div><b>'+rr[3]+'</b><div class="se"><span>يبدأ</span><div class="q">'+W(txt(s,a)).slice(0,6).join(' ')+' …</div><span>وينتهي</span><div class="q q2">… '+W(txt(s,b)).slice(-5).join(' ')+'</div></div>'+'<div class="tadj"><button class="chipb" data-act="tadj" data-k="'+k+'" data-d="-1"'+(b<=B0[k][2]?' disabled':'')+'>− أقل</button><span class="meta">'+AR(n)+(n<=2?(n===1?' سطر':' سطران'):n<=10?' أسطر':' سطرًا')+'</span><button class="chipb" data-act="tadj" data-k="'+k+'" data-d="1"'+(b>=D.Q[s-1].length?' disabled':'')+'>+ أكثر</button></div><div class="rkf">'+tafBtnR(s,a,b)+'</div></div>'});
-  x+='<button class="btn primary" data-act="tread">'+ICON.read+'قراءة المجموعة</button><button class="btn goldb" data-act="tpray">قراءتها '+PN1[TP]+' '+whenOf(TP)+'</button><button class="btn ghostb" data-act="plan" data-from="topic">'+ICON.cal+'أضِف إلى مخططك</button>';
+  x+='<button class="btn primary" data-act="tread">'+ICON.read+'قراءة المجموعة</button><button class="btn goldb" data-act="tpray">قراءتها '+PN1[TP]+' '+whenOf(TP)+'</button><button class="btn ghostb" data-act="plan" data-from="topic">'+ICON.cal+'أضِف إلى جدولك</button>';
   return x;
 }
 /* ---- record ---- */
@@ -1505,7 +1505,7 @@ document.addEventListener('click',ev=>{
   case 'plp':PLD.p=b.dataset.p;refreshSheet();break;
   case 'plsave':planSave();break;
   case 'plread':{const e=S.plan[+b.dataset.k];if(e)openReader({mode:'view',title:e.title,blocks:e.blocks.map((x,i)=>Object.assign({label:x.label||(i?'الركعة الثانية':'الركعة الأولى')},x))});break}
-  case 'pldel':{S.plan.splice(+b.dataset.k,1);save();toast('أُزيل من مخططك.');render();break}
+  case 'pldel':{S.plan.splice(+b.dataset.k,1);save();toast('أُزيل من جدولك.');render();break}
   case 'tset':TSEL[cur().id]=+b.dataset.k;render();break;
   case 'tadj':{const t=TOPICS.find(x=>x.id===cur().id);if(!t)break;const key=t.id+':'+(TSEL[t.id]||0);const k=+b.dataset.k;const R=TR(t).r[k],r0=TS(t).r[k];const e=TEXT[key]||(TEXT[key]={});const before=tPrayer(TR(t));e[k]=+b.dataset.d>0?stopAfter(R[0],R[2]):stopBefore(R[0],R[1],R[2],r0[2]);const y=window.scrollY;render();window.scrollTo(0,y);const after=tPrayer(TR(t));if(after!==before)toast('صار مقدارها يناسب صلاة '+PR[after].n);break}
   case 'tst':S.topics[cur().id]=v;save();render();toast(v==='ok'?'اعتُمدت المجموعة.':v==='rej'?'رُفضت المجموعة.':'سُجّلت للتعديل.');break;
