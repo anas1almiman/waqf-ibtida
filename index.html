@@ -903,12 +903,12 @@ function vPrayer(r){
   if(recentDone(p)&&!S.last.nx)return x+doneView();
   const friK=dayKey(np.day),isFri=p==='fajr'&&S.friday&&fridayFajr(np),useFri=isFri&&S.friOff!==friK;
   if(isFri)x+='<div class="card banner"><b>سنّة فجر الجمعة</b><p>كان النبي ﷺ يقرأ في فجر الجمعة سورة السجدة في الأولى، وسورة الإنسان في الثانية. رواه البخاري ومسلم.</p>'+(useFri?'':'<button class="btn sm primary" data-act="frion">القراءة بالسنّة</button>')+'</div>';
-  if(useFri)return x+rakCard('الركعة الأولى',FRI.a,null)+rakCard('الركعة الثانية',FRI.b,null)+'<button class="btn primary" data-act="readfri">'+ICON.read+'قراءة السورتين</button><div class="row2"><button class="btn outline" data-act="frioff">مقطع من الختمة</button><button class="btn goldb" data-act="prayedfri">تمّت الصلاة بهما</button></div>';
+  if(useFri)return x+rakCard('الركعة الأولى',FRI.a,null)+rakCard('الركعة الثانية',FRI.b,null)+'<button class="btn primary" data-act="readfri">'+ICON.read+'قراءة السورتين</button><div class="row2"><button class="btn outline" data-act="frioff">مقطع من الختمة</button><button class="btn goldb" data-act="prayedfri">تمّت قراءة المقترح</button></div>';
   {const pd=(p===np.p&&np.day)?np.day:new Date();const e=planFor(pd,p);if(e)x+='<div class="card accent pl-now"><div class="kick meta">من جدولك لهذه الصلاة</div><b>'+e.title+'</b>'+e.blocks.map(b=>'<span>'+(b.label?b.label+': ':'')+blkSum(b)+'</span>').join('')+'<div class="row2"><button class="btn primary" data-act="plread" data-k="'+S.plan.indexOf(e)+'">'+ICON.read+'قراءته</button><button class="btn outline" data-act="pldel" data-k="'+S.plan.indexOf(e)+'">إزالته من الجدول</button></div></div>'}
   const c=current(p);
   if(!c)return x+emptyCard(p);
   x+=rakCard('الركعة الأولى',c.a,'a')+rakCard('الركعة الثانية',c.b,'b');
-  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت الصلاة به</button></div>';
+  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button></div>';
   return x+'<p class="note">يبدأ كل مقطع وينتهي عند وقف تام، ولا يتكرر حتى تتم الختمة.</p>';
 }
 function doneView(){
@@ -987,10 +987,10 @@ function vReader(r){
   });
   x+='</div>';
   if(revMode)x+='<div class="revbar"><button class="btn sm goldb" data-act="reveal">الآية التالية</button><button class="btn sm outline" data-act="revealall">إظهار الكل</button></div><p class="note">'+AR(Math.min(revealN,idx))+' من '+AR(idx)+'</p>';
-  if(RD.mode==='prayer')x+='<button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت الصلاة به</button>';
-  else if(RD.mode==='fri')x+='<button class="btn goldb" data-act="prayedfri">'+ICON.check+'تمّت الصلاة بهما</button>';
+  if(RD.mode==='prayer')x+='<button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button>';
+  else if(RD.mode==='fri')x+='<button class="btn goldb" data-act="prayedfri">'+ICON.check+'تمّت قراءة المقترح</button>';
   else if(RD.mode==='wird')x+='<button class="btn goldb" data-act="wdone">'+ICON.check+'أتممت الورد</button>';
-  else if(RD.mode==='topic')x+='<button class="btn goldb" data-act="tprayed">'+ICON.check+'تمّت الصلاة بها</button>';
+  else if(RD.mode==='topic')x+='<button class="btn goldb" data-act="tprayed">'+ICON.check+'تمّت قراءة المقترح</button>';
   else if(RD.mode==='night')x+='<button class="btn goldb" data-act="ndone" data-k="'+RD.k+'" data-m="'+RD.m+'">'+ICON.check+'تمّت القراءة</button>';
   return x+'<div style="height:70px"></div>';
 }
