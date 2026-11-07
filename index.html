@@ -1465,7 +1465,7 @@ function obExtra(){const W=isWird();let x='<div class="stitle">تفضيلات ا
   if(!W)x+='<div class="xrow"><div class="xl">كيف تفضّل ترتيب المقاطع؟</div>'+segB('ordered',[['0','التنويع بين السور'],['1','وفق ترتيب المصحف']])+'</div>';
   x+='<div class="xrow"><div class="xl">هل ترغب في إظهار معاني الكلمات أسفل كل مقطع؟</div>'+segB('taf',[['1','نعم'],['0','لا']])+'</div>';
   x+='<div class="xrow"><div class="xl">هل ترغب في التذكير بالقراءة؟</div>'+remRow()+(S.remOn?'<div class="xok">أُضيف التذكير إلى تقويمك</div>':'')+'</div></div>';
-  return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button><button class="skipl" data-act="stnext">تخطّي</button></div>'}
+  return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button><button class="skipl" data-act="stnext">تخطى الآن</button></div>'}
 let OBB=false;
 function obGo(dir,mut){
   if(OBB)return;const old=document.querySelector('#app .obb');const prev=stStep;
