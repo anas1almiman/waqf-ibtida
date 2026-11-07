@@ -912,6 +912,7 @@ function avail(sg){for(let x=sg[0];x<=sg[1];x++){if(S.noRepeat&&READ.has(x))retu
 function restDone(j){const s=D.P[j][0];for(let x=j+1;x<NP&&D.P[x][0]===s;x++){if(!READ.has(x)&&!NM.has(x))return false}return true}
 function hasHz(){return S.hifz.length>0||(S.hifzS||[]).length>0}
 function inHz(x){return S.hifz.indexOf(D.P[x][6])>=0||(S.hifzS||[]).indexOf(D.P[x][0])>=0}
+function segInHz(i,j){if(!hasHz())return false;for(let x=i;x<=j;x++)if(!inHz(x))return false;return true}
 function allowed(p,sg){
   if(S.hifzOnly&&hasHz()){for(let x=sg[0];x<=sg[1];x++)if(!inHz(x))return false}
   if(S.sunna[p]){const s=D.P[sg[0]][0];if(s<MUF[p][0]||s>MUF[p][1])return false}
@@ -942,7 +943,7 @@ let STACK=[{v:'home'}];
 const cur=()=>STACK[STACK.length-1];
 const VKEY='waqf-nav4';
 const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
-let ENTER=false,AFTER=null,prayer='fajr',revSurah=2,revFilter='all',catSel='all',tq='',lastAdj=0,wAdj=0,stRole=null,stStep=0,cityQ='',hifzDraft=null,hifzSDraft=null,obHzOnly=true,pendingLoc=null;
+let ENTER=false,AFTER=null,prayer='fajr',revSurah=2,revFilter='all',catSel='all',tq='',lastAdj=0,wAdj=0,stRole=null,stStep=0,cityQ='',hifzDraft=null,hifzSDraft=null,obHzOnly=false,pendingLoc=null;
 function persist(){try{cur().y=window.scrollY;sessionStorage.setItem(VKEY,JSON.stringify({s:STACK,rs:revSurah,rf:revFilter}))}catch(e){}}
 function restore(){try{const o=JSON.parse(sessionStorage.getItem(VKEY)||'null');if(o&&Array.isArray(o.s)&&o.s.length&&o.s[0].v==='home'){STACK=o.s;revSurah=o.rs||2;revFilter=o.rf||'all';return true}}catch(e){}return false}
 function show(dir,y){
@@ -987,7 +988,7 @@ function startEnd(i,j){
 function rakCard(label,sg,w){
   const [i,j]=sg,s=D.P[i][0];const tags=[];
   if(isWhole(i,j))tags.push(['سورة كاملة','']);
-  if(S.hifzOnly&&hasHz())tags.push(['من محفوظك','']);
+  if(segInHz(i,j))tags.push(['من محفوظك','']);
   if(hasSajda(i,j))tags.push(['فيه سجدة تلاوة','gold']);
   return '<div class="card accent"><div class="cardtop"><span class="rk">'+label+'</span><span class="meta">الصفحة '+AR(D.P[i][4])+'</span></div><div class="cart">سورة '+D.N[s-1]+(isWhole(i,j)?'':' <small>'+ayRange(i,j)+'</small>')+'</div>'+(tags.length?'<div class="tags">'+tags.map(t=>'<span class="tag '+t[1]+'">'+t[0]+'</span>').join('')+'</div>':'')+startEnd(i,j)+
   '<div class="rkf">'+dalilBtn(j,i)+tafBtn(i,j)+(w?'<button class="chipb plain" data-act="tools" data-w="'+w+'">'+ICON.tune+'تعديل المقدار</button>':'')+'</div></div>';
