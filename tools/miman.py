@@ -1,4 +1,5 @@
 # Choose a complete Anas Al-Miman mushaf, check that file N is surah N (durations against a
+# (rerun: patient downloads)
 # reference reciter), re-encode for phones and write audio/miman/NNN.mp3.
 import json, os, re, subprocess, sys, urllib.request
 sys.path.insert(0, os.path.dirname(__file__))
