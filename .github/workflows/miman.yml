@@ -1,0 +1,27 @@
+name: miman
+on:
+  push:
+    branches: [audio-lab]
+    paths: ['.github/workflows/miman.yml', 'tools/miman.py']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get -qq install -y ffmpeg >/dev/null && pip -q install numpy numba librosa
+      - run: python3 tools/align.py ref 282,58,340
+      - run: python3 tools/miman.py
+      - name: timing for the re-encoded files
+        run: |
+          mkdir -p /tmp/srv && cp -r site/audio /tmp/srv/ && (cd /tmp/srv && python3 -m http.server 8000 >/dev/null 2>&1 &) && sleep 2
+          python3 tools/dtw.py miman http://127.0.0.1:8000/audio/miman/ '282=https://cdn.mp3quran.net/audio/abdulaziz-turki/r1/,58=https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/,340=https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/' 0 all
+      - name: commit to the app
+        run: |
+          git clone -q --depth 1 -b main "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" app
+          mkdir -p app/audio/miman && cp site/audio/miman/*.mp3 app/audio/miman/
+          python3 -c "import json;d=json.load(open('out/al_miman.json'));json.dump({str(k):v for k,v in d.items()},open('app/timing/miman.json','w'),separators=(',',':'))"
+          cd app && git add -A && git -c user.name="anas1almiman" -c user.email="anas1almiman@users.noreply.github.com" commit -qm "Anas Al-Miman: complete mushaf hosted with the app (48 kbps mono) and its ayah timings" && git push -q
+          du -sh audio/miman
