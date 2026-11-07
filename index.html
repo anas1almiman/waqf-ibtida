@@ -502,6 +502,21 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .ocard b{font-size:17.5px!important}.ocard small{font-size:13.5px!important;line-height:1.5!important}
 .ob .obtn{padding-top:12px!important}
 @media (max-height:700px){.hhero{min-height:calc(26vh + var(--sat))!important;padding-bottom:12px!important}.ptile{padding:8px 12px!important}.hh-next b{font-size:32px!important}.ptile{padding:7px 12px!important}.ob .emb{width:72px!important;height:72px!important}}
+
+/* v22: zoom-aware heights, home minis 3 x 2 */
+.wrap{min-height:0!important}
+.ob{min-height:calc((100vh - var(--sat) - var(--sab)) / 1.08 - 22px)!important}
+.hhero{min-height:calc(26vh + var(--sat))!important;padding-bottom:16px!important}
+.hh-next{padding-top:10px!important}
+.hh-next b{font-size:36px!important}
+.wrap>.sect{margin:12px 4px 8px!important}
+.ptiles{gap:8px!important}
+.ptile{padding:9px 14px 9px 12px!important}
+.minis{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+.mini{padding:10px 0 8px!important;font-size:14.5px!important;gap:6px!important;border-radius:17px!important}
+.mini span{width:38px!important;height:38px!important;border-radius:12px!important}
+.mini svg{width:22px!important;height:22px!important}
+@media (max-height:740px){.hhero{min-height:calc(20vh + var(--sat))!important}.ptile{padding:7px 12px!important}.mini{padding:7px 0 6px!important}}
 </style>
 </head>
 <body>
