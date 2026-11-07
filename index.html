@@ -541,7 +541,7 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .obsum{text-align:center;color:#D9C48C;font-size:14px;margin:12px 4px 0;line-height:1.6}
 .obtog{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:10px;padding:10px 14px;border-radius:16px;border:1px solid rgba(201,162,79,.3);background:rgba(255,255,255,.03);color:#F3E9CF;font:16px 'Amiri',serif;text-align:right}
 .obtog .tg{pointer-events:none}
-.reclist{position:relative;max-height:calc((100vh - var(--sat) - var(--sab)) / 1.08 - 300px);min-height:200px;overflow-y:auto;border:1px solid rgba(201,162,79,.3);border-radius:18px;background:rgba(255,255,255,.03);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.reclist{position:relative;max-height:calc((100vh - var(--sat) - var(--sab)) / 1.08 - 420px);min-height:190px;overflow-y:auto;border:1px solid rgba(201,162,79,.3);border-radius:18px;background:rgba(255,255,255,.03);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .rrow{display:flex;align-items:center;border-top:1px solid rgba(201,162,79,.14);transition:background .2s}
 .rrow:first-child{border-top:0}
 .rrow.on{background:linear-gradient(90deg,rgba(217,180,90,.04),rgba(217,180,90,.14))}
@@ -595,6 +595,13 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .gls p{margin:6px 0 0;font-size:15.5px;line-height:1.85;color:var(--ink2)}
 .gls .tq{color:var(--em);font-weight:700}
 .olist.hzs{max-height:56vh;overflow-y:auto}
+
+.ob .obback{position:absolute;top:0;right:0;z-index:3;width:auto;text-align:right;padding:2px 4px 8px}
+.obhd.sm .emb{width:52px!important;height:52px!important;margin:6px auto 1px!important}
+.obhd.sm .ob-nm{width:min(40vw,150px)!important}
+.obhd.sm .ob-mt{width:min(31vw,116px)!important;margin-top:2px!important}
+.obhd.sm .gw{animation:none}
+@media (max-height:740px){.obhd.sm .emb,.obhd.sm .ob-mt{display:none!important}.obhd.sm .ob-nm{width:min(36vw,128px)!important;margin-top:2px}.ob .grid30.obg .c{height:34px}.reclist{max-height:calc((100vh - var(--sat) - var(--sab)) / 1.08 - 340px)}}
 </style>
 </head>
 <body>
@@ -1345,8 +1352,8 @@ function obExtra(){const W=isWird();let x='<div class="stitle">لمساتٌ تخ
 function vStart(){
   const role=stRole||S.role;const FL=stFlow();if(stStep>FL.length-1)stStep=FL.length-1;const sk=FL[stStep];const q=sk==='days'?ROLEQ.self:ROLEQ[role];const cur2=String(S[q.key]);
   let x='<div class="ob">';
-  if(stStep>0)x+='<button class="link" style="text-align:right;padding:0 2px 6px;width:auto" data-act="stback">رجوع</button>';
-  if(sk!=='hifz'&&sk!=='rec'&&sk!=='extra')x+='<div class="emb">'+MEDAL('ob1')+'</div>';x+=(stStep===0?'<div style="width:100%;max-width:300px;margin:0 auto">'+'<div class="gw ob-nm" role="img" aria-label="وقف وابتداء"><div class="gm"></div></div><div class="gw ob-mt" role="img" aria-label="هدي الوقف، وهدى المعنى"><div class="gm"></div></div></div>':'');
+  if(stStep>0)x+='<button class="link obback" data-act="stback">رجوع</button>';
+  x+='<div class="obhd'+(stStep?' sm':'')+'"><div class="emb">'+MEDAL('ob1')+'</div><div style="width:100%;max-width:300px;margin:0 auto"><div class="gw ob-nm" role="img" aria-label="وقف وابتداء"><div class="gm"></div></div><div class="gw ob-mt" role="img" aria-label="هدي الوقف، وهدى المعنى"><div class="gm"></div></div></div></div>';
   x+='<div class="dots">'+FL.map((s,k)=>'<i class="'+(stStep===k?'on':'')+'"></i>').join('')+'</div>';
   if(sk==='role'){
     x+='<div class="stitle">ساعدنا بالتعرف عليك</div><div class="ocards">'+ROLES.map(r=>'<button class="ocard'+(r.k===role?' on':'')+'" data-act="role" data-k="'+r.k+'"><span class="ri">'+ICON[r.ic]+'</span><span><b>'+r.t+'</b><small>'+r.s+'</small></span></button>').join('')+'</div>';
