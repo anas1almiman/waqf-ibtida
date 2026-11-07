@@ -1,0 +1,25 @@
+name: discover
+on:
+  push:
+    branches: [audio-lab]
+    paths: ['.github/workflows/discover.yml']
+permissions:
+  contents: write
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - name: query
+        run: |
+          mkdir -p out
+          curl -sSL "https://mp3quran.net/api/v3/reciters?language=ar" -o out/reciters_ar.json
+          curl -sSL "https://mp3quran.net/api/v3/ayat_timing/reads" -o out/timing_reads.json
+          curl -sSL "https://archive.org/metadata/alfirdwsiy1433_22_201812" -o out/miman_meta.json
+          curl -sSL "https://archive.org/advancedsearch.php?q=%D8%A7%D9%84%D8%A8%D8%B9%D9%8A%D8%AC%D8%A7%D9%86&fl%5B%5D=identifier&fl%5B%5D=title&rows=50&output=json" -o out/arch_buaijan.json
+          curl -sSL "https://archive.org/advancedsearch.php?q=%D8%A7%D9%84%D8%B9%D8%B5%D9%81%D9%88%D8%B1&fl%5B%5D=identifier&fl%5B%5D=title&rows=50&output=json" -o out/arch_asfour.json
+          curl -sSL "https://archive.org/advancedsearch.php?q=%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86&fl%5B%5D=identifier&fl%5B%5D=title&rows=50&output=json" -o out/arch_miman.json
+          for u in "https://server10.mp3quran.net/bader/Rewayat-Hafs-A-n-Assem/001.mp3" "https://server16.mp3quran.net/a_alqrafi/Rewayat-Hafs-A-n-Assem/001.mp3" "https://archive.org/download/alfirdwsiy1433_22_201812/001.mp3"; do echo "== $u"; curl -sSIL "$u" | grep -iE "^HTTP|content-type|content-length|access-control|location" ; done > out/heads.txt 2>&1
+          ls -la out
+      - name: save
+        run: |
+          git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
