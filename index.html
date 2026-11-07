@@ -609,6 +609,15 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .tscale b{color:var(--gold);font-weight:700}
 .tamt{text-align:center;font-size:13.5px;color:var(--gold);margin-top:6px}
 .tamt.over{color:#B4472F}
+
+.totop{position:fixed;right:16px;bottom:calc(22px + var(--sab));z-index:45;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(201,162,79,.65);background:rgba(14,42,33,.92);color:#F3DFA8;box-shadow:0 6px 20px rgba(0,0,0,.28),inset 0 0 0 1px rgba(243,223,168,.12);opacity:0;transform:translateY(14px) scale(.9);pointer-events:none;transition:opacity .3s ease,transform .35s cubic-bezier(.22,1,.36,1);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.totop svg{width:21px;height:21px}
+.totop.on{opacity:1;transform:none;pointer-events:auto}
+.totop:active{transform:scale(.92)}
+.ay[data-act]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ay[data-act]:active{background:rgba(200,162,83,.18)}
+.ayq{font-family:'Amiri Quran','Amiri',serif;font-size:calc(var(--qs,27px) + 1px);line-height:2.2;text-align:center;color:var(--ink);padding:14px 16px 10px;margin:4px 0 14px;border-radius:18px;border:1px solid var(--gold3);background:var(--chip)}
+.ayq .an{font-size:.75em}
 </style>
 </head>
 <body>
@@ -960,7 +969,7 @@ function show(dir,y){
   if(dir&&!RM){try{const E='cubic-bezier(.22,1,.36,1)';app.animate([{opacity:0,transform:'scale('+(dir>0?1.025:.97)+')'},{opacity:1,transform:'none'}],{duration:500,delay:90,fill:'backwards',easing:E});}catch(e){}}
   persist();
 }
-function navPush(r){persist();auStop();STACK.push(r);try{history.pushState({d:STACK.length},'')}catch(e){}show(1,0)}
+function navPush(r){persist();auStop();ayStop();STACK.push(r);try{history.pushState({d:STACK.length},'')}catch(e){}show(1,0)}
 function navBack(){if(SH){closeSheet();return}if(STACK.length<=1)return;const st=history.state;if(st&&st.d===STACK.length){history.back()}else{STACK.pop();auStop();show(-1,cur().y)}}
 function goHome(){STACK=[{v:'home'}];try{history.replaceState({d:1},'')}catch(e){}show(-1,0)}
 window.addEventListener('popstate',e=>{
@@ -970,9 +979,14 @@ window.addEventListener('popstate',e=>{
 });
 /* ================= sheet ================= */
 let SH=null,SHF=null;
-function openSheet(html,kind,fn){const box=$('sheetbox');box.innerHTML=html;SHF=fn||null;const s=$('sheet');if(!s.classList.contains('open')){box.scrollTop=0;s.classList.add('open');s.setAttribute('aria-hidden','false');document.body.classList.add('sheet-open')}SH=kind||'x'}
+function openSheet(html,kind,fn){const box=$('sheetbox');box.innerHTML=html;SHF=fn||null;const s=$('sheet');if(!s.classList.contains('open')){box.scrollTop=0;s.classList.add('open');s.setAttribute('aria-hidden','false');document.body.classList.add('sheet-open')}SH=kind||'x';setTimeout(ttSync,30)}
 function refreshSheet(){if(SH&&SHF){const y=$('sheetbox').scrollTop;$('sheetbox').innerHTML=SHF();$('sheetbox').scrollTop=y}}
-function closeSheet(){const s=$('sheet');s.classList.remove('open');s.setAttribute('aria-hidden','true');document.body.classList.remove('sheet-open');SH=null;SHF=null}
+function closeSheet(){const s=$('sheet');s.classList.remove('open');s.setAttribute('aria-hidden','true');document.body.classList.remove('sheet-open');SH=null;SHF=null;setTimeout(ttSync,30)}
+const TT=(()=>{const b=document.createElement('button');b.className='totop';b.type='button';b.setAttribute('aria-label','إلى الأعلى');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg>';document.body.appendChild(b);return b})();
+function ttBox(){return SH&&$('sheet').classList.contains('open')?$('sheetbox'):null}
+function ttSync(){const bx=ttBox();const y=bx?bx.scrollTop:window.scrollY;const lim=(bx?bx.clientHeight:innerHeight)*1.1;TT.classList.toggle('on',y>lim&&S.onb&&!document.body.classList.contains('bookmode'));TT.classList.toggle('insh',!!bx)}
+TT.addEventListener('click',()=>{const bx=ttBox();try{(bx||window).scrollTo({top:0,behavior:RM?'auto':'smooth'})}catch(e){if(bx)bx.scrollTop=0;else window.scrollTo(0,0)}});
+window.addEventListener('scroll',ttSync,{passive:true});$('sheetbox').addEventListener('scroll',ttSync,{passive:true});
 function shead(t){return '<div class="grab"></div><div class="sh-h"><h2>'+t+'</h2><button class="xbtn" data-act="closesheet" aria-label="إغلاق">'+ICON.x+'</button></div>'}
 (function(){const box=$('sheetbox');let y0=null,dy=0;
   box.addEventListener('touchstart',e=>{if(box.scrollTop>2){y0=null;return}y0=e.touches[0].clientY;dy=0},{passive:true});
@@ -1009,7 +1023,7 @@ function render(){
   document.documentElement.classList.toggle('onb',!S.onb);
   if(!S.onb){document.body.classList.remove('bookmode');document.documentElement.classList.remove('bookmode');document.body.classList.remove('reading');$('app').innerHTML=vStart();fabSync();{const rl=document.querySelector('.reclist .rrow.on');if(rl){const L=rl.parentNode;L.scrollTop=Math.max(0,rl.offsetTop-L.clientHeight/2+rl.offsetHeight/2)}}return}
   const r=cur();document.body.classList.toggle('reading',r.v==='reader');document.body.classList.toggle('bookmode',r.v==='book');document.documentElement.classList.toggle('bookmode',r.v==='book');
-  $('app').innerHTML=(VIEWS[r.v]||vHome)(r);bgwSet(r.v);barSync();parallax();fabSync();if(r.v==='book')bkMount();
+  $('app').innerHTML=(VIEWS[r.v]||vHome)(r);bgwSet(r.v);setTimeout(ttSync,60);barSync();parallax();fabSync();if(r.v==='book')bkMount();
 }
 function parallax(){if(RM)return;const h=document.querySelector('#app .hero,#app .hhero');if(h)h.style.backgroundPosition='center calc(50% + '+Math.min(120,window.scrollY*0.32).toFixed(1)+'px)'}
 window.addEventListener('scroll',()=>{requestAnimationFrame(parallax)},{passive:true});
@@ -1131,6 +1145,37 @@ function glossHTML(list){
   if(!n)return '';
   return '<details class="gls" open><summary><span>معاني المفردات</span><small>'+plN(n,'كلمة واحدة','كلمتان','كلمات','كلمةً','كلمة')+'</small></summary>'+o+'</details>';
 }
+/* ---- single ayah: listen + word meanings ---- */
+const AY={el:null,k:'',ctx:0,end:0};
+function ayStop(){AY.ctx++;if(AY.el){try{AY.el.pause()}catch(e){}}const was=AY.k;AY.k='';if(was){document.querySelectorAll('#app .ay.cur').forEach(e=>e.classList.remove('cur'));ayBtnSync()}}
+function ayBtnSync(){const bt=document.querySelector('#sheetbox [data-act="ayplay"]');if(bt){const on=AY.k===bt.dataset.s+':'+bt.dataset.a;bt.innerHTML=(on?ICON.pause+'إيقاف':ICON.play+'استمع للآية');bt.classList.toggle('on',on)}}
+function ayPlay(s,a){
+  const key=s+':'+a;if(AY.k===key){ayStop();return}
+  ayStop();if(AU.on)auStop();if(typeof pvStop==='function')pvStop();
+  if(INART){toast('الاستماع متاح في التطبيق المثبّت على الجوال، ولا تسمح به هذه المعاينة.');return}
+  if(!navigator.onLine){toast('يحتاج الاستماع اتصالًا بالإنترنت.');return}
+  if(!AY.el){AY.el=new Audio();AY.el.preload='auto';AY.el.addEventListener('ended',()=>ayStop());AY.el.addEventListener('timeupdate',()=>{if(AY.k&&AY.end&&AY.el.currentTime>=AY.end)ayStop()})}
+  const rc=RC();const ctx=++AY.ctx;AY.k=key;AY.end=0;
+  const el2=document.querySelector('#app .ay[data-s="'+s+'"][data-a="'+a+'"]');if(el2)el2.classList.add('cur');ayBtnSync();
+  const fail=()=>{if(ctx===AY.ctx){ayStop();toast('تعذّر تشغيل الآية الآن، فأعد المحاولة بعد قليل.')}};
+  if(rc[2]==='ea'){AY.el.muted=false;AY.el.src=eaUrl({s:s,a:a});const p=AY.el.play();if(p&&p.catch)p.catch(fail);return}
+  AY.el.src=rc[3]+pad3(s)+'.mp3';AY.el.muted=true;const p=AY.el.play();if(p&&p.catch)p.catch(fail);
+  timingFor(rc,s).then(T=>{if(ctx!==AY.ctx)return;const m=T.m[a];if(!m){fail();return}const st=a===1?0:Math.max(0,m[0]-0.12);AY.end=m[1]+0.3;
+    const seek=()=>{try{AY.el.currentTime=st}catch(e){}};seek();
+    const ok=()=>{if(ctx!==AY.ctx)return;if(Math.abs(AY.el.currentTime-st)>1.5){seek();return}AY.el.removeEventListener('seeked',ok);AY.el.removeEventListener('canplay',ok);AY.el.muted=false};
+    AY.el.addEventListener('seeked',ok);AY.el.addEventListener('canplay',ok);setTimeout(ok,1500)},fail);
+}
+function ayaHTML(s,a){
+  let h=shead('سورة '+D.N[s-1]+' · الآية '+AR(a))+'<div class="ayq">'+txt(s,a)+' <span class="an">'+AR(a)+'</span></div>';
+  const on=AY.k===s+':'+a;
+  h+='<button class="btn goldb'+(on?' on':'')+'" data-act="ayplay" data-s="'+s+'" data-a="'+a+'">'+(on?ICON.pause+'إيقاف':ICON.play+'استمع للآية')+'</button><div class="meta" style="text-align:center;margin:-2px 0 12px">بصوت '+RC()[1]+'</div>';
+  h+='<div class="sect" style="margin:6px 4px 8px">معاني الكلمات</div>';
+  if(!GH)return h+(GHERR?'<div class="tload">تعذّر تحميل المعاني الآن، فتحقّق من الاتصال.</div>':'<div class="tload"><i class="tspin"></i>جارٍ التحميل…</div>');
+  const rows=(GH.g[s-1]||[]).filter(r=>a>=r[0]&&a<=(r[3]||r[0]));
+  if(!rows.length)return h+'<p class="note">لم يُشرح في «الميسر في غريب القرآن الكريم» شيءٌ من كلمات هذه الآية.</p>';
+  return h+'<div class="taf"><div class="tws">'+rows.map(r=>'<p class="tw"><span class="tq">﴿'+r[1]+'﴾</span> <span class="te">'+esc(r[2])+'</span></p>').join('')+'</div><p class="tfoot">من «الميسر في غريب القرآن الكريم»، مجمع الملك فهد لطباعة المصحف الشريف.</p></div>';
+}
+function ayaSheet(s,a){const f=()=>ayaHTML(s,a);openSheet(f(),'aya',f);if(!GH)ghLoad().then(()=>{if(SH==='aya')refreshSheet()},()=>{GHERR=1;if(SH==='aya')refreshSheet()})}
 function vReader(r){
   const RD=r.spec;if(RD.p)prayer=RD.p;const BS=D.Q[0][0];const rc=RECK[S.reciter]||RECK.dosari;
   let x=topbar(RD.title||'القراءة',{end:'<button class="ib" data-act="ropts" aria-label="خيارات القراءة">'+ICON.aa+'</button>'});
@@ -1140,7 +1185,7 @@ function vReader(r){
     let open=false,ls=0;
     blockAyat(b).forEach(([s,a],k)=>{
       if(k===0||s!==ls||a===1){if(open)x+='</div>';x+='<div class="sh">سورة '+D.N[s-1]+'</div>';if(a===1&&s!==1&&s!==9)x+='<div class="bs">'+BS+'</div>';x+='<div class="ayt">';open=true;ls=s}
-      const hid=revMode&&idx>=revealN;x+='<span class="ay'+(hid?' hid':'')+'" data-s="'+s+'" data-a="'+a+'">'+txt(s,a)+(SAJ.has(s+':'+a)?' <span class="sajda">۩ سجدة</span>':'')+'<span class="an">'+AR(a)+'</span></span> ';idx++;
+      const hid=revMode&&idx>=revealN;x+='<span class="ay'+(hid?' hid':'')+'" data-act="ayt" data-s="'+s+'" data-a="'+a+'">'+txt(s,a)+(SAJ.has(s+':'+a)?' <span class="sajda">۩ سجدة</span>':'')+'<span class="an">'+AR(a)+'</span></span> ';idx++;
     });
     if(open)x+='</div>';
     if(b.i!=null)x+='<div class="stopmark">موضع الوقف '+dalilBtn(b.j,b.i)+tafBtn(b.i,b.j)+'</div>';else if(b.s)x+='<div class="stopmark">'+tafBtnR(b.s,b.a,b.b)+'</div>';
@@ -1148,6 +1193,7 @@ function vReader(r){
   });
   x+='</div>';
   if(revMode)x+='<div class="revbar"><button class="btn sm goldb" data-act="reveal">الآية التالية</button><button class="btn sm outline" data-act="revealall">إظهار الكل</button></div><p class="note">'+AR(Math.min(revealN,idx))+' من '+AR(idx)+'</p>';
+  if(!S.ayHint){S.ayHint=1;setTimeout(()=>{toast('المس أي آية لتستمع إليها وحدها، أو تقرأ معاني كلماتها.');saveLocal()},900)}
   if(RD.mode==='prayer')x+='<button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button>';
   else if(RD.mode==='fri')x+='<button class="btn goldb" data-act="prayedfri">'+ICON.check+'تمّت قراءة المقترح</button>';
   else if(RD.mode==='wird')x+='<button class="btn goldb" data-act="wdone">'+ICON.check+'أتممت الورد</button>';
@@ -1603,6 +1649,7 @@ function sfTick(){
 }
 function auToggle(){
   if(AU.on){auStop();return}
+  ayStop();
   if(cur().v!=='reader')return;
   if(!navigator.onLine){toast('يحتاج الاستماع اتصالًا بالإنترنت.');return}
   if(!AU.el){AU.el=new Audio();AU.el.preload='auto';AU.el.addEventListener('ended',()=>{if(!AU.on)return;if(AU.mode==='ea')eaNext();else sfNext()});AU.el.addEventListener('error',()=>{if(AU.on)auFail()});AU.el.addEventListener('timeupdate',sfTick)}
@@ -1675,6 +1722,8 @@ document.addEventListener('click',ev=>{
   case 'openp':navPush({v:'prayer',p:b.dataset.p});break;
   case 'topic':navPush({v:'topic',id:b.dataset.id});break;
   case 'closesheet':closeSheet();break;
+  case 'ayt':{if(b.classList.contains('hid'))break;const sel=window.getSelection&&String(window.getSelection());if(sel&&sel.length>1)break;ayaSheet(+b.dataset.s,+b.dataset.a);break}
+  case 'ayplay':ayPlay(+b.dataset.s,+b.dataset.a);break;
   case 'pick':pickSheet(k);break;
   case 'pickv':{b.parentNode.querySelectorAll('.orow').forEach(r=>r.classList.toggle('on',r===b));setTimeout(()=>{closeSheet();applyPick(k,v);render();if(k==='reciter')toast('القارئ: '+RECK[v][1])},200);break}
   case 'mufsheet':mufSheet();break;
