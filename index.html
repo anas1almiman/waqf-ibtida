@@ -600,6 +600,9 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .obhd.sm .gw{animation:none}
 .obhd.sm+.dots{margin-top:8px!important}
 @media (max-height:740px){.obhd.sm .emb{width:52px!important;height:52px!important;margin:6px auto 1px!important}.obhd.sm .emb,.obhd.sm .ob-mt{display:none!important}.obhd.sm .ob-nm{width:min(36vw,128px)!important;margin-top:2px}.ob .grid30.obg .c{height:34px}.reclist{max-height:calc((100vh - var(--sat) - var(--sab)) / 1.08 - 340px)}}
+
+.obb{display:flex;flex-direction:column;flex:1 1 auto;transform-origin:50% 35%;will-change:opacity,transform}
+.dots i{transition:width .45s cubic-bezier(.22,1,.36,1),background-color .45s ease,border-radius .45s ease!important}
 </style>
 </head>
 <body>
@@ -945,9 +948,9 @@ function restore(){try{const o=JSON.parse(sessionStorage.getItem(VKEY)||'null');
 function show(dir,y){
   const app=$('app');
   if(dir&&!RM&&app.firstChild){const g=app.cloneNode(true);g.removeAttribute('id');g.classList.add('ghost');g.style.top=(-window.scrollY)+'px';document.body.appendChild(g);
-    try{g.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateX('+(dir>0?24:-24)+'px) scale(.975)'}],{duration:280,easing:'cubic-bezier(.4,0,.8,.5)',fill:'forwards'}).onfinish=()=>g.remove()}catch(e){g.remove()}}
+    try{g.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale('+(dir>0?.965:1.025)+')'}],{duration:260,easing:'cubic-bezier(.4,0,.9,.6)',fill:'forwards'}).onfinish=()=>g.remove()}catch(e){g.remove()}}
   ENTER=false;render();window.scrollTo(0,y||0);parallax();
-  if(dir&&!RM){try{const E='cubic-bezier(.22,1,.36,1)';app.animate([{opacity:0,transform:'translateX('+(dir>0?-28:28)+'px) scale(.99)'},{opacity:1,transform:'none'}],{duration:520,delay:70,fill:'backwards',easing:E});}catch(e){}}
+  if(dir&&!RM){try{const E='cubic-bezier(.22,1,.36,1)';app.animate([{opacity:0,transform:'scale('+(dir>0?1.025:.97)+')'},{opacity:1,transform:'none'}],{duration:500,delay:90,fill:'backwards',easing:E});}catch(e){}}
   persist();
 }
 function navPush(r){persist();auStop();STACK.push(r);try{history.pushState({d:STACK.length},'')}catch(e){}show(1,0)}
@@ -1346,13 +1349,27 @@ function obExtra(){const W=isWird();let x='<div class="stitle">لمساتٌ تخ
   if(!W)x+='<div class="xrow"><div class="xl">كيف تُقترح عليك المقاطع؟</div>'+segB('ordered',[['0','التنويع بين السور'],['1','على ترتيب المصحف']])+'</div>';
   x+='<div class="xrow"><div class="xl">هل تودّ إظهار معاني المفردات تحت كل مقطع؟</div>'+segB('taf',[['1','نعم'],['0','لا']])+'</div>';
   x+='<div class="xrow"><div class="xl">هل ترغب في التذكير '+(W?'بوردك':'بقراءتك')+'؟</div>'+remRow()+(S.remOn?'<div class="xok">أُضيف التذكير إلى تقويمك</div>':'')+'</div></div>';
-  return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button><button class="skipl" data-act="stnext">تخطٍّ</button></div>'}
+  return x+'<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button><button class="skipl" data-act="stnext">تخطى</button></div>'}
+let OBB=false;
+function obGo(dir,mut){
+  if(OBB)return;const old=document.querySelector('#app .obb');const prev=stStep;
+  if(RM||!old||!old.animate){mut();render();window.scrollTo(0,0);return}
+  OBB=true;const bk0=document.querySelector('#app .obback');
+  const done=()=>{mut();render();window.scrollTo(0,0);OBB=false;
+    const nb=document.querySelector('#app .obb');
+    try{if(nb)nb.animate([{opacity:0,transform:'scale('+(dir>0?1.03:.965)+')'},{opacity:1,transform:'none'}],{duration:480,easing:'cubic-bezier(.22,1,.36,1)'})}catch(e){}
+    const bk=document.querySelector('#app .obback');if(bk&&!bk0){try{bk.animate([{opacity:0},{opacity:1}],{duration:420,easing:'ease-out'})}catch(e){}}
+    const ds=[...document.querySelectorAll('#app .dots i')];if(ds.length){ds.forEach((d,k)=>d.classList.toggle('on',k===prev));requestAnimationFrame(()=>requestAnimationFrame(()=>ds.forEach((d,k)=>d.classList.toggle('on',k===stStep))))}};
+  try{const a=old.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale('+(dir>0?.965:1.03)+')'}],{duration:230,easing:'cubic-bezier(.4,0,.9,.6)',fill:'forwards'});
+    if(bk0&&dir<0&&prev===1)bk0.animate([{opacity:1},{opacity:0}],{duration:230,fill:'forwards'});
+    a.onfinish=done;setTimeout(()=>{if(OBB)done()},420)}catch(e){done()}
+}
 function vStart(){
   const role=stRole||S.role;const FL=stFlow();if(stStep>FL.length-1)stStep=FL.length-1;const sk=FL[stStep];const q=sk==='days'?ROLEQ.self:ROLEQ[role];const cur2=String(S[q.key]);
   let x='<div class="ob">';
   if(stStep>0)x+='<button class="link obback" data-act="stback">رجوع</button>';
   x+='<div class="obhd'+(stStep?' sm':'')+'"><div class="emb">'+MEDAL('ob1')+'</div><div style="width:100%;max-width:300px;margin:0 auto"><div class="gw ob-nm" role="img" aria-label="وقف وابتداء"><div class="gm"></div></div><div class="gw ob-mt" role="img" aria-label="هدي الوقف، وهدى المعنى"><div class="gm"></div></div></div></div>';
-  x+='<div class="dots">'+FL.map((s,k)=>'<i class="'+(stStep===k?'on':'')+'"></i>').join('')+'</div>';
+  x+='<div class="dots">'+FL.map((s,k)=>'<i class="'+(stStep===k?'on':'')+'"></i>').join('')+'</div><div class="obb">';
   if(sk==='role'){
     x+='<div class="stitle">ساعدنا بالتعرف عليك</div><div class="ocards">'+ROLES.map(r=>'<button class="ocard'+(r.k===role?' on':'')+'" data-act="role" data-k="'+r.k+'"><span class="ri">'+ICON[r.ic]+'</span><span><b>'+r.t+'</b><small>'+r.s+'</small></span></button>').join('')+'</div>';
     x+='<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button></div>';
@@ -1362,9 +1379,9 @@ function vStart(){
     x+='<div class="obtn"><button class="btn goldb" data-act="stnext">متابعة</button></div>';
   }else{
     x+='<div class="stitle">مواقيت الصلاة</div><div class="ocards"><div class="ocard" style="display:block;line-height:1.9">يضبط التطبيق المواقيت على <b style="display:inline;color:#F3DFA8">تقويم أم القرى</b> بحسب موقعك، فيعرض لك صلاة الوقت، ويذكّرك بسنّة فجر الجمعة، ويعرف دخول رمضان.'+(S.loc?'<br><span style="color:#E6C878">الموقع: '+esc(S.loc.name)+'</span>':'')+'</div></div>';
-    x+='<div class="obtn"><button class="btn goldb" data-act="locate">'+ICON.pin+'تحديد موقعي</button><button class="btn outline" style="background:transparent;color:#F3DFA8" data-act="cities">اختيار المدينة</button><button class="btn primary" data-act="startgo">'+(S.loc?'ابدأ':'تخطٍّ الآن')+'</button><p class="fine">يمكن تغيير كل ذلك من الإعدادات.</p></div>';
+    x+='<div class="obtn"><button class="btn goldb" data-act="locate">'+ICON.pin+'تحديد موقعي</button><button class="btn outline" style="background:transparent;color:#F3DFA8" data-act="cities">اختيار المدينة</button><button class="btn primary" data-act="startgo">'+(S.loc?'ابدأ':'تخطى الآن')+'</button><p class="fine">يمكن تغيير كل ذلك من الإعدادات.</p></div>';
   }
-  return x+'</div>';
+  return x+'</div></div>';
 }
 /* ================= sheets ================= */
 function openDalil(x,startX){
@@ -1735,8 +1752,8 @@ document.addEventListener('click',ev=>{
   case 'wirdnew':S.wird={pos:0,done:[],round:(S.wird.round||1)+1};save();render();break;
   case 'role':stRole=k;S.role=k;render();break;
   case 'ropt':S[b.dataset.key]=b.dataset.key==='days'?+v:v;render();break;
-  case 'stnext':{const FL=stFlow();if(FL[stStep]==='hifz')obHzCommit();pvStop();stStep=Math.min(FL.length-1,stStep+1);show(1,0);break}
-  case 'stback':pvStop();stStep=Math.max(0,stStep-1);show(-1,0);break;
+  case 'stnext':{if(OBB)break;const FL=stFlow();if(FL[stStep]==='hifz')obHzCommit();pvStop();obGo(1,()=>{stStep=Math.min(stFlow().length-1,stStep+1)});break}
+  case 'stback':if(OBB)break;pvStop();obGo(-1,()=>{stStep=Math.max(0,stStep-1)});break;
   case 'startgo':pvStop();buildSegs();S.onb=true;S.sug={};stRole=null;stStep=0;save();closeSheet();STACK=[{v:'home'}];try{history.replaceState({d:1},'')}catch(e){}show(1,0);break;
   }
 });

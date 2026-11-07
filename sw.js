@@ -1,4 +1,4 @@
-const V='maqati-v33',DATA='maqati-data-1';
+const V='maqati-v34',DATA='maqati-data-1';
 const CORE=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-180.png','apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(CORE)).then(()=>caches.open(DATA)).then(c=>c.match('gharib.json?v=1').then(m=>m||c.add('gharib.json?v=1')).catch(()=>{})).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!==DATA).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
