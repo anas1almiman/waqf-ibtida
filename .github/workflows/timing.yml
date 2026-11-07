@@ -1,0 +1,29 @@
+name: timing
+on:
+  push:
+    branches: [audio-lab]
+    paths: ['.github/workflows/timing.yml', 'tools/align.py']
+permissions:
+  contents: write
+jobs:
+  ref:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/align.py ref 282,58,340
+      - uses: actions/upload-artifact@v4
+        with: {name: refs, path: out/}
+  validate:
+    needs: ref
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - {name: v_burhaji, base: 'https://cdn.mp3quran.net/audio/muhammad-burhaji/r1/', ref: 282, truth: 340}
+          - {name: v_buaijan, base: 'https://cdn.mp3quran.net/audio/abdullah-buaijan/r1/', ref: 282, truth: 58}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {name: refs, path: out/}
+      - run: sudo apt-get -qq install -y ffmpeg >/dev/null && pip -q install numpy
+      - run: python3 tools/align.py align ${{ matrix.name }} ${{ matrix.base }} ${{ matrix.ref }} ${{ matrix.truth }} 1,2,12,18,36,50,55,67,78,81,84,88,93,113
