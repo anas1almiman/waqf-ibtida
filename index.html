@@ -658,6 +658,25 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .xl{margin-bottom:4px!important}
 .remlab{margin-bottom:4px}
 @media (max-height:740px){.ob .grid30.obg .c{height:31px!important}}
+
+.pkbadge{display:flex;align-items:center;gap:8px;margin:2px 2px 10px;padding:8px 12px;border-radius:14px;border:1px solid var(--gold3);background:var(--chip);color:var(--gold);font:700 15px 'Amiri',serif}
+.pkbadge svg{width:16px;height:16px}
+.pkbadge span{flex:1}
+.pkbadge button{border:0;background:none;color:var(--em);font:700 15px 'Amiri',serif;text-decoration:underline;text-underline-offset:4px}
+.pkc .cardtop{align-items:center}
+.pksur{display:inline-flex;align-items:center;gap:4px;padding:5px 12px 3px;border-radius:999px;border:1px solid var(--gold2);background:var(--chip);color:var(--em);font:700 17px 'Amiri',serif}
+.pksur svg{width:14px;height:14px;transform:rotate(90deg)}
+.pkrow{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.pkl{font-size:13.5px;color:var(--gold);margin-bottom:2px}
+.pkrow .q{margin:2px 0 8px}
+.pkbtns{display:flex;gap:8px}
+.pkbtns .chipb{flex:1;justify-content:center}
+.pkbtns .chipb[disabled]{opacity:.4}
+.pkfit{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;padding:9px 12px 7px;border-radius:14px;background:linear-gradient(180deg,rgba(201,162,79,.10),rgba(201,162,79,.04));border:1px solid var(--gold3);font-size:14.5px;color:var(--muted)}
+.pkfit b{color:var(--em);font-size:15.5px}
+.pkfit.over b{color:#B4472F}
+.tscale.pks span.on{background:var(--gg);color:#2A1E06;border-color:transparent}
+.tscale.pks span.on b{color:#2A1E06}
 </style>
 </head>
 <body>
@@ -988,7 +1007,7 @@ function suggest(p,avoid){
 }
 function endOK(j){return !noEnd(j)||restDone(j)}
 function valid(p,sg){if(!(Array.isArray(sg)&&sg.length===2&&sg[0]<=sg[1]&&sg[1]<NP&&avail(sg)&&allowed(p,sg)))return false;const s=D.P[sg[0]][0];if(s>=QISAR)return fits(p,sg[0],sg[1]);return D.P[sg[1]][0]===s&&endOK(sg[1])&&inCap(p,segLines(sg[0],sg[1]))}
-function current(p){const c=S.sug[p];if(c&&valid(p,c.a)&&valid(p,c.b)&&c.b[0]>c.a[1])return c;const n=suggest(p);S.sug[p]=n;save();return n}
+function current(p){const c=S.sug[p];if(c&&c.custom&&Array.isArray(c.a)&&Array.isArray(c.b)&&c.a[1]<NP&&c.b[1]<NP)return c;if(c&&valid(p,c.a)&&valid(p,c.b)&&c.b[0]>c.a[1])return c;const n=suggest(p);S.sug[p]=n;save();return n}
 const FRI={a:surahRange(32),b:surahRange(76)};
 function fridayFajr(np){return !!(np&&np.p==='fajr'&&np.day&&np.day.getDay()===5)}
 function dayKey(d){d=d||new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()}
@@ -1059,8 +1078,50 @@ function rakCard(label,sg,w){
 }
 function miniSeg(sg){const [i,j]=sg;const s=D.P[i][0];return 'سورة '+D.N[s-1]+(isWhole(i,j)?' كاملة':'، '+ayRange(i,j))}
 function dateLine(d){d=d||new Date();const h=hijri(d);return weekday(d)+(h?' '+h.t:'')}
+/* ================= pick from a surah ================= */
+const SFIRST=[],SLAST=[];D.P.forEach((p,x)=>{if(SFIRST[p[0]]==null)SFIRST[p[0]]=x;SLAST[p[0]]=x});
+function pkOkStart(x){const s=D.P[x][0];return x===SFIRST[s]||endOK(x-1)}
+function pkOkEnd(x){const s=D.P[x][0];return x===SLAST[s]||endOK(x)}
+function pkFirstEnd(i){const s=D.P[i][0];for(let x=i;x<=SLAST[s];x++)if(pkOkEnd(x))return x;return SLAST[s]}
+function pkLines(i,j){const p=D.P[i],q=D.P[j];return lines(p[0],p[1],q[2])}
+function pkCap(){return RANGES[rgK()].fajr[3]}
+function pkPrayer(n){const g=RANGES[rgK()];return n<=g.maghrib[2]?'maghrib':n<=g.isha[2]?'isha':n<=g.fajr[3]?'fajr':null}
+function pkFrom(s){const i=SFIRST[s];return {i:i,j:pkFirstEnd(i)}}
+function pkAfter(A){const s=D.P[A.j][0];let i=A.j+1;if(i>=NP)i=0;if(D.P[i][0]!==s){i=SFIRST[s<114?s+1:1]}while(!pkOkStart(i)&&i<SLAST[D.P[i][0]])i++;return {i:i,j:pkFirstEnd(i),auto:true}}
+function pkScale(n){const g=RANGES[rgK()];const cur=pkPrayer(n);const ln=v=>AR(v)+(v<=10?' أسطر':' سطرًا');return '<div class="tscale pks">'+[['maghrib',g.maghrib[2]],['isha',g.isha[2]],['fajr',g.fajr[3]]].map(([p,v])=>'<span class="'+(cur===p?'on':'')+'"><b>'+PR[p].n+'</b> حتى '+ln(v)+'</span>').join('')+'</div>'}
+function pkCard(k,R){
+  const i=R.i,j=R.j,s=D.P[i][0];const n=pkLines(i,j);const pr=pkPrayer(n);
+  let canLess=false;for(let x=j-1;x>=i;x--)if(pkOkEnd(x)){canLess=true;break}
+  let nx=-1;for(let x=j+1;x<=SLAST[s];x++)if(pkOkEnd(x)){nx=x;break}
+  const canMore=nx>=0&&pkLines(i,nx)<=pkCap();
+  let canEarly=false;for(let x=i-1;x>=SFIRST[s];x--)if(pkOkStart(x)){canEarly=true;break}
+  let canLate=false;for(let x=i+1;x<=SLAST[s];x++)if(pkOkStart(x)){canLate=true;break}
+  return '<div class="card accent pkc"><div class="cardtop"><span class="rk">'+(k?'الركعة الثانية':'الركعة الأولى')+'</span><button class="pksur" data-act="pksurah" data-k="'+k+'">سورة '+D.N[s-1]+' '+ICON.back+'</button></div>'
+   +'<div class="pkrow"><div class="pkl">الابتداء</div><div class="q">'+firstW(i)+' …</div><div class="pkbtns"><button class="chipb plain" data-act="pkst" data-k="'+k+'" data-d="-1"'+(canEarly?'':' disabled')+'>ابتداء أسبق</button><button class="chipb plain" data-act="pkst" data-k="'+k+'" data-d="1"'+(canLate?'':' disabled')+'>ابتداء لاحق</button></div></div>'
+   +'<div class="pkrow"><div class="pkl">الوقف</div><div class="q q2">… '+lastW(j)+'</div><div class="pkbtns"><button class="chipb plain" data-act="pken" data-k="'+k+'" data-d="-1"'+(canLess?'':' disabled')+'>− قصّر المقطع</button><button class="chipb'+(canMore?'':' plain')+'" data-act="pken" data-k="'+k+'" data-d="1"'+(canMore?'':' disabled')+'>+ طوّل المقطع</button></div></div>'
+   +'<div class="pkfit'+(pr?'':' over')+'"><span>'+ayRange(i,j)+'، '+AR(n)+(n<=10?' أسطر':' سطرًا')+'</span><b>'+(pr?'مناسب لصلاة '+PR[pr].n:'أطول من مقدار صلاة الفجر')+'</b></div>'+pkScale(n)+'</div>';
+}
+function vPick(r){
+  let x=topbar('من سورة تختارها');
+  x+='<p class="note" style="margin:4px 6px 12px">اختر السورة، ثم حرّك الابتداء أو الوقف، ويبيّن لك التطبيق أيّ صلاة يناسبها المقطع. يقف كل مقطع عند وقف تام.</p>';
+  if(!r.A)return x+'<button class="btn primary" data-act="pksurah" data-k="0">'+ICON.juz+'اختر سورة الركعة الأولى</button>';
+  x+=pkCard(0,r.A)+pkCard(1,r.B);
+  if(r.B.i<=r.A.j&&D.P[r.B.i][0]<=D.P[r.A.j][0])x+='<p class="note">الأولى أن تكون قراءة الركعة الثانية بعد الأولى في ترتيب المصحف.</p>';
+  x+='<button class="btn primary" data-act="pkread">'+ICON.read+'قراءة المقطع</button><button class="btn goldb" data-act="pkok">'+ICON.check+'اعتماده لصلاة '+PR[r.p].n+'</button>';
+  return x;
+}
+function pkSurahSheet(k){const f=()=>shead('اختر سورة الركعة '+(k?'الثانية':'الأولى'))+'<input class="search" id="pkq" type="search" placeholder="اسم السورة أو رقمها"><div class="citylist" id="pklist" data-k="'+k+'">'+pkItems('',k)+'</div>';openSheet(f(),'pks')}
+function pkItems(q,k){q=(q||'').trim();return D.N.map((n,i)=>[n,i+1]).filter(([n,i])=>!q||n.indexOf(q)>=0||String(i)===q).map(([n,i])=>'<button data-act="pks" data-k="'+k+'" data-v="'+i+'"><span>'+AR(i)+' · سورة '+n+'</span><small>'+AR(D.Q[i-1].length)+' آية</small></button>').join('')}
+function pkMove(R,what,d){
+  const s=D.P[R.i][0];
+  if(what==='st'){let x=R.i+d;while(x>=SFIRST[s]&&x<=SLAST[s]&&!pkOkStart(x))x+=d;if(x<SFIRST[s]||x>SLAST[s])return false;R.i=x;if(R.j<x||!pkOkEnd(R.j))R.j=pkFirstEnd(x);
+    while(pkLines(R.i,R.j)>pkCap()){let y=R.j-1;while(y>=R.i&&!pkOkEnd(y))y--;if(y<R.i)break;R.j=y}return true}
+  let y=R.j+d;while(y>=R.i&&y<=SLAST[s]&&!pkOkEnd(y))y+=d;if(y<R.i||y>SLAST[s])return false;
+  if(d>0&&pkLines(R.i,y)>pkCap()){toast('بلغتَ أقصى مقدار لصلاة الفجر ('+AR(pkCap())+' سطرًا للركعة).');return false}
+  R.j=y;return true;
+}
 /* ================= views ================= */
-const VIEWS={plan:vPlan,library:vLibrary,book:vBook,home:vHome,prayer:vPrayer,reader:vReader,topics:vTopics,topic:vTopic,record:vRecord,settings:vSettings,about:vAbout,hifz:vHifz,ramadan:vRamadan,review:vReview,wird:vWird};
+const VIEWS={pick:vPick,plan:vPlan,library:vLibrary,book:vBook,home:vHome,prayer:vPrayer,reader:vReader,topics:vTopics,topic:vTopic,record:vRecord,settings:vSettings,about:vAbout,hifz:vHifz,ramadan:vRamadan,review:vReview,wird:vWird};
 let BGW=-1,BGK=0;function bgwSet(v){if(typeof BGS==='undefined')return;let i;if(v==='home')i=BGP.home;else{const r=cur();if(r.bg==null||r.bg>=BGS.length){let k;do{k=Math.floor(Math.random()*BGS.length)}while(BGS.length>1&&(k===BGW||k===BGP.home));r.bg=k}i=r.bg}if(i===BGW)return;BGW=i;const L=document.querySelectorAll('#bgw i');if(!L.length)return;BGK^=1;L[BGK].style.backgroundImage='url('+BGS[i]+')';L[BGK].classList.add('on');L[BGK^1].classList.remove('on')}
 function render(){
   applyTheme();
@@ -1119,8 +1180,9 @@ function vPrayer(r){
   {const pd=(p===np.p&&np.day)?np.day:new Date();const e=planFor(pd,p);if(e)x+='<div class="card accent pl-now"><div class="kick meta">من جدولك لهذه الصلاة</div><b>'+e.title+'</b>'+e.blocks.map(b=>'<span>'+(b.label?b.label+': ':'')+blkSum(b)+'</span>').join('')+'<div class="row2"><button class="btn primary" data-act="plread" data-k="'+S.plan.indexOf(e)+'">'+ICON.read+'قراءته</button><button class="btn outline" data-act="pldel" data-k="'+S.plan.indexOf(e)+'">إزالته من الجدول</button></div></div>'}
   const c=current(p);
   if(!c)return x+emptyCard(p);
+  if(c.custom)x+='<div class="pkbadge">'+ICON.check+'<span>اختيارك من السور</span><button data-act="pkedit">تعديل</button></div>';
   x+=rakCard('الركعة الأولى',c.a,'a')+rakCard('الركعة الثانية',c.b,'b');
-  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button></div>';
+  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="pkopen">'+ICON.juz+'اقترح لي من سورة…</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button></div>';
   return x+'<p class="note">يبدأ كل مقطع وينتهي عند وقف تام، ولا يتكرر حتى تتم الختمة.</p>';
 }
 function doneView(){
@@ -1807,6 +1869,13 @@ document.addEventListener('click',ev=>{
   case 'reveal':revealN++;render();break;
   case 'revealall':revMode=false;render();break;
   case 'fs':S.fs=Math.max(20,Math.min(44,S.fs+parseInt(b.dataset.d,10)));saveLocal();refreshSheet();render();break;
+  case 'pkopen':{const c=S.sug[prayer];const r={v:'pick',p:prayer};if(c&&c.custom){r.A={i:c.a[0],j:c.a[1]};r.B={i:c.b[0],j:c.b[1]}}navPush(r);if(!r.A)setTimeout(()=>pkSurahSheet(0),380);break}
+  case 'pkedit':{const c=S.sug[prayer];if(!c)break;navPush({v:'pick',p:prayer,A:{i:c.a[0],j:c.a[1]},B:{i:c.b[0],j:c.b[1]}});break}
+  case 'pksurah':pkSurahSheet(+k);break;
+  case 'pks':{const r=cur();if(r.v!=='pick')break;const sN=+v;const R=pkFrom(sN);if(+k===0){r.A=R;if(!r.B||r.B.auto)r.B=pkAfter(R)}else{R.auto=false;r.B=R}closeSheet();render();break}
+  case 'pkst':case 'pken':{const r=cur();if(r.v!=='pick')break;const isA=+k===0;const R=isA?r.A:r.B;if(!R)break;if(!isA)R.auto=false;if(pkMove(R,a==='pkst'?'st':'en',+b.dataset.d)){if(isA&&r.B&&r.B.auto)r.B=pkAfter(r.A);const y=window.scrollY;render();window.scrollTo(0,y)}break}
+  case 'pkread':{const r=cur();if(r.v!=='pick'||!r.A)break;openReader({mode:'view',title:'صلاة '+PR[r.p].n,blocks:[{label:'الركعة الأولى',i:r.A.i,j:r.A.j},{label:'الركعة الثانية',i:r.B.i,j:r.B.j}]});break}
+  case 'pkok':{const r=cur();if(r.v!=='pick'||!r.A)break;S.sug[r.p]={a:[r.A.i,r.A.j],b:[r.B.i,r.B.j],custom:true};if(S.last&&S.last.p===r.p)S.last.nx=true;save();navBack();toast('اعتُمد اختيارك لصلاة '+PR[r.p].n+'.');break}
   case 'another':{const c=S.sug[prayer];const n=suggest(prayer,c&&c.a);if(n){S.sug[prayer]=n;save();show(1,0)}else toast('لا يوجد اقتراح آخر متاح.');break}
   case 'prayed':prayed();break;
   case 'tools':toolsSheet(b.dataset.w);break;
@@ -1887,6 +1956,7 @@ document.addEventListener('click',ev=>{
 document.addEventListener('input',ev=>{
   const el=ev.target;
   if(el.id==='tq'){tq=el.value;const l=$('tlist');if(l)l.innerHTML=topicItems()}
+  else if(el.id==='pkq'){const l=$('pklist');if(l)l.innerHTML=pkItems(el.value,+l.dataset.k)}
   else if(el.id==='hsq'){const l=$('hslist');if(l)l.innerHTML=hzSItems(el.value)}
   else if(el.id==='remt'){S.remT=el.value||'21:00';saveLocal()}
   else if(el.id==='cq'){cityQ=el.value;const l=$('clist');if(l)l.innerHTML=cityItems()}
