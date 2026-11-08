@@ -1182,7 +1182,7 @@ function vPrayer(r){
   if(!c)return x+emptyCard(p);
   if(c.custom)x+='<div class="pkbadge">'+ICON.check+'<span>اختيارك من السور</span><button data-act="pkedit">تعديل</button></div>';
   x+=rakCard('الركعة الأولى',c.a,'a')+rakCard('الركعة الثانية',c.b,'b');
-  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="pkopen">'+ICON.juz+'اقترح لي من سورة محددة</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button></div>';
+  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="pkopen">'+ICON.juz+'اقتراح من سورة محددة</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button></div>';
   return x+'<p class="note">يبدأ كل مقطع وينتهي عند وقف تام، ولا يتكرر حتى تتم الختمة.</p>';
 }
 function doneView(){
