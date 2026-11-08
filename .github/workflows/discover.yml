@@ -10,22 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: tools
-        run: sudo apt-get -qq install -y ffmpeg >/dev/null; pip -q install -U yt-dlp
-      - name: probe downloads from the Saudi Center channel
         run: |
-          mkdir -p out
-          for v in XS6mp8puy5s 6cPJunNtBmk 6dEZZvzuxFg; do
-            yt-dlp -f bestaudio -o "out/$v.%(ext)s" --print-to-file "%(id)s|%(title)s|%(duration)s|%(upload_date)s|%(format_id)s|%(abr)s|%(acodec)s" out/info.txt "https://www.youtube.com/watch?v=$v" > out/dl_$v.log 2>&1 || echo "FAIL $v" >> out/info.txt
-          done
-          cat out/info.txt; tail -n 5 out/dl_*.log
-          for f in out/*.webm out/*.m4a out/*.opus; do [ -f "$f" ] || continue; b=$(basename "$f"); b=${b%.*}
-            ffprobe -v error -show_entries format=duration -of csv=p=0 "$f"
-            ffmpeg -v error -y -i "$f" -t 40 -ac 1 -ar 22050 -b:a 64k "out/head_$b.mp3"
-            ffmpeg -v error -y -sseof -25 -i "$f" -ac 1 -ar 22050 -b:a 64k "out/tail_$b.mp3"
-            ffmpeg -v error -i "$f" -af silencedetect=n=-38dB:d=0.35 -f null - 2>&1 | grep -oE "silence_(start|end): [0-9.]+" | head -16 | tr "\n" " "; echo
-            rm -f "$f"
+          sudo apt-get -qq install -y ffmpeg >/dev/null
+          pip -q install -U --pre "yt-dlp[default]"
+          curl -fsSL https://deno.land/install.sh | sh -s -- -y >/dev/null 2>&1 || true
+          echo "$HOME/.deno/bin" >> $GITHUB_PATH
+      - name: try clients
+        run: |
+          mkdir -p out; deno --version | head -1 || true; yt-dlp --version
+          v=6cPJunNtBmk
+          for c in default tv tv_simply web_embedded mweb android_vr web_safari ios; do
+            if [ "$c" = default ]; then a=""; else a="--extractor-args youtube:player_client=$c"; fi
+            timeout 120 yt-dlp $a -f "bestaudio/best" -o "out/t_$c.%(ext)s" "https://www.youtube.com/watch?v=$v" > out/c_$c.log 2>&1 && echo "OK $c" || echo "NO $c: $(grep -m1 ERROR out/c_$c.log | cut -c1-160)"
           done
           ls -la out
       - name: save
         run: |
+          rm -f out/t_*
           git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
