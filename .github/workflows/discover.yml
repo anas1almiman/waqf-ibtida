@@ -11,45 +11,21 @@ jobs:
     steps:
       - name: tools
         run: sudo apt-get -qq install -y ffmpeg >/dev/null; pip -q install -U yt-dlp
-      - name: archive.org
+      - name: probe downloads from the Saudi Center channel
         run: |
           mkdir -p out
-          get(){ for i in 1 2 3 4 5; do curl -sSL --max-time 90 "$1" -o "$2" && [ -s "$2" ] && head -c 1 "$2" | grep -q '[{[]' && return 0; sleep 8; done; return 0; }
-          get "https://archive.org/metadata/Anas-AlMiman-Hafs" out/new_meta.json
-          get "https://archive.org/metadata/anas-almyman" out/old_meta.json
-          get "https://archive.org/advancedsearch.php?q=%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86+OR+almiman+OR+almyman+OR+al-miman+OR+almeman&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=publicdate&fl%5B%5D=description&rows=200&output=json" out/arch_search.json
-          python3 - <<'E'
-          import json
-          for f in ['new','old']:
-              try:
-                  m=json.load(open('out/%s_meta.json'%f))
-                  md=m.get('metadata',{})
-                  print('==',f,md.get('identifier'),md.get('title'),md.get('publicdate'),md.get('uploader'))
-                  print('desc:',str(md.get('description'))[:600])
-                  mp=[(x['name'],x.get('length'),x.get('size')) for x in m.get('files',[]) if x['name'].lower().endswith('.mp3')]
-                  print('mp3 count',len(mp)); print(sorted(mp)[:12]); print(sorted(mp)[-6:])
-              except Exception as e: print(f,'ERR',e)
-          try:
-              d=json.load(open('out/arch_search.json'))
-              for x in d['response']['docs']: print('S',x.get('identifier'),'|',x.get('title'),'|',x.get('publicdate'))
-          except Exception as e: print('search ERR',e)
-          E
-      - name: youtube
-        continue-on-error: true
-        run: |
-          yt-dlp --flat-playlist --print "%(title)s | %(id)s | %(playlist_count)s" "https://www.youtube.com/@SaudiQHC/playlists" > out/qhc_playlists.txt 2> out/yt_err1.txt || true
-          yt-dlp --flat-playlist --print "%(title)s | %(id)s" "https://www.youtube.com/@SaudiQHC/videos" > out/qhc_videos.txt 2> out/yt_err2.txt || true
-          yt-dlp --flat-playlist --print "%(channel)s | %(title)s | %(id)s" "ytsearch40:المصحف المرتل أنس الميمان المركز السعودي للتلاوات" > out/yt_search.txt 2> out/yt_err3.txt || true
-          wc -l out/qhc_*.txt out/yt_search.txt; grep -i "ميمان" out/qhc_*.txt | head -40; echo ---; head -40 out/yt_search.txt; echo ---; tail -3 out/yt_err*.txt
-      - name: compare first surahs (old vs new)
-        continue-on-error: true
-        run: |
-          for s in 001 036 067; do
-            for it in Anas-AlMiman-Hafs; do curl -sSL --max-time 120 "https://archive.org/download/$it/$s.mp3" -o out/new_$s.mp3 || true; done
-            ffprobe -v error -show_entries format=duration:format_tags -of compact out/new_$s.mp3 2>&1 | head -3 || true
+          for v in XS6mp8puy5s 6cPJunNtBmk 6dEZZvzuxFg; do
+            yt-dlp -f bestaudio -o "out/$v.%(ext)s" --print-to-file "%(id)s|%(title)s|%(duration)s|%(upload_date)s|%(format_id)s|%(abr)s|%(acodec)s" out/info.txt "https://www.youtube.com/watch?v=$v" > out/dl_$v.log 2>&1 || echo "FAIL $v" >> out/info.txt
+          done
+          cat out/info.txt; tail -n 5 out/dl_*.log
+          for f in out/*.webm out/*.m4a out/*.opus; do [ -f "$f" ] || continue; b=$(basename "$f"); b=${b%.*}
+            ffprobe -v error -show_entries format=duration -of csv=p=0 "$f"
+            ffmpeg -v error -y -i "$f" -t 40 -ac 1 -ar 22050 -b:a 64k "out/head_$b.mp3"
+            ffmpeg -v error -y -sseof -25 -i "$f" -ac 1 -ar 22050 -b:a 64k "out/tail_$b.mp3"
+            ffmpeg -v error -i "$f" -af silencedetect=n=-38dB:d=0.35 -f null - 2>&1 | grep -oE "silence_(start|end): [0-9.]+" | head -16 | tr "\n" " "; echo
+            rm -f "$f"
           done
           ls -la out
       - name: save
         run: |
-          rm -f out/*.mp3
           git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
