@@ -1098,8 +1098,8 @@ function pkCard(k,R){
   let canLate=false;for(let x=i+1;x<=SLAST[s];x++)if(pkOkStart(x)){canLate=true;break}
   return '<div class="card accent pkc"><div class="cardtop"><span class="rk">'+(k?'الركعة الثانية':'الركعة الأولى')+'</span><button class="pksur" data-act="pksurah" data-k="'+k+'">سورة '+D.N[s-1]+' '+ICON.back+'</button></div>'
    +'<div class="pkrow"><div class="pkl">الابتداء</div><div class="q">'+firstW(i)+' …</div><div class="pkbtns"><button class="chipb plain" data-act="pkst" data-k="'+k+'" data-d="-1"'+(canEarly?'':' disabled')+'>ابتداء أسبق</button><button class="chipb plain" data-act="pkst" data-k="'+k+'" data-d="1"'+(canLate?'':' disabled')+'>ابتداء لاحق</button></div></div>'
-   +'<div class="pkrow"><div class="pkl">الوقف</div><div class="q q2">… '+lastW(j)+'</div><div class="pkbtns"><button class="chipb plain" data-act="pken" data-k="'+k+'" data-d="-1"'+(canLess?'':' disabled')+'>− قصّر المقطع</button><button class="chipb'+(canMore?'':' plain')+'" data-act="pken" data-k="'+k+'" data-d="1"'+(canMore?'':' disabled')+'>+ طوّل المقطع</button></div></div>'
-   +'<div class="pkfit'+(pr?'':' over')+'"><span>'+ayRange(i,j)+'، '+AR(n)+(n<=10?' أسطر':' سطرًا')+'</span><b>'+(pr?'مناسب لصلاة '+PR[pr].n:'أطول من مقدار صلاة الفجر')+'</b></div>'+pkScale(n)+'</div>';
+   +'<div class="pkrow"><div class="pkl">الوقف</div><div class="q q2">… '+lastW(j)+'</div><div class="pkbtns"><button class="chipb plain" data-act="pken" data-k="'+k+'" data-d="-1"'+(canLess?'':' disabled')+'>− أقل</button><button class="chipb'+(canMore?'':' plain')+'" data-act="pken" data-k="'+k+'" data-d="1"'+(canMore?'':' disabled')+'>+ أكثر</button></div></div>'
+   +'<div class="pkfit'+(pr?'':' over')+'"><span>'+ayRange(i,j)+'، '+AR(n)+(n<=10?' أسطر':' سطرًا')+'</span><b>'+(pr?'أصبح مقدارها يناسب صلاة '+PR[pr].n:'أطول من مقدار صلاة الفجر')+'</b></div>'+pkScale(n)+'</div>';
 }
 function vPick(r){
   let x=topbar('من سورة تختارها');
@@ -1182,7 +1182,7 @@ function vPrayer(r){
   if(!c)return x+emptyCard(p);
   if(c.custom)x+='<div class="pkbadge">'+ICON.check+'<span>اختيارك من السور</span><button data-act="pkedit">تعديل</button></div>';
   x+=rakCard('الركعة الأولى',c.a,'a')+rakCard('الركعة الثانية',c.b,'b');
-  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="pkopen">'+ICON.juz+'اقترح لي من سورة…</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button></div>';
+  x+='<button class="btn primary" data-act="read">'+ICON.read+'قراءة المقطع</button><button class="btn ghostb" data-act="pkopen">'+ICON.juz+'اقترح لي من سورة محددة</button><button class="btn ghostb" data-act="plan" data-from="prayer">'+ICON.cal+'أضِف إلى جدولك</button><div class="row2"><button class="btn outline" data-act="another">'+ICON.refresh+'اقتراح آخر</button><button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button></div>';
   return x+'<p class="note">يبدأ كل مقطع وينتهي عند وقف تام، ولا يتكرر حتى تتم الختمة.</p>';
 }
 function doneView(){
@@ -1900,7 +1900,7 @@ document.addEventListener('click',ev=>{
   case 'plread':{const e=S.plan[+b.dataset.k];if(e)openReader({mode:'view',title:e.title,blocks:e.blocks.map((x,i)=>Object.assign({label:x.label||(i?'الركعة الثانية':'الركعة الأولى')},x))});break}
   case 'pldel':{S.plan.splice(+b.dataset.k,1);save();toast('أُزيل من جدولك.');render();break}
   case 'tset':TSEL[cur().id]=+b.dataset.k;render();break;
-  case 'tadj':{const t=TOPICS.find(x=>x.id===cur().id);if(!t)break;const key=t.id+':'+(TSEL[t.id]||0);const k=+b.dataset.k;const R=TR(t).r[k],r0=TS(t).r[k];if(+b.dataset.d>0){const nb=stopAfter(R[0],R[2]);if(nb<=R[2]||lines(R[0],R[1],nb)>tCapF()){toast('بلغتَ أقصى مقدار لصلاة الفجر ('+AR(tCapF())+' سطرًا للركعة)، فلا يُزاد عليه.');break}}const e=TEXT[key]||(TEXT[key]={});const before=tPrayer(TR(t));e[k]=+b.dataset.d>0?stopAfter(R[0],R[2]):stopBefore(R[0],R[1],R[2],r0[2]);const y=window.scrollY;render();window.scrollTo(0,y);const after=tPrayer(TR(t));if(after!==before)toast('صار مقدارها يناسب صلاة '+PR[after].n);break}
+  case 'tadj':{const t=TOPICS.find(x=>x.id===cur().id);if(!t)break;const key=t.id+':'+(TSEL[t.id]||0);const k=+b.dataset.k;const R=TR(t).r[k],r0=TS(t).r[k];if(+b.dataset.d>0){const nb=stopAfter(R[0],R[2]);if(nb<=R[2]||lines(R[0],R[1],nb)>tCapF()){toast('بلغتَ أقصى مقدار لصلاة الفجر ('+AR(tCapF())+' سطرًا للركعة)، فلا يُزاد عليه.');break}}const e=TEXT[key]||(TEXT[key]={});const before=tPrayer(TR(t));e[k]=+b.dataset.d>0?stopAfter(R[0],R[2]):stopBefore(R[0],R[1],R[2],r0[2]);const y=window.scrollY;render();window.scrollTo(0,y);const after=tPrayer(TR(t));if(after!==before)toast('أصبح مقدارها يناسب صلاة '+PR[after].n);break}
   case 'tst':S.topics[cur().id]=v;save();render();toast(v==='ok'?'اعتُمدت المجموعة.':v==='rej'?'رُفضت المجموعة.':'سُجّلت للتعديل.');break;
   case 'tread':case 'tpray':{const t=TOPICS.find(x=>x.id===cur().id);if(t)openReader({mode:a==='tpray'?'topic':'view',tid:t.id,title:t.sets?t.title+' — '+TS(t).t:t.title,blocks:TR(t).r.map((r,i)=>({label:i?'الركعة الثانية':'الركعة الأولى',s:r[0],a:r[1],b:r[2]}))});break}
   case 'tprayed':{const t=TOPICS.find(x=>x.id===cur().spec.tid);if(!t)break;const cov=topicCovered(t);cov.forEach(x=>READ.add(x));S.hist.unshift({t:Date.now(),p:tPrayer(TR(t)),topic:t.id,cov:cov});save();leaveReaderTo();toast('تقبّل الله منك، وسُجّلت في السجل.',undo);break}
