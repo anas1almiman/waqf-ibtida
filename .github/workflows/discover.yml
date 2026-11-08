@@ -9,17 +9,47 @@ jobs:
   d:
     runs-on: ubuntu-latest
     steps:
-      - name: query
+      - name: tools
+        run: sudo apt-get -qq install -y ffmpeg >/dev/null; pip -q install -U yt-dlp
+      - name: archive.org
         run: |
           mkdir -p out
-          curl -sSL "https://mp3quran.net/api/v3/reciters?language=ar" -o out/reciters_ar.json
-          curl -sSL "https://mp3quran.net/api/v3/ayat_timing/reads" -o out/timing_reads.json
-          curl -sSL "https://archive.org/metadata/alfirdwsiy1433_22_201812" -o out/miman_meta.json
-          curl -sSL "https://archive.org/advancedsearch.php?q=%D8%A7%D9%84%D8%A8%D8%B9%D9%8A%D8%AC%D8%A7%D9%86&fl%5B%5D=identifier&fl%5B%5D=title&rows=50&output=json" -o out/arch_buaijan.json
-          curl -sSL "https://archive.org/advancedsearch.php?q=%D8%A7%D9%84%D8%B9%D8%B5%D9%81%D9%88%D8%B1&fl%5B%5D=identifier&fl%5B%5D=title&rows=50&output=json" -o out/arch_asfour.json
-          curl -sSL "https://archive.org/advancedsearch.php?q=%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86&fl%5B%5D=identifier&fl%5B%5D=title&rows=50&output=json" -o out/arch_miman.json
-          for u in "https://server10.mp3quran.net/bader/Rewayat-Hafs-A-n-Assem/001.mp3" "https://server16.mp3quran.net/a_alqrafi/Rewayat-Hafs-A-n-Assem/001.mp3" "https://archive.org/download/alfirdwsiy1433_22_201812/001.mp3"; do echo "== $u"; curl -sSIL "$u" | grep -iE "^HTTP|content-type|content-length|access-control|location" ; done > out/heads.txt 2>&1
+          get(){ for i in 1 2 3 4 5; do curl -sSL --max-time 90 "$1" -o "$2" && [ -s "$2" ] && head -c 1 "$2" | grep -q '[{[]' && return 0; sleep 8; done; return 0; }
+          get "https://archive.org/metadata/Anas-AlMiman-Hafs" out/new_meta.json
+          get "https://archive.org/metadata/anas-almyman" out/old_meta.json
+          get "https://archive.org/advancedsearch.php?q=%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86+OR+almiman+OR+almyman+OR+al-miman+OR+almeman&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=publicdate&fl%5B%5D=description&rows=200&output=json" out/arch_search.json
+          python3 - <<'E'
+          import json
+          for f in ['new','old']:
+              try:
+                  m=json.load(open('out/%s_meta.json'%f))
+                  md=m.get('metadata',{})
+                  print('==',f,md.get('identifier'),md.get('title'),md.get('publicdate'),md.get('uploader'))
+                  print('desc:',str(md.get('description'))[:600])
+                  mp=[(x['name'],x.get('length'),x.get('size')) for x in m.get('files',[]) if x['name'].lower().endswith('.mp3')]
+                  print('mp3 count',len(mp)); print(sorted(mp)[:12]); print(sorted(mp)[-6:])
+              except Exception as e: print(f,'ERR',e)
+          try:
+              d=json.load(open('out/arch_search.json'))
+              for x in d['response']['docs']: print('S',x.get('identifier'),'|',x.get('title'),'|',x.get('publicdate'))
+          except Exception as e: print('search ERR',e)
+          E
+      - name: youtube
+        continue-on-error: true
+        run: |
+          yt-dlp --flat-playlist --print "%(title)s | %(id)s | %(playlist_count)s" "https://www.youtube.com/@SaudiQHC/playlists" > out/qhc_playlists.txt 2> out/yt_err1.txt || true
+          yt-dlp --flat-playlist --print "%(title)s | %(id)s" "https://www.youtube.com/@SaudiQHC/videos" > out/qhc_videos.txt 2> out/yt_err2.txt || true
+          yt-dlp --flat-playlist --print "%(channel)s | %(title)s | %(id)s" "ytsearch40:المصحف المرتل أنس الميمان المركز السعودي للتلاوات" > out/yt_search.txt 2> out/yt_err3.txt || true
+          wc -l out/qhc_*.txt out/yt_search.txt; grep -i "ميمان" out/qhc_*.txt | head -40; echo ---; head -40 out/yt_search.txt; echo ---; tail -3 out/yt_err*.txt
+      - name: compare first surahs (old vs new)
+        continue-on-error: true
+        run: |
+          for s in 001 036 067; do
+            for it in Anas-AlMiman-Hafs; do curl -sSL --max-time 120 "https://archive.org/download/$it/$s.mp3" -o out/new_$s.mp3 || true; done
+            ffprobe -v error -show_entries format=duration:format_tags -of compact out/new_$s.mp3 2>&1 | head -3 || true
+          done
           ls -la out
       - name: save
         run: |
+          rm -f out/*.mp3
           git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
