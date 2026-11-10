@@ -13,21 +13,16 @@ jobs:
         run: |
           set +e +o pipefail
           mkdir -p out
-          curl -sSL --max-time 40 "https://itunes.apple.com/lookup?id=1861812834" -o out/it.json; jq -c '.results[0]|{feedUrl,trackCount,artistName,collectionName,releaseDate}' out/it.json
-          f=$(jq -r '.results[0].feedUrl' out/it.json)
-          curl -sSL --max-time 60 -A "Mozilla/5.0" "$f" -o out/feed.xml; wc -c out/feed.xml; head -c 1500 out/feed.xml; echo
-          python3 - <<'PY'
-          import re
-          x=open('out/feed.xml',encoding='utf-8',errors='ignore').read()
-          items=re.findall(r'<item>(.*?)</item>',x,flags=re.S)
-          print('items',len(items))
-          for it in items:
-              t=re.search(r'<title>(.*?)</title>',it,flags=re.S); e=re.search(r'<enclosure[^>]*url="([^"]+)"[^>]*',it); d=re.search(r'<itunes:duration>(.*?)</itunes:duration>',it); l=re.search(r'length="(\d+)"',it)
-              print((t.group(1) if t else '')[:60],'|',d.group(1) if d else '','|',l.group(1) if l else '','|',e.group(1) if e else '')
-          PY
-          for q in "%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86" "%D8%A3%D9%86%D8%B3"; do for u in "https://tilawatalharamain.com/search?q=$q" "https://tilawatalharamain.com/?s=$q" "https://tilawatalharamain.com/search/$q"; do echo "== $u"; curl -sSL --max-time 40 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36" "$u" -o out/x.html -w "%{http_code} %{size_download}\n"; grep -oE '<a[^>]*href="[^"]*"[^>]*>[^<]*(ميمان)[^<]*' out/x.html | head -10; done; done
-          curl -sSL --max-time 40 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36" "https://tilawatalharamain.com/quran/5800" -o out/q5800.html -w "%{http_code} %{size_download}\n"; grep -oE 'href="[^"]*(mp3|download|reciter|mushaf|quran/[a-z]+)[^"]*"' out/q5800.html | sort -u | head -40
-          curl -sSL --max-time 40 -A "Mozilla/5.0" "https://www.koonoz.info/2025/11/Anas-AlMiman-Hafs.html" | grep -oE 'https?://[^"]*(archive\.org|\.mp3|\.zip)[^"]*' | sort -u | head -12
+          pip -q install -U --pre "yt-dlp[default]"
+          v=XS6mp8puy5s
+          for c in tv tv_simply tv_embedded android_vr android ios web_safari web_music web_creator mweb; do
+            timeout 120 yt-dlp --extractor-args "youtube:player_client=$c" -f "bestaudio/best" -o "out/t_$c.%(ext)s" "https://www.youtube.com/watch?v=$v" > out/a_$c.log 2>&1
+            if ls out/t_$c.* >/dev/null 2>&1; then echo "OK $c $(ls -la out/t_$c.* | awk '{print $5}')"; else echo "NO $c: $(grep -m1 -iE 'error' out/a_$c.log | cut -c1-200)"; fi
+          done
+          timeout 120 yt-dlp -f "bestaudio/best" -o "out/t_music.%(ext)s" "https://music.youtube.com/watch?v=$v" > out/a_music.log 2>&1; ls out/t_music.* 2>/dev/null || grep -m1 -i error out/a_music.log | cut -c1-200
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36"
+          for u in "https://t.me/s/SaudiQHC" "https://t.me/s/saudiqhc_sa" "https://soundcloud.com/saudiqhc" "https://qhc.gov.sa" "https://www.qhc.gov.sa" "https://saudiqhc.sa" "https://saudiqhc.com" "https://www.youtube.com/@SaudiQHC/about"; do echo "== $u"; curl -sSL --max-time 30 -A "$UA" "$u" -o out/x.html -w "%{http_code} %{size_download} %{url_effective}\n"; grep -oE '<title>[^<]*' out/x.html | head -1; grep -oE 'https?://[^"\\ <]*(t\.me|soundcloud|\.sa/|telegram|apps\.apple|play\.google)[^"\\ <]*' out/x.html | sort -u | head -12; done
+          rm -f out/t_*
       - name: save
         if: always()
         run: |
