@@ -13,16 +13,24 @@ jobs:
         run: |
           set +e +o pipefail
           mkdir -p out
-          pip -q install -U --pre "yt-dlp[default]"
-          v=XS6mp8puy5s
-          for c in tv tv_simply tv_embedded android_vr android ios web_safari web_music web_creator mweb; do
-            timeout 120 yt-dlp --extractor-args "youtube:player_client=$c" -f "bestaudio/best" -o "out/t_$c.%(ext)s" "https://www.youtube.com/watch?v=$v" > out/a_$c.log 2>&1
-            if ls out/t_$c.* >/dev/null 2>&1; then echo "OK $c $(ls -la out/t_$c.* | awk '{print $5}')"; else echo "NO $c: $(grep -m1 -iE 'error' out/a_$c.log | cut -c1-200)"; fi
-          done
-          timeout 120 yt-dlp -f "bestaudio/best" -o "out/t_music.%(ext)s" "https://music.youtube.com/watch?v=$v" > out/a_music.log 2>&1; ls out/t_music.* 2>/dev/null || grep -m1 -i error out/a_music.log | cut -c1-200
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36"
-          for u in "https://t.me/s/SaudiQHC" "https://t.me/s/saudiqhc_sa" "https://soundcloud.com/saudiqhc" "https://qhc.gov.sa" "https://www.qhc.gov.sa" "https://saudiqhc.sa" "https://saudiqhc.com" "https://www.youtube.com/@SaudiQHC/about"; do echo "== $u"; curl -sSL --max-time 30 -A "$UA" "$u" -o out/x.html -w "%{http_code} %{size_download} %{url_effective}\n"; grep -oE '<title>[^<]*' out/x.html | head -1; grep -oE 'https?://[^"\\ <]*(t\.me|soundcloud|\.sa/|telegram|apps\.apple|play\.google)[^"\\ <]*' out/x.html | sort -u | head -12; done
-          rm -f out/t_*
+          curl -sSL --max-time 30 -A "$UA" "https://t.me/s/SaudiQHC" -o out/tg.html
+          grep -oE 'tgme_channel_info_counter[^/]*/span> <span class="counter_type">[^<]*|tgme_page_extra">[^<]*|counter_value">[^<]*' out/tg.html | head -8
+          grep -oE 'data-post="[^"]*"' out/tg.html | head -3; grep -oE 'data-post="[^"]*"' out/tg.html | tail -2
+          grep -c 'tgme_widget_message_voice\|tgme_widget_message_document\|<audio' out/tg.html
+          for q in "%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86" "%D8%A3%D9%86%D8%B3"; do
+            curl -sSL --max-time 30 -A "$UA" "https://t.me/s/SaudiQHC?q=$q" -o out/tgq.html
+            echo "== q=$q posts: $(grep -c 'data-post=' out/tgq.html)"
+            python3 - <<'PY'
+          import re,html
+          x=open('out/tgq.html',encoding='utf-8',errors='ignore').read()
+          for m in re.finditer(r'data-post="([^"]+)"(.*?)(?=data-post="|$)',x,flags=re.S):
+              body=m.group(2)
+              txt=re.sub(r'<[^>]+>',' ',' '.join(re.findall(r'tgme_widget_message_text[^>]*>(.*?)</div>',body,flags=re.S)))
+              aud=re.findall(r'<audio[^>]*src="([^"]+)"',body); doc=re.findall(r'tgme_widget_message_document_title[^>]*>(.*?)</div>',body,flags=re.S); links=re.findall(r'href="(https?://(?!t\.me)[^"]+)"',body)
+              print(m.group(1),'|',html.unescape(txt)[:140].strip(),'| audio',len(aud),aud[:1],'| doc',doc[:2],'| links',[l for l in links if 'telegram' not in l][:4])
+          PY
+          done
       - name: save
         if: always()
         run: |
