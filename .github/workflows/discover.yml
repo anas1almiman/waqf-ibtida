@@ -22,6 +22,7 @@ jobs:
           wc -l out/pl_user.txt; head -3 out/pl_user.txt; tail -2 out/pl_err.txt
       - name: attempts
         run: |
+          set +e +o pipefail
           v=XS6mp8puy5s
           try(){ n=$1; shift; timeout 150 "$@" > out/a_$n.log 2>&1 && ls out/t_$n.* >/dev/null 2>&1 && echo "OK $n $(ls -la out/t_$n.* | awk '{print $5}')" || echo "NO $n: $(grep -m1 -iE 'error|fail' out/a_$n.log | cut -c1-170)"; }
           try pot_web yt-dlp --extractor-args "youtube:player_client=web" -f "bestaudio/best" -o "out/t_pot_web.%(ext)s" "https://www.youtube.com/watch?v=$v"
@@ -43,6 +44,7 @@ jobs:
           ls -la out | head -30
           for f in out/t_*; do [ -f "$f" ] && ffprobe -v error -show_entries format=duration,format_name -of compact "$f" 2>&1 | head -1; done
       - name: save
+        if: always()
         run: |
           rm -f out/t_*
           git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
