@@ -8,27 +8,92 @@ permissions:
 jobs:
   d:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
-      - name: riwayat
+      - name: tools
         run: |
+          sudo apt-get -qq install -y ffmpeg >/dev/null
+          pip -q install -U --pre "yt-dlp[default]" bgutil-ytdlp-pot-provider
+          curl -fsSL https://deno.land/install.sh | sh -s -- -y >/dev/null 2>&1 || true
+          echo "$HOME/.deno/bin" >> $GITHUB_PATH
           mkdir -p out
-          curl -sSL --max-time 60 "https://mp3quran.net/api/v3/riwayat?language=ar" -o out/riwayat.json
-          curl -sSL --max-time 120 "https://mp3quran.net/api/v3/reciters?language=ar" -o out/reciters.json
-          python3 - <<'E'
-          import json,urllib.request
-          rw=json.load(open('out/riwayat.json'))['riwayat']
-          rc=json.load(open('out/reciters.json'))['reciters']
-          print(len(rw),len(rc))
-          res=[]
-          for r in rc:
-              for m in r['moshaf']:
-                  res.append({'r':r['name'],'rid':r['id'],'mid':m['id'],'name':m['name'],'srv':m['server'],'n':m['surah_total'],'type':m.get('moshaf_type')})
-          json.dump({'riwayat':rw,'moshaf':res},open('out/qiraat_src.json','w'),ensure_ascii=False)
-          import collections
-          c=collections.Counter(x['name'] for x in res if x['n']==114)
-          for k,v in c.most_common(): print(v,k)
-          E
-          rm -f out/reciters.json
-      - name: save
+      - name: list
         run: |
+          yt-dlp --flat-playlist --print "%(title)s | %(id)s" "https://www.youtube.com/@SaudiQHC/videos" > out/qhc_videos.txt 2> out/err_list.txt || true
+          grep -c "أنس الميمان" out/qhc_videos.txt || true
+          yt-dlp --flat-playlist --print "%(title)s | %(id)s" "https://www.youtube.com/playlist?list=PLS3Rg2HZgsBTAbnOOS9HLFF_ccjPM3JSG" > out/pl.txt 2>> out/err_list.txt || true
+          wc -l out/pl.txt; head -3 out/pl.txt
+      - name: A pot provider
+        continue-on-error: true
+        run: |
+          docker run -d --name bgutil -p 4416:4416 brainicism/bgutil-ytdlp-pot-provider >/dev/null 2>&1 || true
+          sleep 8
+          v=XS6mp8puy5s
+          for c in default web mweb tv web_safari; do
+            a=""; [ "$c" != default ] && a="--extractor-args youtube:player_client=$c"
+            timeout 150 yt-dlp $a -f "bestaudio/best" -o "out/A_$c.%(ext)s" "https://www.youtube.com/watch?v=$v" > out/A_$c.log 2>&1 && echo "A OK $c" || echo "A NO $c: $(grep -m1 ERROR out/A_$c.log | cut -c1-140)"
+          done
+          ls -la out | grep "A_" | grep -v log || true
+      - name: B invidious
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          def get(u,t=20):
+              r=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'});return urllib.request.urlopen(r,timeout=t).read()
+          v='XS6mp8puy5s';ok=0
+          try: inst=[x[1]['uri'] for x in json.loads(get('https://api.invidious.io/instances.json?sort_by=health')) if x[1].get('type')=='https']
+          except Exception as e: inst=[];print('inst list fail',e)
+          inst+=['https://inv.nadeko.net','https://yewtu.be','https://invidious.nerdvpn.de','https://invidious.f5.si','https://inv.tux.pizza','https://invidious.privacyredirect.com']
+          for i in dict.fromkeys(inst):
+              try:
+                  j=json.loads(get(i+'/api/v1/videos/'+v+'?local=true'))
+                  af=[f for f in j.get('adaptiveFormats',[]) if 'audio' in f.get('type','')]
+                  if not af: print('B',i,'no formats',str(j)[:80]);continue
+                  u=af[0]['url']; u=u if u.startswith('http') else i+u
+                  d=get(u,60);print('B OK',i,len(d),af[0].get('type'));ok+=1
+                  if ok>=2:break
+              except Exception as e: print('B NO',i,str(e)[:80])
+          PY
+      - name: C piped
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request
+          def get(u,t=20):
+              r=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'});return urllib.request.urlopen(r,timeout=t).read()
+          v='XS6mp8puy5s'
+          try: inst=[x['api_url'] for x in json.loads(get('https://piped-instances.kavin.rocks/'))]
+          except Exception as e: inst=[];print('piped list fail',e)
+          inst+=['https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de','https://api.piped.private.coffee','https://pipedapi.leptons.xyz','https://piped-api.privacy.com.de']
+          ok=0
+          for i in dict.fromkeys(inst):
+              try:
+                  j=json.loads(get(i+'/streams/'+v))
+                  au=j.get('audioStreams') or []
+                  if not au: print('C',i,'none',str(j)[:80]);continue
+                  d=get(au[0]['url'],60);print('C OK',i,len(d),au[0].get('mimeType'));ok+=1
+                  if ok>=2:break
+              except Exception as e: print('C NO',i,str(e)[:80])
+          PY
+      - name: D warp
+        continue-on-error: true
+        run: |
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list >/dev/null
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y cloudflare-warp >/dev/null
+          sudo warp-cli --accept-tos registration new >/dev/null 2>&1 || true
+          sudo warp-cli --accept-tos connect || true
+          sleep 8; curl -s --max-time 15 https://www.cloudflare.com/cdn-cgi/trace | grep -E "warp|ip=" || true
+          v=XS6mp8puy5s
+          for c in default tv mweb; do
+            a=""; [ "$c" != default ] && a="--extractor-args youtube:player_client=$c"
+            timeout 150 yt-dlp $a -f "bestaudio/best" -o "out/D_$c.%(ext)s" "https://www.youtube.com/watch?v=$v" > out/D_$c.log 2>&1 && echo "D OK $c" || echo "D NO $c: $(grep -m1 ERROR out/D_$c.log | cut -c1-140)"
+          done
+          ls -la out | grep "D_" | grep -v log || true
+          sudo warp-cli --accept-tos disconnect || true
+      - name: save
+        if: always()
+        run: |
+          rm -f out/*.webm out/*.m4a out/*.mp4 out/*.opus
           git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
