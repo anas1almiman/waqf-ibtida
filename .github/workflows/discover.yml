@@ -12,15 +12,10 @@ jobs:
       - name: probe
         run: |
           set +e +o pipefail
-          sudo apt-get -qq install -y ffmpeg jq >/dev/null
           mkdir -p out
-          for id in anasal-maiman Anas-Al-Miman-Mouratel; do
-            curl -sSL --max-time 60 "https://archive.org/metadata/$id" -o out/meta_$id.json
-            jq -c '.metadata' out/meta_$id.json
-            jq -r '.files[]|select(.format|test("MP3|Ogg|AAC|M4A|Flac|WAVE|MPEG4|Opus";"i"))|[.name,.format,.size,.length]|@tsv' out/meta_$id.json | head -150
-          done
-          n=$(jq -r '[.files[]|select(.name|test("\\.mp3$"))][0].name' out/meta_anasal-maiman.json); echo "first: $n"
-          curl -sSL --max-time 200 "https://archive.org/download/anasal-maiman/$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$n")" -o a.mp3; ffprobe -v error -show_format a.mp3 | grep -E "duration|bit_rate|TAG"
+          pip -q install -U --pre "yt-dlp[default]"
+          yt-dlp --flat-playlist --print "%(playlist_index)s | %(title)s | %(id)s | %(duration)s" "https://youtube.com/playlist?list=PLe0p3tPlFXOU" > out/pl_dur.txt 2> out/pl_err.txt
+          wc -l out/pl_dur.txt; cat out/pl_dur.txt; tail -3 out/pl_err.txt
       - name: save
         if: always()
         run: |
