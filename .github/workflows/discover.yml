@@ -8,92 +8,41 @@ permissions:
 jobs:
   d:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
     steps:
       - name: tools
         run: |
-          sudo apt-get -qq install -y ffmpeg >/dev/null
+          sudo apt-get -qq install -y ffmpeg jq >/dev/null
           pip -q install -U --pre "yt-dlp[default]" bgutil-ytdlp-pot-provider
-          curl -fsSL https://deno.land/install.sh | sh -s -- -y >/dev/null 2>&1 || true
-          echo "$HOME/.deno/bin" >> $GITHUB_PATH
-          mkdir -p out
-      - name: list
-        run: |
-          yt-dlp --flat-playlist --print "%(title)s | %(id)s" "https://www.youtube.com/@SaudiQHC/videos" > out/qhc_videos.txt 2> out/err_list.txt || true
-          grep -c "أنس الميمان" out/qhc_videos.txt || true
-          yt-dlp --flat-playlist --print "%(title)s | %(id)s" "https://www.youtube.com/playlist?list=PLS3Rg2HZgsBTAbnOOS9HLFF_ccjPM3JSG" > out/pl.txt 2>> out/err_list.txt || true
-          wc -l out/pl.txt; head -3 out/pl.txt
-      - name: A pot provider
-        continue-on-error: true
-        run: |
-          docker run -d --name bgutil -p 4416:4416 brainicism/bgutil-ytdlp-pot-provider >/dev/null 2>&1 || true
+          docker run -d --name pot -p 4416:4416 brainicism/bgutil-ytdlp-pot-provider >/dev/null 2>&1 || true
           sleep 8
+      - name: playlist
+        run: |
+          mkdir -p out
+          yt-dlp --flat-playlist --print "%(title)s | %(id)s" "https://youtube.com/playlist?list=PLe0p3tPlFXOU" > out/pl_user.txt 2> out/pl_err.txt || true
+          wc -l out/pl_user.txt; head -3 out/pl_user.txt; tail -2 out/pl_err.txt
+      - name: attempts
+        run: |
           v=XS6mp8puy5s
-          for c in default web mweb tv web_safari; do
-            a=""; [ "$c" != default ] && a="--extractor-args youtube:player_client=$c"
-            timeout 150 yt-dlp $a -f "bestaudio/best" -o "out/A_$c.%(ext)s" "https://www.youtube.com/watch?v=$v" > out/A_$c.log 2>&1 && echo "A OK $c" || echo "A NO $c: $(grep -m1 ERROR out/A_$c.log | cut -c1-140)"
+          try(){ n=$1; shift; timeout 150 "$@" > out/a_$n.log 2>&1 && ls out/t_$n.* >/dev/null 2>&1 && echo "OK $n $(ls -la out/t_$n.* | awk '{print $5}')" || echo "NO $n: $(grep -m1 -iE 'error|fail' out/a_$n.log | cut -c1-170)"; }
+          try pot_web yt-dlp --extractor-args "youtube:player_client=web" -f "bestaudio/best" -o "out/t_pot_web.%(ext)s" "https://www.youtube.com/watch?v=$v"
+          try pot_mweb yt-dlp --extractor-args "youtube:player_client=mweb" -f "bestaudio/best" -o "out/t_pot_mweb.%(ext)s" "https://www.youtube.com/watch?v=$v"
+          try pot_embed yt-dlp --extractor-args "youtube:player_client=web_embedded" -f "bestaudio/best" -o "out/t_pot_embed.%(ext)s" "https://www.youtube.com/watch?v=$v"
+          for inst in https://pipedapi.kavin.rocks https://pipedapi.adminforge.de https://api.piped.yt https://pipedapi.reallyaweso.me https://piped-api.privacy.com.de https://pipedapi.leptons.xyz; do
+            u=$(curl -sS --max-time 25 "$inst/streams/$v" | jq -r '.audioStreams|sort_by(.bitrate)|last|.url' 2>/dev/null)
+            if [ -n "$u" ] && [ "$u" != null ]; then curl -sSL --max-time 120 "$u" -o out/t_piped.bin && s=$(stat -c %s out/t_piped.bin) && echo "PIPED $inst size $s" && [ "$s" -gt 100000 ] && break; else echo "piped no: $inst"; fi
           done
-          ls -la out | grep "A_" | grep -v log || true
-      - name: B invidious
-        continue-on-error: true
-        run: |
-          python3 - <<'PY'
-          import json,urllib.request
-          def get(u,t=20):
-              r=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'});return urllib.request.urlopen(r,timeout=t).read()
-          v='XS6mp8puy5s';ok=0
-          try: inst=[x[1]['uri'] for x in json.loads(get('https://api.invidious.io/instances.json?sort_by=health')) if x[1].get('type')=='https']
-          except Exception as e: inst=[];print('inst list fail',e)
-          inst+=['https://inv.nadeko.net','https://yewtu.be','https://invidious.nerdvpn.de','https://invidious.f5.si','https://inv.tux.pizza','https://invidious.privacyredirect.com']
-          for i in dict.fromkeys(inst):
-              try:
-                  j=json.loads(get(i+'/api/v1/videos/'+v+'?local=true'))
-                  af=[f for f in j.get('adaptiveFormats',[]) if 'audio' in f.get('type','')]
-                  if not af: print('B',i,'no formats',str(j)[:80]);continue
-                  u=af[0]['url']; u=u if u.startswith('http') else i+u
-                  d=get(u,60);print('B OK',i,len(d),af[0].get('type'));ok+=1
-                  if ok>=2:break
-              except Exception as e: print('B NO',i,str(e)[:80])
-          PY
-      - name: C piped
-        continue-on-error: true
-        run: |
-          python3 - <<'PY'
-          import json,urllib.request
-          def get(u,t=20):
-              r=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'});return urllib.request.urlopen(r,timeout=t).read()
-          v='XS6mp8puy5s'
-          try: inst=[x['api_url'] for x in json.loads(get('https://piped-instances.kavin.rocks/'))]
-          except Exception as e: inst=[];print('piped list fail',e)
-          inst+=['https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de','https://api.piped.private.coffee','https://pipedapi.leptons.xyz','https://piped-api.privacy.com.de']
-          ok=0
-          for i in dict.fromkeys(inst):
-              try:
-                  j=json.loads(get(i+'/streams/'+v))
-                  au=j.get('audioStreams') or []
-                  if not au: print('C',i,'none',str(j)[:80]);continue
-                  d=get(au[0]['url'],60);print('C OK',i,len(d),au[0].get('mimeType'));ok+=1
-                  if ok>=2:break
-              except Exception as e: print('C NO',i,str(e)[:80])
-          PY
-      - name: D warp
-        continue-on-error: true
-        run: |
-          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list >/dev/null
-          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y cloudflare-warp >/dev/null
-          sudo warp-cli --accept-tos registration new >/dev/null 2>&1 || true
-          sudo warp-cli --accept-tos connect || true
-          sleep 8; curl -s --max-time 15 https://www.cloudflare.com/cdn-cgi/trace | grep -E "warp|ip=" || true
-          v=XS6mp8puy5s
-          for c in default tv mweb; do
-            a=""; [ "$c" != default ] && a="--extractor-args youtube:player_client=$c"
-            timeout 150 yt-dlp $a -f "bestaudio/best" -o "out/D_$c.%(ext)s" "https://www.youtube.com/watch?v=$v" > out/D_$c.log 2>&1 && echo "D OK $c" || echo "D NO $c: $(grep -m1 ERROR out/D_$c.log | cut -c1-140)"
+          for inst in https://inv.nadeko.net https://invidious.nerdvpn.de https://yewtu.be https://invidious.f5.si https://inv.tux.pizza https://invidious.privacyredirect.com; do
+            u=$(curl -sS --max-time 25 "$inst/api/v1/videos/$v" | jq -r '[.adaptiveFormats[]|select(.type|startswith("audio"))]|sort_by(.bitrate|tonumber)|last|.itag' 2>/dev/null)
+            if [ -n "$u" ] && [ "$u" != null ]; then curl -sSL --max-time 120 "$inst/latest_version?id=$v&itag=$u&local=true" -o out/t_inv.bin && s=$(stat -c %s out/t_inv.bin) && echo "INV $inst itag $u size $s" && [ "$s" -gt 100000 ] && break; else echo "inv no: $inst"; fi
           done
-          ls -la out | grep "D_" | grep -v log || true
-          sudo warp-cli --accept-tos disconnect || true
+          for inst in https://cobalt-api.kwiatekmiki.com https://capi.3kh0.net https://cobalt-backend.canine.tools https://api.cobalt.tools; do
+            r=$(curl -sS --max-time 40 -X POST "$inst/" -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"url\":\"https://www.youtube.com/watch?v=$v\",\"downloadMode\":\"audio\",\"audioFormat\":\"mp3\"}")
+            u=$(echo "$r" | jq -r '.url' 2>/dev/null)
+            if [ -n "$u" ] && [ "$u" != null ]; then curl -sSL --max-time 150 "$u" -o out/t_cobalt.bin && s=$(stat -c %s out/t_cobalt.bin) && echo "COBALT $inst size $s" && [ "$s" -gt 100000 ] && break; else echo "cobalt no: $inst $(echo $r | cut -c1-120)"; fi
+          done
+          ls -la out | head -30
+          for f in out/t_*; do [ -f "$f" ] && ffprobe -v error -show_entries format=duration,format_name -of compact "$f" 2>&1 | head -1; done
       - name: save
-        if: always()
         run: |
-          rm -f out/*.webm out/*.m4a out/*.mp4 out/*.opus
+          rm -f out/t_*
           git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
