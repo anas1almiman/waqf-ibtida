@@ -9,22 +9,26 @@ jobs:
   d:
     runs-on: ubuntu-latest
     steps:
-      - name: tools
+      - name: riwayat
         run: |
-          sudo apt-get -qq install -y ffmpeg >/dev/null
-          pip -q install -U --pre "yt-dlp[default]"
-          curl -fsSL https://deno.land/install.sh | sh -s -- -y >/dev/null 2>&1 || true
-          echo "$HOME/.deno/bin" >> $GITHUB_PATH
-      - name: try clients
-        run: |
-          mkdir -p out; deno --version | head -1 || true; yt-dlp --version
-          v=6cPJunNtBmk
-          for c in default tv tv_simply web_embedded mweb android_vr web_safari ios; do
-            if [ "$c" = default ]; then a=""; else a="--extractor-args youtube:player_client=$c"; fi
-            timeout 120 yt-dlp $a -f "bestaudio/best" -o "out/t_$c.%(ext)s" "https://www.youtube.com/watch?v=$v" > out/c_$c.log 2>&1 && echo "OK $c" || echo "NO $c: $(grep -m1 ERROR out/c_$c.log | cut -c1-160)"
-          done
-          ls -la out
+          mkdir -p out
+          curl -sSL --max-time 60 "https://mp3quran.net/api/v3/riwayat?language=ar" -o out/riwayat.json
+          curl -sSL --max-time 120 "https://mp3quran.net/api/v3/reciters?language=ar" -o out/reciters.json
+          python3 - <<'E'
+          import json,urllib.request
+          rw=json.load(open('out/riwayat.json'))['riwayat']
+          rc=json.load(open('out/reciters.json'))['reciters']
+          print(len(rw),len(rc))
+          res=[]
+          for r in rc:
+              for m in r['moshaf']:
+                  res.append({'r':r['name'],'rid':r['id'],'mid':m['id'],'name':m['name'],'srv':m['server'],'n':m['surah_total'],'type':m.get('moshaf_type')})
+          json.dump({'riwayat':rw,'moshaf':res},open('out/qiraat_src.json','w'),ensure_ascii=False)
+          import collections
+          c=collections.Counter(x['name'] for x in res if x['n']==114)
+          for k,v in c.most_common(): print(v,k)
+          E
+          rm -f out/reciters.json
       - name: save
         run: |
-          rm -f out/t_*
           git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
