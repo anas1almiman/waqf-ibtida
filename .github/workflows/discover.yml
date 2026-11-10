@@ -9,42 +9,25 @@ jobs:
   d:
     runs-on: ubuntu-latest
     steps:
-      - name: tools
-        run: |
-          sudo apt-get -qq install -y ffmpeg jq >/dev/null
-          pip -q install -U --pre "yt-dlp[default]" bgutil-ytdlp-pot-provider
-          docker run -d --name pot -p 4416:4416 brainicism/bgutil-ytdlp-pot-provider >/dev/null 2>&1 || true
-          sleep 8
-      - name: playlist
-        run: |
-          mkdir -p out
-          yt-dlp --flat-playlist --print "%(title)s | %(id)s" "https://youtube.com/playlist?list=PLe0p3tPlFXOU" > out/pl_user.txt 2> out/pl_err.txt || true
-          wc -l out/pl_user.txt; head -3 out/pl_user.txt; tail -2 out/pl_err.txt
-      - name: attempts
+      - name: probe
         run: |
           set +e +o pipefail
-          v=XS6mp8puy5s
-          try(){ n=$1; shift; timeout 150 "$@" > out/a_$n.log 2>&1 && ls out/t_$n.* >/dev/null 2>&1 && echo "OK $n $(ls -la out/t_$n.* | awk '{print $5}')" || echo "NO $n: $(grep -m1 -iE 'error|fail' out/a_$n.log | cut -c1-170)"; }
-          try pot_web yt-dlp --extractor-args "youtube:player_client=web" -f "bestaudio/best" -o "out/t_pot_web.%(ext)s" "https://www.youtube.com/watch?v=$v"
-          try pot_mweb yt-dlp --extractor-args "youtube:player_client=mweb" -f "bestaudio/best" -o "out/t_pot_mweb.%(ext)s" "https://www.youtube.com/watch?v=$v"
-          try pot_embed yt-dlp --extractor-args "youtube:player_client=web_embedded" -f "bestaudio/best" -o "out/t_pot_embed.%(ext)s" "https://www.youtube.com/watch?v=$v"
-          for inst in https://pipedapi.kavin.rocks https://pipedapi.adminforge.de https://api.piped.yt https://pipedapi.reallyaweso.me https://piped-api.privacy.com.de https://pipedapi.leptons.xyz; do
-            u=$(curl -sS --max-time 25 "$inst/streams/$v" | jq -r '.audioStreams|sort_by(.bitrate)|last|.url' 2>/dev/null)
-            if [ -n "$u" ] && [ "$u" != null ]; then curl -sSL --max-time 120 "$u" -o out/t_piped.bin && s=$(stat -c %s out/t_piped.bin) && echo "PIPED $inst size $s" && [ "$s" -gt 100000 ] && break; else echo "piped no: $inst"; fi
-          done
-          for inst in https://inv.nadeko.net https://invidious.nerdvpn.de https://yewtu.be https://invidious.f5.si https://inv.tux.pizza https://invidious.privacyredirect.com; do
-            u=$(curl -sS --max-time 25 "$inst/api/v1/videos/$v" | jq -r '[.adaptiveFormats[]|select(.type|startswith("audio"))]|sort_by(.bitrate|tonumber)|last|.itag' 2>/dev/null)
-            if [ -n "$u" ] && [ "$u" != null ]; then curl -sSL --max-time 120 "$inst/latest_version?id=$v&itag=$u&local=true" -o out/t_inv.bin && s=$(stat -c %s out/t_inv.bin) && echo "INV $inst itag $u size $s" && [ "$s" -gt 100000 ] && break; else echo "inv no: $inst"; fi
-          done
-          for inst in https://cobalt-api.kwiatekmiki.com https://capi.3kh0.net https://cobalt-backend.canine.tools https://api.cobalt.tools; do
-            r=$(curl -sS --max-time 40 -X POST "$inst/" -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"url\":\"https://www.youtube.com/watch?v=$v\",\"downloadMode\":\"audio\",\"audioFormat\":\"mp3\"}")
-            u=$(echo "$r" | jq -r '.url' 2>/dev/null)
-            if [ -n "$u" ] && [ "$u" != null ]; then curl -sSL --max-time 150 "$u" -o out/t_cobalt.bin && s=$(stat -c %s out/t_cobalt.bin) && echo "COBALT $inst size $s" && [ "$s" -gt 100000 ] && break; else echo "cobalt no: $inst $(echo $r | cut -c1-120)"; fi
-          done
-          ls -la out | head -30
-          for f in out/t_*; do [ -f "$f" ] && ffprobe -v error -show_entries format=duration,format_name -of compact "$f" 2>&1 | head -1; done
+          sudo apt-get -qq install -y ffmpeg jq >/dev/null
+          mkdir -p out
+          curl -sSL --max-time 60 "https://archive.org/metadata/Anas-Al-Miman-Mouratel" -o out/meta.json
+          jq '.metadata' out/meta.json
+          jq -r '.files[]|[.name,.format,.size,.length,.bitrate]|@tsv' out/meta.json | head -80
+          curl -sSL --max-time 300 "https://archive.org/download/Anas-Al-Miman-Mouratel/030.mp3" -o j30.mp3
+          ls -la j30.mp3; ffprobe -v error -show_format j30.mp3 | head -30
+          curl -sSL --max-time 60 "https://archive.org/advancedsearch.php?q=%D8%A3%D9%86%D8%B3+%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=publicdate&rows=60&output=json" -o out/s1.json
+          curl -sSL --max-time 60 "https://archive.org/advancedsearch.php?q=Miman+OR+Mayman+OR+Maiman+quran&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=publicdate&rows=80&output=json" -o out/s2.json
+          curl -sSL --max-time 60 "https://archive.org/advancedsearch.php?q=%22%D8%A7%D9%84%D9%85%D8%B1%D9%83%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A+%D9%84%D9%84%D8%AA%D9%84%D8%A7%D9%88%D8%A7%D8%AA%22&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=publicdate&rows=80&output=json" -o out/s3.json
+          for f in out/s*.json; do echo "== $f"; jq -r '.response.docs[]|[.identifier,.title,.publicdate]|@tsv' $f; done
+          for u in "https://tilawatalharamain.com" "https://www.mp3quran.net/api/v3/reciters?language=ar" "https://server.mp3quran.net/"; do echo "== $u"; curl -sSL --max-time 40 -A "Mozilla/5.0" "$u" -o out/x.bin -w "%{http_code} %{size_download}\n"; done
+          curl -sSL --max-time 40 "https://www.mp3quran.net/api/v3/reciters?language=ar" | jq -c '.reciters[]|select(.name|test("ميمان|الميمن"))' | tee out/mp3q.json
+          curl -sSL --max-time 40 -A "Mozilla/5.0" "https://tilawatalharamain.com" | grep -oiE 'href="[^"]*"' | sort -u | head -150 > out/tilawat_links.txt; grep -ciE "" out/tilawat_links.txt
+          curl -sSL --max-time 40 -A "Mozilla/5.0" "https://tilawatalharamain.com/?s=%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86" | grep -oiE '<a [^>]*>[^<]*ميمان[^<]*' | head -30 | tee out/tilawat_s.txt
       - name: save
         if: always()
         run: |
-          rm -f out/t_*
           git init -q pub && cd pub && git checkout -q -b discover-out && cp -r ../out . && git add -A && git -c user.name=bot -c user.email=bot@users.noreply.github.com commit -qm out && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" discover-out
