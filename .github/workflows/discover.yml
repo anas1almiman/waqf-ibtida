@@ -14,19 +14,13 @@ jobs:
           set +e +o pipefail
           sudo apt-get -qq install -y ffmpeg jq >/dev/null
           mkdir -p out
-          curl -sSL --max-time 60 "https://archive.org/metadata/Anas-Al-Miman-Mouratel" -o out/meta.json
-          jq '.metadata' out/meta.json
-          jq -r '.files[]|[.name,.format,.size,.length,.bitrate]|@tsv' out/meta.json | head -80
-          curl -sSL --max-time 300 "https://archive.org/download/Anas-Al-Miman-Mouratel/030.mp3" -o j30.mp3
-          ls -la j30.mp3; ffprobe -v error -show_format j30.mp3 | head -30
-          curl -sSL --max-time 60 "https://archive.org/advancedsearch.php?q=%D8%A3%D9%86%D8%B3+%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=publicdate&rows=60&output=json" -o out/s1.json
-          curl -sSL --max-time 60 "https://archive.org/advancedsearch.php?q=Miman+OR+Mayman+OR+Maiman+quran&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=publicdate&rows=80&output=json" -o out/s2.json
-          curl -sSL --max-time 60 "https://archive.org/advancedsearch.php?q=%22%D8%A7%D9%84%D9%85%D8%B1%D9%83%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A+%D9%84%D9%84%D8%AA%D9%84%D8%A7%D9%88%D8%A7%D8%AA%22&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=publicdate&rows=80&output=json" -o out/s3.json
-          for f in out/s*.json; do echo "== $f"; jq -r '.response.docs[]|[.identifier,.title,.publicdate]|@tsv' $f; done
-          for u in "https://tilawatalharamain.com" "https://www.mp3quran.net/api/v3/reciters?language=ar" "https://server.mp3quran.net/"; do echo "== $u"; curl -sSL --max-time 40 -A "Mozilla/5.0" "$u" -o out/x.bin -w "%{http_code} %{size_download}\n"; done
-          curl -sSL --max-time 40 "https://www.mp3quran.net/api/v3/reciters?language=ar" | jq -c '.reciters[]|select(.name|test("ميمان|الميمن"))' | tee out/mp3q.json
-          curl -sSL --max-time 40 -A "Mozilla/5.0" "https://tilawatalharamain.com" | grep -oiE 'href="[^"]*"' | sort -u | head -150 > out/tilawat_links.txt; grep -ciE "" out/tilawat_links.txt
-          curl -sSL --max-time 40 -A "Mozilla/5.0" "https://tilawatalharamain.com/?s=%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86" | grep -oiE '<a [^>]*>[^<]*ميمان[^<]*' | head -30 | tee out/tilawat_s.txt
+          for id in anasal-maiman Anas-Al-Miman-Mouratel; do
+            curl -sSL --max-time 60 "https://archive.org/metadata/$id" -o out/meta_$id.json
+            jq -c '.metadata' out/meta_$id.json
+            jq -r '.files[]|select(.format|test("MP3|Ogg|AAC|M4A|Flac|WAVE|MPEG4|Opus";"i"))|[.name,.format,.size,.length]|@tsv' out/meta_$id.json | head -150
+          done
+          n=$(jq -r '[.files[]|select(.name|test("\\.mp3$"))][0].name' out/meta_anasal-maiman.json); echo "first: $n"
+          curl -sSL --max-time 200 "https://archive.org/download/anasal-maiman/$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$n")" -o a.mp3; ffprobe -v error -show_format a.mp3 | grep -E "duration|bit_rate|TAG"
       - name: save
         if: always()
         run: |
