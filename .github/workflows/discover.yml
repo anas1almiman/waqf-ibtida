@@ -13,9 +13,21 @@ jobs:
         run: |
           set +e +o pipefail
           mkdir -p out
-          pip -q install -U --pre "yt-dlp[default]"
-          yt-dlp --flat-playlist --print "%(playlist_index)s | %(title)s | %(id)s | %(duration)s" "https://youtube.com/playlist?list=PLe0p3tPlFXOU" > out/pl_dur.txt 2> out/pl_err.txt
-          wc -l out/pl_dur.txt; cat out/pl_dur.txt; tail -3 out/pl_err.txt
+          curl -sSL --max-time 40 "https://itunes.apple.com/lookup?id=1861812834" -o out/it.json; jq -c '.results[0]|{feedUrl,trackCount,artistName,collectionName,releaseDate}' out/it.json
+          f=$(jq -r '.results[0].feedUrl' out/it.json)
+          curl -sSL --max-time 60 -A "Mozilla/5.0" "$f" -o out/feed.xml; wc -c out/feed.xml; head -c 1500 out/feed.xml; echo
+          python3 - <<'PY'
+          import re
+          x=open('out/feed.xml',encoding='utf-8',errors='ignore').read()
+          items=re.findall(r'<item>(.*?)</item>',x,flags=re.S)
+          print('items',len(items))
+          for it in items:
+              t=re.search(r'<title>(.*?)</title>',it,flags=re.S); e=re.search(r'<enclosure[^>]*url="([^"]+)"[^>]*',it); d=re.search(r'<itunes:duration>(.*?)</itunes:duration>',it); l=re.search(r'length="(\d+)"',it)
+              print((t.group(1) if t else '')[:60],'|',d.group(1) if d else '','|',l.group(1) if l else '','|',e.group(1) if e else '')
+          PY
+          for q in "%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86" "%D8%A3%D9%86%D8%B3"; do for u in "https://tilawatalharamain.com/search?q=$q" "https://tilawatalharamain.com/?s=$q" "https://tilawatalharamain.com/search/$q"; do echo "== $u"; curl -sSL --max-time 40 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36" "$u" -o out/x.html -w "%{http_code} %{size_download}\n"; grep -oE '<a[^>]*href="[^"]*"[^>]*>[^<]*(ميمان)[^<]*' out/x.html | head -10; done; done
+          curl -sSL --max-time 40 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36" "https://tilawatalharamain.com/quran/5800" -o out/q5800.html -w "%{http_code} %{size_download}\n"; grep -oE 'href="[^"]*(mp3|download|reciter|mushaf|quran/[a-z]+)[^"]*"' out/q5800.html | sort -u | head -40
+          curl -sSL --max-time 40 -A "Mozilla/5.0" "https://www.koonoz.info/2025/11/Anas-AlMiman-Hafs.html" | grep -oE 'https?://[^"]*(archive\.org|\.mp3|\.zip)[^"]*' | sort -u | head -12
       - name: save
         if: always()
         run: |
