@@ -762,6 +762,7 @@ body.dark .mpage{background:linear-gradient(180deg,#15211D,#101A17)}
 .qpill{display:flex;align-items:center;gap:10px;margin:2px 0 12px;padding:10px 16px;border-radius:999px;border:1px solid rgba(200,162,83,.6);background:rgba(200,162,83,.14);color:var(--em);font:inherit;font-weight:700;width:fit-content}.qpill span{display:flex}.qpill svg{width:18px;height:18px}.qpill small{font-weight:400;color:var(--muted);font-size:13px}
 .trow{display:flex;gap:8px;align-items:stretch;margin:0 0 12px}.trow .card{flex:1;margin:0}.tplay{flex:none;width:68px;border:none;border-radius:20px;background:linear-gradient(160deg,#F6E3A1,#C99A36);color:#14352a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:inherit;box-shadow:0 6px 16px rgba(160,120,30,.35)}.tplay span{width:34px;height:34px;border-radius:50%;background:#14352a;color:#F7E7B3;display:flex;align-items:center;justify-content:center}.tplay svg{width:17px;height:17px}.tplay small{font-size:12.5px;font-weight:700}
 .lisbig{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;width:100%;margin:6px 0 12px;padding:16px 18px;border-radius:22px;border:1px solid #C79B3B;background:linear-gradient(135deg,#1d6a51,#0f382c);color:#F7E7B3;font:inherit;text-align:right;box-shadow:0 10px 24px rgba(0,0,0,.25)}.lisbig span{grid-row:1/3;width:52px;height:52px;border-radius:50%;background:linear-gradient(145deg,#F6E3A1,#C99A36);color:#14352a;display:flex;align-items:center;justify-content:center}.lisbig svg{width:24px;height:24px}.lisbig b{font-size:20px}.lisbig small{opacity:.85;font-size:13.5px}
+.rpick{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:1px solid rgba(200,162,83,.55);background:rgba(200,162,83,.12);color:var(--muted);font:inherit}.rpick b{color:var(--em);font-weight:700}.rpick i{font-style:normal;transform:rotate(-90deg);display:inline-block;font-size:18px;color:var(--gold2,#C79B3B)}
 .ttsb{width:100%;margin:2px 0 10px}.prybtn{width:100%;margin:2px 0 10px}.tends{display:grid;gap:8px;margin:0 0 10px}.tends div{background:var(--card,#fffdf8);border:1px solid rgba(200,162,83,.35);border-radius:14px;padding:10px 14px}.tends small{display:block;color:var(--muted);font-size:13px}.tends b{font-family:'Amiri Quran','KFGQPC Hafs',serif;font-weight:400;font-size:19px;line-height:1.9}
 .mchips{flex:none;display:flex;gap:8px;margin:0 0 6px}.mchip{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 8px;border-radius:12px;border:1px solid var(--line,rgba(200,162,83,.35));background:var(--card,#fffdf8);font:inherit;font-size:13.5px;color:var(--muted)}.mchip i{width:11px;height:11px;border-radius:3px;background:rgba(200,162,83,.6)}.mchip.k1 i{background:rgba(20,110,84,.42)}.mchip.on{color:var(--ink,#1d3b30);border-color:var(--gold);font-weight:700}
 .mhl i{display:inline-block;width:11px;height:11px;border-radius:3px;margin:0 2px;vertical-align:-1px;background:rgba(200,162,83,.6)}.mhl i.k1{background:rgba(20,110,84,.42)}
@@ -1822,7 +1823,7 @@ function ayaSheet(s,a){const f=()=>ayaHTML(s,a);openSheet(f(),'aya',f);setTimeou
 function vReader(r){
   const RD=r.spec;if(RD.p)prayer=RD.p;const BS=D.Q[0][0];const rc=RECK[S.reciter]||RECK.dosari;
   let x=topbar(RD.title||'القراءة',{end:'<button class="ib" data-act="rmus" aria-label="القراءة من المصحف">'+ICON.book+'</button><button class="ib" data-act="ropts" aria-label="خيارات القراءة">'+ICON.aa+'</button>'});
-  x+='<div class="rmeta">القارئ: '+rc[1]+'</div><div style="--qs:'+S.fs+'px">';let idx=0;
+  x+='<div class="rmeta"><button class="rpick" data-act="pick" data-k="reciter">القارئ: <b>'+rc[1]+'</b><i>‹</i></button></div><div style="--qs:'+S.fs+'px">';let idx=0;
   RD.blocks.forEach((b,bi)=>{
     if(b.label)x+='<div class="rh">'+b.label+'</div>';
     let open=false,ls=0;
@@ -2582,7 +2583,7 @@ document.addEventListener('click',ev=>{
   case 'ayfrom':{const s2=+b.dataset.s,a2=+b.dataset.a;closeSheet();ayStop();if(AU.on)auStop();AU.from=[s2,a2];auToggle();break}
   case 'ayshare':{const s2=+b.dataset.s,a2=+b.dataset.a;const t2='﴿'+txt(s2,a2)+'﴾\n[سورة '+D.N[s2-1]+'، الآية '+AR(a2)+']\n— من تطبيق «'+APP+'»';if(navigator.share){navigator.share({text:t2}).catch(()=>{})}else copyText(t2);break}
   case 'pick':pickSheet(k);break;
-  case 'pickv':{b.parentNode.querySelectorAll('.orow').forEach(r=>r.classList.toggle('on',r===b));setTimeout(()=>{closeSheet();applyPick(k,v);render();if(k==='reciter'){toast('القارئ: '+RECK[v][1]);setTimeout(prefetchData,400)}},200);break}
+  case 'pickv':{b.parentNode.querySelectorAll('.orow').forEach(r=>r.classList.toggle('on',r===b));setTimeout(()=>{closeSheet();applyPick(k,v);render();if(k==='reciter'){if(AU.on)auStop();toast('القارئ: '+RECK[v][1]);setTimeout(prefetchData,400)}},200);break}
   case 'mufsheet':mufSheet();break;
   case 'locsheet':locSheet();break;
   case 'locate':locate();break;
