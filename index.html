@@ -1779,7 +1779,7 @@ function vTopics(){
   let x=topbar('المختارات',{over:true})+hero('topics','آيات في موضوع واحد','المختارات',AR(TOPICS.length)+' عنوانًا، لكلٍّ منها ركعتان على ترتيب المصحف');
   const hj=hijri(new Date());
   TOPICS.forEach(t=>{if(t.occasion&&hj&&hj.m===t.occasion.m&&t.occasion.d-hj.d>=0&&t.occasion.d-hj.d<=2)x+='<button class="card banner go" data-act="topic" data-id="'+t.id+'"><span><small class="meta">مناسبة قريبة</small><b>'+t.occasion.name+': '+t.title+'</b></span></button>'});
-  x+='<button class="rqcard" data-act="cat" data-k="ruqya"><span class="rqi">'+ICON.heart+'</span><span><b>الرقية الشرعية</b><small>استمع إلى الرقية كاملة، أو اختر آيةً آية</small></span></button>';
+  x+='<button class="rqcard" data-act="tlisten" data-id="ruqya" data-all="1"><span class="rqi">'+ICON.heart+'</span><span><b>الرقية الشرعية</b><small>استمع إلى الرقية كاملة</small></span></button>';
   x+='<div class="adpills"><button data-act="nav" data-v="adhkar2">النوم والاستيقاظ</button><button data-act="nav" data-v="adhkar3">بعد الصلاة</button><button data-act="nav" data-v="adhkar4">أذكار المناسبات</button></div>';
   x+='<div class="opts" style="margin-bottom:12px">'+CATS.map(([k,l])=>'<button class="opt'+(catSel===k?' on':'')+'" data-act="cat" data-k="'+k+'">'+l+'</button>').join('')+'</div>';
   x+='<input class="search" id="tq" type="search" placeholder="ابحث: الرزق، الشكر، رمضان، موسى…" value="'+esc(tq)+'"><div id="tlist">'+topicItems()+'</div>';
