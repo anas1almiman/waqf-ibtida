@@ -1904,21 +1904,22 @@ function voSay(txt,cb){let done=0;const go=()=>{if(done)return;done=1;cb&&cb()};
 function auPrime(){try{if(!AU.pool)AU.pool=[auMk(),auMk()];if(!AU.el)AU.el=AU.pool[0];AU.pool.forEach(e=>{e.muted=true;e.src=SILENT;const p=e.play();const un=()=>{try{e.pause()}catch(_){}e.muted=false};if(p&&p.then)p.then(un,un);else un()})}catch(e){}}
 function listenCur(){const r=cur();return r&&r.v==='reader'&&r.spec&&r.spec.listen?r.spec:null}
 const LIC={prev:'<svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M6 5h2v14H6zM20 5v14L9 12z" transform="scale(-1 1) translate(-24 0)"/></svg>',next:'<svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>'};
+function fmtDur(sec){const m=Math.max(1,Math.round(sec/60));if(m<60)return AR(m)+(m<=2?(m===1?' دقيقة':' دقيقتان'):m<=10?' دقائق':' دقيقة');const h=Math.floor(m/60),r=m%60;return (h===1?'ساعة':h===2?'ساعتان':AR(h)+(h<=10?' ساعات':' ساعة'))+(r?' و'+AR(r)+(r<=2?(r===1?' دقيقة':' دقيقتان'):r<=10?' دقائق':' دقيقة'):'')}
+function durSec(sp){const rc=RC();const T=rc[2]==='sf'?TMF[rc[4]]:null;if(rc[2]==='sf'&&!T)tmLoad(rc[4]).then(()=>{try{ldockSync()}catch(e){}},()=>{});let sec=0;
+  sp.blocks.forEach(b=>{sec+=.3;blockAyat(b).forEach(([s,a])=>{const tt=T&&(T[s]||T[String(s)]);if(tt&&tt[a-1])sec+=(tt[a-1][1]-tt[a-1][0])/1000+.1;else sec+=W(txt(s,a)).length*1.37+.3})});return {sec:sec,exact:!!T}}
+function durLine(sp){const d=durSec(sp);return (d.exact?'':'نحو ')+fmtDur(d.sec)+((S.rep||1)>1?' · مع التكرار ×'+AR(S.rep)+' = '+fmtDur(d.sec*S.rep):'')}
 function ldockSync(){const d=$('ldock');if(!d)return;const sp=listenCur();if(!sp||!S.onb){d.hidden=true;document.body.classList.remove('hasdock');return}
   d.hidden=false;document.body.classList.add('hasdock');const q=AU.q&&AU.q.length?TOPICS.find(x=>x.id===AU.q[0]):null;
-  d.innerHTML='<div class="ld-top"><span class="ld-now">'+(AU.on?'يُتلى الآن':'متوقف')+'</span><b>'+esc(sp.title||'')+'</b>'+(S.rep>1?'<small>تكرار ×'+AR(S.rep)+'</small>':'')+'</div><div class="ld-ctl"><button class="ld-r" data-act="ldrep" aria-label="التكرار">×'+AR(S.rep||1)+'</button><button class="ld-s" data-act="ldprev" aria-label="السابقة">'+LIC.prev+'</button><button class="ld-p" data-act="play" aria-label="'+(AU.on?'إيقاف':'تشغيل')+'">'+(AU.on?ICON.pause:ICON.play)+'</button><button class="ld-s" data-act="ldnext" aria-label="التالية">'+LIC.next+'</button></div>'}
-function ldJump(d){if(!AU.on)return;const sp=listenCur();if(!sp)return;const bl=sp.blocks.map(b=>blockAyat(b));if(!bl.length)return;
-  const c=document.querySelector('#app .ay.cur');let bi=-1,first=false;if(c){const cs=+c.dataset.s,ca=+c.dataset.a;bl.forEach((ar,i)=>{if(bi<0&&ar.some(([x,y])=>x===cs&&y===ca)){bi=i;first=ar[0][0]===cs&&ar[0][1]===ca}})}
-  if(bi<0)bi=0;let ti;if(d>0){ti=bi+1;if(ti>=bl.length){return}}else{ti=first?Math.max(0,bi-1):bi}
-  const tg=bl[ti][0];
-  if(AU.mode==='ea'){let ix=AU.list.findIndex(x=>!x.bs&&x.s===tg[0]&&x.a===tg[1]);if(ix<0)return;if(ix>0&&AU.list[ix-1].bs)ix--;AU.k=ix-1;eaNext();return}
-  const R0=AU.r0||AU.ranges,ri=R0.findIndex(r=>r.s===tg[0]&&r.a<=tg[1]&&tg[1]<=r.b);
-  if(ri<0){const k=R0.findIndex(r=>r.s===tg[0]);if(k<0)return;AU.ri=k-1;sfNext();return}
-  if(ri===AU.ri&&AU.T&&AU.T.m[tg[1]]){try{AU.el.currentTime=Math.max(0,AU.T.m[tg[1]][0]-0.12)+AU.off}catch(e){}auMarkAy(tg[0],tg[1])}
-  else{AU.ranges[ri]=Object.assign({},R0[ri],{a:tg[1]});AU.ri=ri-1;sfNext()}}
-function auEnd(){if(AU.left>0&&AU.on&&listenCur()){AU.left--;toast('تكرار التلاوة: باقي '+AR(AU.left+1)+(AU.left+1<=2?' مرّة':' مرّات'));if(AU.mode==='ea'){AU.k=-1;eaNext()}else{AU.ri=-1;sfNext()}return}auStop();AU.q=null;toast('انتهت التلاوة.')}function tListen(id,all){const tp=TOPICS.find(x=>x.id===id);if(!tp)return;if(typeof closeSheet==='function')closeSheet();
+  d.innerHTML='<div class="ld-top"><span class="ld-now">'+(AU.on?'يُتلى الآن':'متوقف')+'</span><b>'+esc(sp.title||'')+'</b>'+'<small>المدة '+durLine(sp)+'</small>'+'</div><div class="ld-ctl"><button class="ld-r" data-act="ldrep" aria-label="التكرار">×'+AR(S.rep||1)+'</button><button class="ld-s" data-act="ldprev" aria-label="السابقة">'+LIC.prev+'</button><button class="ld-p" data-act="play" aria-label="'+(AU.on?'إيقاف':'تشغيل')+'">'+(AU.on?ICON.pause:ICON.play)+'</button><button class="ld-s" data-act="ldnext" aria-label="التالية">'+LIC.next+'</button></div>'}
+function ldJump(d){const sp=listenCur();if(!sp)return;const n=sp.blocks.length;let cb;
+  if(AU.on){const x=AU.mode==='ea'?AU.list[AU.k]:AU.ranges[AU.ri];cb=x&&x.bi!=null?x.bi:(AU.b0||0)}else cb=AU.lastBi!=null?AU.lastBi:visBlock();
+  let t=d>0?cb+1:cb-1;if(t>=n){toast('هذا آخر مقطع.');return}if(t<0)t=0;
+  AU.lastBi=t;
+  if(!AU.on){AU.fb=t;AU.qt=1;auToggle();return}
+  AU.b0=t;if(AU.mode==='ea'){AU.list=auItems();AU.k=-1;eaNext()}else{AU.ranges=auRanges();AU.ri=-1;AU.pre=null;sfNext()}}
+function auEnd(){if(AU.left>0&&AU.on&&listenCur()){AU.left--;toast('تكرار التلاوة: باقي '+AR(AU.left+1)+(AU.left+1<=2?' مرّة':' مرّات'));AU.b0=0;if(AU.mode==='ea'){AU.list=auItems();AU.k=-1;eaNext()}else{AU.ranges=auRanges();AU.ri=-1;AU.pre=null;sfNext()}return}auStop();AU.q=null;AU.lastBi=null;toast('انتهت التلاوة.')}function tListen(id,all){const tp=TOPICS.find(x=>x.id===id);if(!tp)return;if(typeof closeSheet==='function')closeSheet();
   let bl;if(tp.sets&&all)bl=tp.sets.reduce((a,st)=>a.concat(st.r.map((r,i)=>({label:st.t+(st.r.length>1?(i?' · الثانية':' · الأولى'):''),s:r[0],a:r[1],b:r[2]}))),[]);else{const R=TR(tp).r;bl=R.map((r,i)=>({label:tp.single?(r[3]&&R.length>1?r[3]:''):(i?'الركعة الثانية':'الركعة الأولى'),s:r[0],a:r[1],b:r[2]}))}
-  if(AU.on)auStop();AU.q=null;
+  if(AU.on)auStop();AU.q=null;AU.lastBi=null;
   openReader({mode:'view',text:true,listen:true,tid:tp.id,note:tp.fadl,title:tp.sets&&all?tp.title+' — كاملة':(tp.sets?tp.title+' — '+TS(tp).t:tp.title),blocks:bl});
   try{if(listenCur())auToggle()}catch(e){}}
 function vqStart(id,q){const tp=TOPICS.find(x=>x.id===id);tListen(id,!!(tp&&tp.sets&&tp.sets.length>1&&/رقي/.test(tp.title)),q)}
@@ -1935,7 +1936,7 @@ function vTopics(){
   let x=topbar('المختارات',{over:true})+hero('topics','آيات في موضوع واحد','المختارات',AR(TOPICS.length)+' عنوانًا، لكلٍّ منها ركعتان على ترتيب المصحف');
   const hj=hijri(new Date());
   TOPICS.forEach(t=>{if(t.occasion&&hj&&hj.m===t.occasion.m&&t.occasion.d-hj.d>=0&&t.occasion.d-hj.d<=2)x+='<button class="card banner go" data-act="topic" data-id="'+t.id+'"><span><small class="meta">مناسبة قريبة</small><b>'+t.occasion.name+': '+t.title+'</b></span></button>'});
-  x+='<button class="rqcard" data-act="tlisten" data-id="ruqya" data-all="1"><span class="rqi">'+ICON.heart+'</span><span><b>الرقية الشرعية</b><small>استمع إلى الرقية كاملة</small></span></button>';
+  x+='<button class="rqcard" data-act="tlisten" data-id="ruqya" data-all="1"><span class="rqi">'+ICON.heart+'</span><span><b>الرقية الشرعية</b><small>استمع إلى الرقية كاملة · '+(()=>{const t=TOPICS.find(x=>x.id==='ruqya');const d=durSec({blocks:t.sets.reduce((a,st)=>a.concat(st.r.map(r=>({s:r[0],a:r[1],b:r[2]}))),[])});return (d.exact?'':'نحو ')+fmtDur(d.sec)})()+'</small></span></button>';
   x+='<div class="adpills"><button data-act="nav" data-v="adhkar2">النوم والاستيقاظ</button><button data-act="nav" data-v="adhkar3">بعد الصلاة</button><button data-act="nav" data-v="adhkar4">أذكار المناسبات</button></div>';
   x+='<div class="opts" style="margin-bottom:12px">'+CATS.map(([k,l])=>'<button class="opt'+(catSel===k?' on':'')+'" data-act="cat" data-k="'+k+'">'+l+'</button>').join('')+'</div>';
   x+='<input class="search" id="tq" type="search" placeholder="ابحث: الرزق، الشكر، رمضان، موسى…" value="'+esc(tq)+'"><div id="tlist">'+topicItems()+'</div>';
@@ -2443,14 +2444,14 @@ const pad3=n=>String(n).padStart(3,'0');
 function auFail(){auStop();toast(INART?'الاستماع متاح في التطبيق المثبّت على الجوال، ولا تسمح به هذه المعاينة.':navigator.onLine?'تعذّر تحميل التلاوة، فأعد المحاولة بعد قليل.':'يحتاج الاستماع اتصالًا بالإنترنت.')}
 function visBlock(){const bl=cur().spec.blocks;if(bl.length<2)return 0;const top=70,mid=innerHeight*.45;let best=null;document.querySelectorAll('#app .ay').forEach(e=>{const r=e.getBoundingClientRect();if(r.bottom<top||r.top>innerHeight)return;const d=Math.abs((r.top+r.bottom)/2-mid);if(!best||d<best.d)best={d:d,s:+e.dataset.s,a:+e.dataset.a}});if(!best)return 0;for(let i=0;i<bl.length;i++){if(blockAyat(bl[i]).some(([s,a])=>s===best.s&&a===best.a))return i}return 0}
 function auBlocks(){return cur().spec.blocks.slice(AU.b0||0)}
-function auItems(){const out=[];auBlocks().forEach(b=>{blockAyat(b).forEach(([s,a])=>{if(a===1&&s!==1&&s!==9)out.push({s:1,a:1,bs:true,at:[s,a]});out.push({s:s,a:a})})});return out}
-function auRanges(){const out=[];auBlocks().forEach(b=>{let c=null;blockAyat(b).forEach(([s,a])=>{if(c&&c.s===s&&a===c.b+1)c.b=a;else{c={s:s,a:a,b:a};out.push(c)}})});return out}
+function auItems(){const out=[];auBlocks().forEach((b,i)=>{const bi=(AU.b0||0)+i;blockAyat(b).forEach(([s,a])=>{if(a===1&&s!==1&&s!==9)out.push({s:1,a:1,bs:true,at:[s,a],bi:bi});out.push({s:s,a:a,bi:bi})})});return out}
+function auRanges(){const out=[];auBlocks().forEach((b,i)=>{let c=null;const bi=(AU.b0||0)+i;blockAyat(b).forEach(([s,a])=>{if(c&&c.s===s&&a===c.b+1)c.b=a;else{c={s:s,a:a,b:a,bi:bi};out.push(c)}})});return out}
 function eaUrl(x){return 'https://everyayah.com/data/'+RC()[3]+'/'+pad3(x.s)+pad3(x.a)+'.mp3'}
 function auMarkAy(s,a){const old=document.querySelector('#app .ay.cur');const el=document.querySelector('#app .ay[data-s="'+s+'"][data-a="'+a+'"]');if(old===el)return;if(old)old.classList.remove('cur');if(el){el.classList.add('cur');try{el.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}}}
 function auClear(){document.querySelectorAll('#app .ay.cur').forEach(e=>e.classList.remove('cur'))}
-function auStop(){const was=AU.on;AU.on=false;AU.ctx++;AU.nxe=null;if(AU.el){try{AU.el.pause()}catch(e){}}AU.k=-1;AU.ri=-1;AU.T=null;if(was){auClear();fabSync()}}
+function auStop(){const was=AU.on;AU.on=false;AU.ctx++;if(AU.pre){try{AU.pre.el.pause()}catch(e){}AU.pre=null}AU.primed=0;AU.nxe=null;if(AU.el){try{AU.el.pause()}catch(e){}}AU.k=-1;AU.ri=-1;AU.T=null;if(was){auClear();fabSync()}}
 function auMk(){const e=new Audio();e.preload='auto';e.addEventListener('ended',()=>{if(!AU.on||AU.el!==e)return;if(AU.mode==='ea')eaNext();else sfNext()});e.addEventListener('error',()=>{if(AU.on&&AU.el===e)auFail()});e.addEventListener('timeupdate',()=>{if(AU.el===e)sfTick()});return e}
-function eaNext(){AU.k++;if(AU.k>=AU.list.length){auEnd();return}const x=AU.list[AU.k],url=eaUrl(x);
+function eaNext(){AU.k++;if(AU.k>=AU.list.length){auEnd();return}const x=AU.list[AU.k],url=eaUrl(x);AU.lastBi=x.bi;
   if(!AU.pool){AU.pool=[AU.el||auMk(),auMk()];AU.el=AU.pool[0]}
   let e=AU.el;const idle=AU.pool[0]===e?AU.pool[1]:AU.pool[0];
   if(idle.dataset.u===url){try{e.pause()}catch(_){}e=idle;AU.el=e}else{e.src=url;e.dataset.u=url}
@@ -2460,9 +2461,21 @@ function eaNext(){AU.k++;if(AU.k>=AU.list.length){auEnd();return}const x=AU.list
 const TMF={},TMP={};
 function tmLoad(key){if(TMF[key])return Promise.resolve(TMF[key]);if(!TMP[key])TMP[key]=(key==='miman'?fetch('audio/miman/SOURCE.txt',{cache:'no-store'}).then(r=>r.ok?r.text():'1',()=>'1').then(t=>String(t).trim().slice(0,40)||'1'):Promise.resolve('1')).then(v=>fetch('timing/'+key+'.json?v='+encodeURIComponent(v))).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()}).then(j=>{TMF[key]=j;return j},e=>{TMP[key]=null;throw e});return TMP[key]}
 async function timingFor(rc,s){const j=await tmLoad(rc[4]);const arr=j[s]||j[String(s)];if(!arr)throw new Error('no timing');const m={};arr.forEach((v,i)=>{m[i+1]=[v[0]/1000,v[1]/1000]});return {exact:true,m:m}}
+function sfPre(){const n=AU.ranges[AU.ri+1];if(!n){AU.pre=null;return}const rc=RC();
+  if(!AU.pool)AU.pool=[AU.el,auMk()];const e=AU.pool[0]===AU.el?AU.pool[1]:AU.pool[0];if(!e||e===AU.el)return;
+  const url=rc[3]+pad3(n.s)+'.mp3';const o={i:AU.ri+1,el:e,ready:false,ctx:AU.ctx,t:0};
+  if(AU.pre&&AU.pre.i===o.i&&AU.pre.el===e&&AU.pre.url===url)return;o.url=url;AU.pre=o;
+  if(e.dataset.u!==url){e.src=url;e.dataset.u=url;try{e.load()}catch(_){}}
+  if(!AU.primed){AU.primed=1;e.muted=true;const q=e.play();const un=()=>{try{e.pause()}catch(_){}e.muted=false};if(q&&q.then)q.then(un,un);else un()}
+  timingFor(rc,n.s).then(T=>{if(AU.pre!==o)return;const st=n.a===1?0:Math.max(0,T.m[n.a][0]-0.12);o.T=T;o.st=st;
+    const seek=()=>{try{e.currentTime=st}catch(_){}};
+    const fin=()=>{if(AU.pre!==o||o.ready)return;if(st>0&&Math.abs(e.currentTime-st)>1.5&&++o.t<4){seek();return}e.removeEventListener('seeked',fin);e.removeEventListener('canplay',fin);o.ready=true};
+    e.addEventListener('seeked',fin);e.addEventListener('canplay',fin);if(e.readyState>=1)seek();else e.addEventListener('loadedmetadata',seek,{once:true});if(st===0)o.ready=true}).catch(()=>{})}
 function sfNext(){
   AU.ri++;if(AU.ri>=AU.ranges.length){auEnd();return}
-  const r=AU.ranges[AU.ri];const rc=RC();const ctx=++AU.ctx;AU.T=null;AU.off=0;AU.approx=false;
+  const r=AU.ranges[AU.ri];const rc=RC();AU.lastBi=r.bi;
+  if(AU.pre&&AU.pre.i===AU.ri&&AU.pre.ready&&AU.pre.T&&AU.pre.el!==AU.el){const o=AU.pre;AU.pre=null;const old=AU.el;AU.ctx++;AU.el=o.el;try{old.pause()}catch(_){}AU.off=0;AU.approx=false;AU.T=o.T;AU.endT=(o.T.m[r.b]?o.T.m[r.b][1]:1e9)+0.3;o.el.muted=false;const pp=o.el.play();if(pp&&pp.catch)pp.catch(()=>auFail());auMarkAy(r.s,r.a);sfPre();return}
+  AU.pre=null;const ctx=++AU.ctx;AU.T=null;AU.off=0;AU.approx=false;
   AU.el.src=rc[3]+pad3(r.s)+'.mp3';AU.el.muted=true;
   const p=AU.el.play();if(p&&p.catch)p.catch(()=>{if(ctx===AU.ctx)auFail()});
   auMarkAy(r.s,r.a);
@@ -2470,7 +2483,7 @@ function sfNext(){
   const go=async()=>{let T;try{T=await tp}catch(e){if(ctx===AU.ctx)auFail();return}if(ctx!==AU.ctx||!AU.on)return;
     const st=r.a===1?0:Math.max(0,T.m[r.a][0]-0.12);AU.endT=(T.m[r.b]?T.m[r.b][1]:1e9)+0.3;
     const seek=()=>{try{AU.el.currentTime=st}catch(e){}};seek();
-    let tries=0;const fin=()=>{AU.el.removeEventListener('seeked',ok);AU.el.removeEventListener('canplay',ok);AU.T=T;AU.el.muted=false};const ok=()=>{if(ctx!==AU.ctx||AU.T)return;if(Math.abs(AU.el.currentTime-st)>1.5&&++tries<4){seek();return}fin()};if(st>0)setTimeout(()=>{if(ctx===AU.ctx&&AU.on&&!AU.T)fin()},7000);
+    let tries=0;const fin=()=>{AU.el.removeEventListener('seeked',ok);AU.el.removeEventListener('canplay',ok);AU.T=T;AU.el.muted=false;sfPre()};const ok=()=>{if(ctx!==AU.ctx||AU.T)return;if(Math.abs(AU.el.currentTime-st)>1.5&&++tries<4){seek();return}fin()};if(st>0)setTimeout(()=>{if(ctx===AU.ctx&&AU.on&&!AU.T)fin()},7000);
     AU.el.addEventListener('seeked',ok);AU.el.addEventListener('canplay',ok);if(st===0)ok()};
   if(AU.el.readyState>=1)go();else AU.el.addEventListener('loadedmetadata',go,{once:true});
 }
@@ -2488,10 +2501,10 @@ function auToggle(){
   const rc=RC();AU.on=true;AU.mode=rc[2];AU.left=listenCur()?Math.max(0,(S.rep||1)-1):0;fabSync();
   try{if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:cur().spec.title||APP,artist:rc[1],album:APP})}catch(e){}
   const FR=AU.from;AU.from=null;
-  if(FR){const bl=cur().spec.blocks;AU.b0=0;for(let i=0;i<bl.length;i++){if(blockAyat(bl[i]).some(([x,y])=>x===FR[0]&&y===FR[1])){AU.b0=i;break}}toast('الاستماع من الآية '+AR(FR[1]))}
-  else{AU.b0=visBlock();if(AU.b0)toast(cur().spec.blocks[AU.b0].label?'الاستماع من '+cur().spec.blocks[AU.b0].label:'الاستماع من الموضع الظاهر')}
+  if(AU.fb!=null){AU.b0=AU.fb;AU.fb=null;AU.qt=0}else if(FR){const bl=cur().spec.blocks;AU.b0=0;for(let i=0;i<bl.length;i++){if(blockAyat(bl[i]).some(([x,y])=>x===FR[0]&&y===FR[1])){AU.b0=i;break}}toast('الاستماع من الآية '+AR(FR[1]))}
+  else{AU.b0=visBlock();if(AU.b0&&!AU.qt)toast(cur().spec.blocks[AU.b0].label?'الاستماع من '+cur().spec.blocks[AU.b0].label:'الاستماع من الموضع الظاهر')}
   if(AU.mode==='ea'){AU.list=auItems();if(FR){let ix=AU.list.findIndex(x=>!x.bs&&x.s===FR[0]&&x.a===FR[1]);if(ix>0&&AU.list[ix-1].bs)ix--;if(ix>0)AU.list=AU.list.slice(ix)}AU.k=-1;eaNext()}
-  else{AU.ranges=auRanges();if(FR){const ix=AU.ranges.findIndex(r=>r.s===FR[0]&&r.a<=FR[1]&&FR[1]<=r.b);if(ix>=0){AU.ranges=AU.ranges.slice(ix);AU.ranges[0]=Object.assign({},AU.ranges[0],{a:FR[1]})}}AU.r0=AU.ranges.map(x=>Object.assign({},x));AU.ri=-1;sfNext()}
+  else{AU.ranges=auRanges();if(FR){const ix=AU.ranges.findIndex(r=>r.s===FR[0]&&r.a<=FR[1]&&FR[1]<=r.b);if(ix>=0){AU.ranges=AU.ranges.slice(ix);AU.ranges[0]=Object.assign({},AU.ranges[0],{a:FR[1]})}}AU.ri=-1;AU.pre=null;AU.primed=0;sfNext()}
 }
 function nudge(d){if(!AU.on||AU.mode!=='sf'||!AU.el)return;AU.off+=d;try{AU.el.currentTime=Math.max(0,AU.el.currentTime+d)}catch(e){}}
 function aproxSync(){const b=$('aprox');if(b)b.hidden=!(AU.on&&AU.mode==='sf'&&AU.approx&&S.onb&&cur().v==='reader')}
@@ -2572,7 +2585,7 @@ document.addEventListener('click',ev=>{
   case 'tab':{closeSheet();const r=cur();if(v==='mus'){musOpen({});break}if(v==='home'){if(STACK.length>1)navBack();break}if(r.v===v)break;if(STACK.length===2&&TABV[r.v]){persist();STACK[1]={v:v};render();window.scrollTo(0,0);persist()}else navPush({v:v});break}
   case 'openp':navPush({v:'prayer',p:b.dataset.p});break;
   case 'tlisten':tListen(b.dataset.id,b.dataset.all==='1');break
-  case 'ldrep':S.rep=(S.rep||1)%3+1;AU.left=Math.max(0,S.rep-1);saveLocal();ldockSync();break
+  case 'ldrep':S.rep=(S.rep||1)%3+1;AU.left=Math.max(0,S.rep-1);saveLocal();ldockSync();toast(S.rep>1?'تُتلى كاملةً '+AR(S.rep)+(S.rep===2?' مرتين':' مرات')+'، وإذا انتهت أُعيدت من أولها.':'تلاوة مرة واحدة.');break
   case 'ldprev':ldJump(-1);break
   case 'ldnext':ldJump(1);break
   case 'topic':{const tq0=TOPICS.find(x=>x.id===b.dataset.id);if(tq0&&tq0.single){tListen(tq0.id,true);break}}navPush({v:'topic',id:b.dataset.id});break;
