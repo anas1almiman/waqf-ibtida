@@ -746,6 +746,7 @@ body.dark .mpage{background:linear-gradient(180deg,#15211D,#101A17)}
 .mlines .ae{font-style:normal}.mlines .ae.wq{color:#B4862B}body.dark .mlines .ae.wq{color:#E7C97F}
 .mlines .ay.hl{background:rgba(200,162,83,.24);border-radius:0}.mlines .ay.hl.h1{background:rgba(20,110,84,.15)}body.dark .mlines .ay.hl.h1{background:rgba(90,190,150,.2)}
 .mlines .ae.be,.mlines .an.be{color:#B3261E}.mlines .an.be{border-color:#B3261E;background:#FBE9E7;font-weight:700}
+.prybtn{width:100%;margin:2px 0 10px}.tends{display:grid;gap:8px;margin:0 0 10px}.tends div{background:var(--card,#fffdf8);border:1px solid rgba(200,162,83,.35);border-radius:14px;padding:10px 14px}.tends small{display:block;color:var(--muted);font-size:13px}.tends b{font-family:'Amiri Quran','KFGQPC Hafs',serif;font-weight:400;font-size:19px;line-height:1.9}
 .mchips{flex:none;display:flex;gap:8px;margin:0 0 6px}.mchip{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 8px;border-radius:12px;border:1px solid var(--line,rgba(200,162,83,.35));background:var(--card,#fffdf8);font:inherit;font-size:13.5px;color:var(--muted)}.mchip i{width:11px;height:11px;border-radius:3px;background:rgba(200,162,83,.6)}.mchip.k1 i{background:rgba(20,110,84,.42)}.mchip.on{color:var(--ink,#1d3b30);border-color:var(--gold);font-weight:700}
 .mhl i{display:inline-block;width:11px;height:11px;border-radius:3px;margin:0 2px;vertical-align:-1px;background:rgba(200,162,83,.6)}.mhl i.k1{background:rgba(20,110,84,.42)}
 .aystop.rkl{border-style:solid;background:var(--chip)}.aystop.rkl b{color:var(--gold);font:700 15.5px 'Amiri',serif}.aystop.rkl span{font-size:13px;color:#B3261E}
@@ -1655,6 +1656,7 @@ function ayaHTML(s,a){
   const on=AY.k===s+':'+a;
   h+='<button class="btn goldb'+(on?' on':'')+'" data-act="ayplay" data-s="'+s+'" data-a="'+a+'">'+(on?ICON.pause+'إيقاف':ICON.play+'استمع للآية')+'</button><div class="meta" style="text-align:center;margin:-2px 0 10px">بصوت '+RC()[1]+'</div>';
   h+='<div class="ayacts">'+(cur().v==='reader'?'<button data-act="ayfrom" data-s="'+s+'" data-a="'+a+'">'+IC2.from+'<span>استمع من هنا</span></button>':'')+'<button data-act="ayrep" data-s="'+s+'" data-a="'+a+'">'+IC2.rep+'<span>تكرار ×٣</span></button><button data-act="ayshare" data-s="'+s+'" data-a="'+a+'">'+IC2.share+'<span>مشاركة</span></button>'+(cur().v!=='mus'?'<button data-act="aymus" data-s="'+s+'" data-a="'+a+'">'+ICON.book+'<span>المصحف</span></button>':'')+(S.qir?'<button data-act="qir" data-s="'+s+'" data-a="'+a+'">'+(ICON.shelf||ICON.list)+'<span>القراءات</span></button>':'')+'</div>';
+  if(cur().v==='mus'&&!cur().hl&&!(cur().rw&&cur().rw!=='hafs')&&s>1)h+='<button class="btn outline prybtn" data-act="aypray" data-s="'+s+'" data-a="'+a+'">'+ICON.mosque+'اقرأ من هنا في الصلاة</button>';
   if(cur().v==='mus'&&cur().hl){const hh=hlAt(cur().hl,s,a);if(hh&&hh[4])h+='<div class="aystop rkl"><b>'+hh[4]+'</b>'+(hlEnd(cur().hl,s,a)?'<span>آخر آية في الركعة</span>':'')+'</div>'}
   if(cur().v==='mus'&&PEND.has(s*1000+a))h+='<div class="aystop">هذه الآية موضع وقف '+dalilBtn(PEND.get(s*1000+a),PEND.get(s*1000+a))+'</div>';
   h+=tafTabs();
@@ -1664,6 +1666,25 @@ function ayaHTML(s,a){
   if(!rows.length)return h+'<p class="note">لم يُشرح في «الميسر في غريب القرآن الكريم» شيءٌ من كلمات هذه الآية.</p>';
   return h+'<div class="taf"><div class="tws">'+rows.map(r=>'<p class="tw"><span class="tq">﴿'+r[1]+'﴾</span> <span class="te">'+esc(r[2])+'</span></p>').join('')+'</div><p class="tfoot">من «الميسر في غريب القرآن الكريم»، مجمع الملك فهد لطباعة المصحف الشريف.</p></div>';
 }
+
+/* from the plain mushaf: the correct start and stop around a tapped ayah, for reading it in prayer */
+let PRY=null;
+function pieceAt(s,a){for(let x=SFIRST[s];x<=SLAST[s];x++)if(D.P[x][1]<=a&&a<=D.P[x][2])return x;return SLAST[s]}
+function pryEnds(i,from){const s=D.P[i][0],E=[];for(let y=Math.max(i,from);y<=SLAST[s]&&E.length<8;y++){if(pkOkEnd(y)){if(E.length&&pkLines(i,y)>40)break;E.push(y)}}if(!E.length)E.push(SLAST[s]);return E}
+function pryInit(s,a,m){const x=pieceAt(s,a);let i=x;while(i>SFIRST[s]&&!pkOkStart(i,0,null))i--;let nx=-1;for(let y=x+1;y<=SLAST[s];y++){if(pkOkStart(y,0,null)){nx=y;break}}
+  if(m===1&&nx<0)m=0;if(m===1)i=nx;PRY={s:s,a:a,i:i,nx:nx,m:m,E:pryEnds(i,m===1?i:x),k:0}}
+function pryHTML(){const R=PRY,i=R.i,j=R.E[R.k],s=D.P[i][0],n=pkLines(i,j),pr=pkPrayer(n),p0=D.P[i];
+  const first=p0[1]<=R.a&&R.a<=p0[2]&&p0[1]===R.a;
+  let h=shead('اقرأه في الصلاة');
+  h+='<div class="cart" style="text-align:center;margin:2px 0 10px">سورة '+D.N[s-1]+(isWhole(i,j)?' كاملة':'، '+ayRange(i,j))+'</div>';
+  h+='<div class="tends"><div><small>يبدأ من</small><b>'+firstW(i,7)+' …</b></div><div><small>وينتهي عند</small><b>… '+lastW(j,6)+'</b></div></div>';
+  h+='<div class="pkfit'+(pr?'':' over')+'"><span>'+AR(n)+(n<=10?' أسطر':' سطرًا')+' · صفحة '+AR(p0[4])+'</span><b>'+(pr?'مقدارها يناسب صلاة '+PR[pr].n:'أطول من مقدار الصلوات الجهرية')+'</b></div>';
+  if(R.m===0&&!first)h+='<p class="note">لا يُبتدأ من الآية '+AR(R.a)+' لتعلّقها بما قبلها، فهذا أقرب ابتداء صحيح قبلها.</p>';if(R.m===1)h+='<p class="note">أقرب ابتداء صحيح بعد الآية '+AR(R.a)+'.</p>';
+  if(R.nx>=0)h+='<div class="row2"><button class="btn outline'+(R.m===0?' on':'')+'" data-act="prym" data-m="0">ابتداء قبل الآية</button><button class="btn outline'+(R.m===1?' on':'')+'" data-act="prym" data-m="1">ابتداء بعدها</button></div>';
+  h+='<div class="row2"><button class="btn outline" data-act="prys" data-d="-1"'+(R.k<=0?' disabled':'')+'>− أقصر</button><button class="btn outline" data-act="prys" data-d="1"'+(R.k>=R.E.length-1?' disabled':'')+'>+ أطول</button></div>';
+  h+='<button class="btn goldb" data-act="pryshow">'+ICON.book+'اعرضه في المصحف</button>';
+  return h}
+function pryOpen(s,a){pryInit(s,a,0);openSheet(pryHTML(),'pry',pryHTML)}
 function ayaSheet(s,a){const f=()=>ayaHTML(s,a);openSheet(f(),'aya',f);setTimeout(ayBtnSync,0);if(!GH)ghLoad().then(()=>{if(SH==='aya')refreshSheet()},()=>{GHERR=1;if(SH==='aya')refreshSheet()})}
 function vReader(r){
   const RD=r.spec;if(RD.p)prayer=RD.p;const BS=D.Q[0][0];const rc=RECK[S.reciter]||RECK.dosari;
@@ -2302,6 +2323,10 @@ document.addEventListener('click',ev=>{
   case 'qirz':{b.classList.toggle('z');if(b.classList.contains('z'))b.scrollLeft=-(b.scrollWidth-b.clientWidth)/2;break}
   case 'qscan':qscanSheet(+b.dataset.pg||1);break;
   case 'musopen':musOpen({});break;
+  case 'aypray':pryOpen(+b.dataset.s,+b.dataset.a);break;
+  case 'prym':{if(!PRY)break;pryInit(PRY.s,PRY.a,+b.dataset.m);refreshSheet();break}
+  case 'prys':{if(!PRY)break;PRY.k=Math.max(0,Math.min(PRY.E.length-1,PRY.k+ +b.dataset.d));refreshSheet();break}
+  case 'pryshow':{if(!PRY)break;const R=PRY;closeSheet();openReader({mode:'view',title:'المقطع المقترح للصلاة',blocks:[{label:'المقطع',i:R.i,j:R.E[R.k]}]});break}
   case 'aymus':{closeSheet();musOpen({s:+b.dataset.s,a:+b.dataset.a});break}
   case 'rmus':{const r=cur();if(r.v!=='reader')break;auStop();ayStop();S.rview='mus';saveLocal();STACK[STACK.length-1]=musSpec(r.spec);render();window.scrollTo(0,0);persist();break}
   case 'mtext':{const r=cur();if(r.v!=='mus'||!r.spec)break;rwStop();S.rview='text';saveLocal();revMode=false;revealN=0;STACK[STACK.length-1]={v:'reader',spec:r.spec};render();window.scrollTo(0,0);persist();break}
