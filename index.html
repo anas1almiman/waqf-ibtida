@@ -1755,11 +1755,15 @@ const LIC={prev:'<svg viewBox="0 0 24 24" width="26" height="26"><path fill="cur
 function ldockSync(){const d=$('ldock');if(!d)return;const sp=listenCur();if(!sp||!S.onb){d.hidden=true;document.body.classList.remove('hasdock');return}
   d.hidden=false;document.body.classList.add('hasdock');const q=AU.q&&AU.q.length?TOPICS.find(x=>x.id===AU.q[0]):null;
   d.innerHTML='<div class="ld-top"><span class="ld-now">'+(AU.on?'يُتلى الآن':'متوقف')+'</span><b>'+esc(sp.title||'')+'</b>'+(S.rep>1?'<small>تكرار ×'+AR(S.rep)+'</small>':'')+'</div><div class="ld-ctl"><button class="ld-r" data-act="ldrep" aria-label="التكرار">×'+AR(S.rep||1)+'</button><button class="ld-s" data-act="ldprev" aria-label="السابقة">'+LIC.prev+'</button><button class="ld-p" data-act="play" aria-label="'+(AU.on?'إيقاف':'تشغيل')+'">'+(AU.on?ICON.pause:ICON.play)+'</button><button class="ld-s" data-act="ldnext" aria-label="التالية">'+LIC.next+'</button></div>'}
-function ldJump(d){if(!AU.on)return;if(AU.mode==='ea'){const cu=AU.list[AU.k];let kk=AU.k+(d<0?-1:1);while(kk>0&&kk<AU.list.length&&AU.list[kk].bs)kk+=d<0?-1:1;if(kk>=AU.list.length){return}kk=Math.max(0,kk);AU.k=kk-1;eaNext();return}
-  const flat=[];AU.ranges.forEach((r,ri)=>{for(let a=r.a;a<=r.b;a++)flat.push({ri,s:r.s,a})});const c=document.querySelector('#app .ay.cur');let ci=c?flat.findIndex(z=>z.s===+c.dataset.s&&z.a===+c.dataset.a):-1;if(ci<0)ci=flat.findIndex(z=>z.ri===AU.ri);
-  const ti=Math.max(0,Math.min(flat.length-1,ci+d));const tg=flat[ti];if(!tg)return;
-  if(tg.ri===AU.ri&&AU.T&&AU.T.m[tg.a]){try{AU.el.currentTime=Math.max(0,AU.T.m[tg.a][0]-0.12)+AU.off}catch(e){}auMarkAy(tg.s,tg.a)}
-  else{const r=AU.ranges[tg.ri];AU.ranges[tg.ri]=Object.assign({},r,{a:tg.a});AU.ri=tg.ri-1;sfNext()}}
+function ldJump(d){if(!AU.on)return;const sp=listenCur();if(!sp)return;const bl=sp.blocks.map(b=>blockAyat(b));if(!bl.length)return;
+  const c=document.querySelector('#app .ay.cur');let bi=-1,first=false;if(c){const cs=+c.dataset.s,ca=+c.dataset.a;bl.forEach((ar,i)=>{if(bi<0&&ar.some(([x,y])=>x===cs&&y===ca)){bi=i;first=ar[0][0]===cs&&ar[0][1]===ca}})}
+  if(bi<0)bi=0;let ti;if(d>0){ti=bi+1;if(ti>=bl.length){return}}else{ti=first?Math.max(0,bi-1):bi}
+  const tg=bl[ti][0];
+  if(AU.mode==='ea'){let ix=AU.list.findIndex(x=>!x.bs&&x.s===tg[0]&&x.a===tg[1]);if(ix<0)return;if(ix>0&&AU.list[ix-1].bs)ix--;AU.k=ix-1;eaNext();return}
+  const R0=AU.r0||AU.ranges,ri=R0.findIndex(r=>r.s===tg[0]&&r.a<=tg[1]&&tg[1]<=r.b);
+  if(ri<0){const k=R0.findIndex(r=>r.s===tg[0]);if(k<0)return;AU.ri=k-1;sfNext();return}
+  if(ri===AU.ri&&AU.T&&AU.T.m[tg[1]]){try{AU.el.currentTime=Math.max(0,AU.T.m[tg[1]][0]-0.12)+AU.off}catch(e){}auMarkAy(tg[0],tg[1])}
+  else{AU.ranges[ri]=Object.assign({},R0[ri],{a:tg[1]});AU.ri=ri-1;sfNext()}}
 function auEnd(){if(AU.left>0&&AU.on&&listenCur()){AU.left--;toast('تكرار التلاوة: باقي '+AR(AU.left+1)+(AU.left+1<=2?' مرّة':' مرّات'));if(AU.mode==='ea'){AU.k=-1;eaNext()}else{AU.ri=-1;sfNext()}return}auStop();AU.q=null;toast('انتهت التلاوة.')}function tListen(id,all){const tp=TOPICS.find(x=>x.id===id);if(!tp)return;if(typeof closeSheet==='function')closeSheet();
   let bl;if(tp.sets&&all)bl=tp.sets.reduce((a,st)=>a.concat(st.r.map((r,i)=>({label:st.t+(st.r.length>1?(i?' · الثانية':' · الأولى'):''),s:r[0],a:r[1],b:r[2]}))),[]);else{const R=TR(tp).r;bl=R.map((r,i)=>({label:tp.single?'':(i?'الركعة الثانية':'الركعة الأولى'),s:r[0],a:r[1],b:r[2]}))}
   if(AU.on)auStop();AU.q=null;
@@ -2335,7 +2339,7 @@ function auToggle(){
   if(FR){const bl=cur().spec.blocks;AU.b0=0;for(let i=0;i<bl.length;i++){if(blockAyat(bl[i]).some(([x,y])=>x===FR[0]&&y===FR[1])){AU.b0=i;break}}toast('الاستماع من الآية '+AR(FR[1]))}
   else{AU.b0=visBlock();if(AU.b0)toast(cur().spec.blocks[AU.b0].label?'الاستماع من '+cur().spec.blocks[AU.b0].label:'الاستماع من الموضع الظاهر')}
   if(AU.mode==='ea'){AU.list=auItems();if(FR){let ix=AU.list.findIndex(x=>!x.bs&&x.s===FR[0]&&x.a===FR[1]);if(ix>0&&AU.list[ix-1].bs)ix--;if(ix>0)AU.list=AU.list.slice(ix)}AU.k=-1;eaNext()}
-  else{AU.ranges=auRanges();if(FR){const ix=AU.ranges.findIndex(r=>r.s===FR[0]&&r.a<=FR[1]&&FR[1]<=r.b);if(ix>=0){AU.ranges=AU.ranges.slice(ix);AU.ranges[0]=Object.assign({},AU.ranges[0],{a:FR[1]})}}AU.ri=-1;sfNext()}
+  else{AU.ranges=auRanges();if(FR){const ix=AU.ranges.findIndex(r=>r.s===FR[0]&&r.a<=FR[1]&&FR[1]<=r.b);if(ix>=0){AU.ranges=AU.ranges.slice(ix);AU.ranges[0]=Object.assign({},AU.ranges[0],{a:FR[1]})}}AU.r0=AU.ranges.map(x=>Object.assign({},x));AU.ri=-1;sfNext()}
 }
 function nudge(d){if(!AU.on||AU.mode!=='sf'||!AU.el)return;AU.off+=d;try{AU.el.currentTime=Math.max(0,AU.el.currentTime+d)}catch(e){}}
 function aproxSync(){const b=$('aprox');if(b)b.hidden=!(AU.on&&AU.mode==='sf'&&AU.approx&&S.onb&&cur().v==='reader')}
