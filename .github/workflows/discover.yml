@@ -13,24 +13,11 @@ jobs:
         run: |
           set +e +o pipefail
           mkdir -p out
-          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36"
-          curl -sSL --max-time 30 -A "$UA" "https://t.me/s/SaudiQHC" -o out/tg.html
-          grep -oE 'tgme_channel_info_counter[^/]*/span> <span class="counter_type">[^<]*|tgme_page_extra">[^<]*|counter_value">[^<]*' out/tg.html | head -8
-          grep -oE 'data-post="[^"]*"' out/tg.html | head -3; grep -oE 'data-post="[^"]*"' out/tg.html | tail -2
-          grep -c 'tgme_widget_message_voice\|tgme_widget_message_document\|<audio' out/tg.html
-          for q in "%D8%A7%D9%84%D9%85%D9%8A%D9%85%D8%A7%D9%86" "%D8%A3%D9%86%D8%B3"; do
-            curl -sSL --max-time 30 -A "$UA" "https://t.me/s/SaudiQHC?q=$q" -o out/tgq.html
-            echo "== q=$q posts: $(grep -c 'data-post=' out/tgq.html)"
-            python3 - <<'PY'
-          import re,html
-          x=open('out/tgq.html',encoding='utf-8',errors='ignore').read()
-          for m in re.finditer(r'data-post="([^"]+)"(.*?)(?=data-post="|$)',x,flags=re.S):
-              body=m.group(2)
-              txt=re.sub(r'<[^>]+>',' ',' '.join(re.findall(r'tgme_widget_message_text[^>]*>(.*?)</div>',body,flags=re.S)))
-              aud=re.findall(r'<audio[^>]*src="([^"]+)"',body); doc=re.findall(r'tgme_widget_message_document_title[^>]*>(.*?)</div>',body,flags=re.S); links=re.findall(r'href="(https?://(?!t\.me)[^"]+)"',body)
-              print(m.group(1),'|',html.unescape(txt)[:140].strip(),'| audio',len(aud),aud[:1],'| doc',doc[:2],'| links',[l for l in links if 'telegram' not in l][:4])
-          PY
-          done
+          curl -sSL --max-time 60 "https://mp3quran.net/api/v3/ayat_timing/reads" -o out/reads.json; wc -c out/reads.json
+          jq -c '.[]|[.id,.name,.rewaya,.folder_url]' out/reads.json | grep -viE "حفص|hafs" | head -80
+          echo "total $(jq length out/reads.json)"
+          curl -sSL --max-time 60 "https://mp3quran.net/api/v3/reciters?language=ar" -o out/rec.json
+          jq -c '.reciters[]|.name as $n|.moshaf[]|select(.name|test("حفص")|not)|[$n,.name,.server,.surah_total]' out/rec.json | head -120
       - name: save
         if: always()
         run: |
