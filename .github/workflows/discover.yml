@@ -9,26 +9,27 @@ jobs:
   d:
     runs-on: ubuntu-latest
     steps:
-      - name: probe
+      - name: fetch
         run: |
           set +e +o pipefail
           mkdir -p out
           python3 - <<'PY'
-          import json,urllib.request,time
-          R={'qalun':270,'warsh':120,'duri':269,'susi':65,'bazzi':296,'shuba':305}
-          for k,rid in R.items():
-              T={};cnt=[]
-              for s in range(1,115):
-                  for attempt in range(4):
-                      try:
-                          d=json.load(urllib.request.urlopen('https://mp3quran.net/api/v3/ayat_timing?surah=%d&read=%d'%(s,rid),timeout=40));break
-                      except Exception as e:
-                          d=None;time.sleep(2)
-                  if not d: cnt.append((s,'ERR'));continue
-                  T[str(s)]=[[x['ayah'],x['start_time'],x['end_time']] for x in d]
-                  if s in (1,2,3,112): cnt.append((s,len(d),d[0]['ayah'],d[-1]['ayah']))
-              json.dump(T,open('out/rw-%s.json'%k,'w'),separators=(',',':'))
-              print(k,rid,len(T),cnt)
+          import json,urllib.request
+          def get(u):
+              return urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'x'}),timeout=60).read()
+          for repo,br in (('A7med3bdulbaset/hadith-json','main'),('rn0x/Adhkar-json','main')):
+              try:
+                  t=json.loads(get('https://api.github.com/repos/%s/git/trees/%s?recursive=1'%(repo,br)))
+                  paths=[x['path'] for x in t['tree'] if x['type']=='blob']
+                  open('out/tree-%s.txt'%repo.replace('/','_'),'w').write('\n'.join(paths))
+                  for p in paths:
+                      lp=p.lower()
+                      if ('nawawi' in lp or 'forties' in lp or 'adhkar' in lp) and lp.endswith('.json') and 'node_modules' not in lp:
+                          try:
+                              b=get('https://raw.githubusercontent.com/%s/%s/%s'%(repo,br,p))
+                              open('out/'+repo.split('/')[0]+'__'+p.replace('/','__'),'wb').write(b);print('ok',p,len(b))
+                          except Exception as e: print('fail',p,e)
+              except Exception as e: print('ERR',repo,e)
           PY
           ls -la out
       - name: save
