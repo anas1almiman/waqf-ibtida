@@ -2399,8 +2399,14 @@ function auRanges(){const out=[];auBlocks().forEach(b=>{let c=null;blockAyat(b).
 function eaUrl(x){return 'https://everyayah.com/data/'+RC()[3]+'/'+pad3(x.s)+pad3(x.a)+'.mp3'}
 function auMarkAy(s,a){const old=document.querySelector('#app .ay.cur');const el=document.querySelector('#app .ay[data-s="'+s+'"][data-a="'+a+'"]');if(old===el)return;if(old)old.classList.remove('cur');if(el){el.classList.add('cur');try{el.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}}}
 function auClear(){document.querySelectorAll('#app .ay.cur').forEach(e=>e.classList.remove('cur'))}
-function auStop(){const was=AU.on;AU.on=false;AU.ctx++;if(AU.el){try{AU.el.pause()}catch(e){}}AU.k=-1;AU.ri=-1;AU.T=null;if(was){auClear();fabSync()}}
-function eaNext(){AU.k++;if(AU.k>=AU.list.length){auStop();toast('انتهت التلاوة.');return}const x=AU.list[AU.k];AU.el.src=eaUrl(x);const at=x.bs?x.at:[x.s,x.a];auMarkAy(at[0],at[1]);const p=AU.el.play();if(p&&p.catch)p.catch(auFail);const nx=AU.list[AU.k+1];if(nx){const pre=new Audio();pre.preload='auto';pre.src=eaUrl(nx)}}
+function auStop(){const was=AU.on;AU.on=false;AU.ctx++;AU.nxe=null;if(AU.el){try{AU.el.pause()}catch(e){}}AU.k=-1;AU.ri=-1;AU.T=null;if(was){auClear();fabSync()}}
+function auMk(){const e=new Audio();e.preload='auto';e.addEventListener('ended',()=>{if(!AU.on||AU.el!==e)return;if(AU.mode==='ea')eaNext();else sfNext()});e.addEventListener('error',()=>{if(AU.on&&AU.el===e)auFail()});e.addEventListener('timeupdate',()=>{if(AU.el===e)sfTick()});return e}
+function eaNext(){AU.k++;if(AU.k>=AU.list.length){auStop();toast('انتهت التلاوة.');return}const x=AU.list[AU.k],url=eaUrl(x);
+  if(!AU.pool){AU.pool=[AU.el||auMk(),auMk()];AU.el=AU.pool[0]}
+  let e=AU.el;const idle=AU.pool[0]===e?AU.pool[1]:AU.pool[0];
+  if(idle.dataset.u===url){try{e.pause()}catch(_){}e=idle;AU.el=e}else{e.src=url;e.dataset.u=url}
+  const at=x.bs?x.at:[x.s,x.a];auMarkAy(at[0],at[1]);try{e.currentTime=0}catch(_){}const p=e.play();if(p&&p.catch)p.catch(auFail);
+  const nx=AU.list[AU.k+1];if(nx){const o=AU.pool[0]===AU.el?AU.pool[1]:AU.pool[0],nu=eaUrl(nx);if(o.dataset.u!==nu){o.src=nu;o.dataset.u=nu;try{o.load()}catch(_){}if(AU.k===0){o.muted=true;const q=o.play();const un=()=>{try{o.pause();o.currentTime=0}catch(_){}o.muted=false};if(q&&q.then)q.then(un,un);else un()}}}}
 /* surah-file reciters: ayah timings bundled with the app (timing/<reciter>.json, milliseconds) */
 const TMF={},TMP={};
 function tmLoad(key){if(TMF[key])return Promise.resolve(TMF[key]);if(!TMP[key])TMP[key]=(key==='miman'?fetch('audio/miman/SOURCE.txt',{cache:'no-store'}).then(r=>r.ok?r.text():'1',()=>'1').then(t=>String(t).trim().slice(0,40)||'1'):Promise.resolve('1')).then(v=>fetch('timing/'+key+'.json?v='+encodeURIComponent(v))).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()}).then(j=>{TMF[key]=j;return j},e=>{TMP[key]=null;throw e});return TMP[key]}
@@ -2429,7 +2435,7 @@ function auToggle(){
   ayStop();
   if(cur().v!=='reader')return;
   if(!navigator.onLine){toast('يحتاج الاستماع اتصالًا بالإنترنت.');return}
-  if(!AU.el){AU.el=new Audio();AU.el.preload='auto';AU.el.addEventListener('ended',()=>{if(!AU.on)return;if(AU.mode==='ea')eaNext();else sfNext()});AU.el.addEventListener('error',()=>{if(AU.on)auFail()});AU.el.addEventListener('timeupdate',sfTick)}
+  if(!AU.el)AU.el=auMk();AU.pool=null;
   const rc=RC();AU.on=true;AU.mode=rc[2];fabSync();
   try{if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:cur().spec.title||APP,artist:rc[1],album:APP})}catch(e){}
   const FR=AU.from;AU.from=null;
