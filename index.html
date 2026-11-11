@@ -1528,7 +1528,7 @@ const TABV={home:'home',topics:'topics',library:'library',more:'more',plan:'more
 const TABS=[['home','اليوم','mosque'],['mus','المصحف','book'],['topics','المختارات','star'],['library','المكتبة','shelf'],['more','المزيد','list']];
 function tabSync(){const r=cur();const on=!!S.onb&&STACK.length<=2&&!!TABV[r.v];let b=$('tabbar');if(!b){b=document.createElement('nav');b.id='tabbar';b.setAttribute('aria-label','التنقل الرئيسي');document.body.appendChild(b)}document.body.classList.toggle('tabs',on);if(!on){b.innerHTML='';return}const act=TABV[r.v];b.innerHTML=TABS.map(x=>'<button class="'+(x[0]===act?'on':'')+'" data-act="tab" data-v="'+x[0]+'">'+ICON[x[2]]+'<span>'+x[1]+'</span></button>').join('')}
 function vMore(){let x=topbar('المزيد')+'<div style="height:12px"></div><div class="group">'+srow('sun','الأذكار','','nav','data-v="adhkar"')+srow('pin','اتجاه القبلة','','nav','data-v="qibla"')+srow('clock','بحسب وقتك','','nav','data-v="time"')+srow('cal','جدولي','','nav','data-v="plan"')+srow('moon','رمضان','','nav','data-v="ramadan"')+srow('book','السجل','','nav','data-v="record"')+srow('gear','الإعدادات','','nav','data-v="settings"')+'</div>';return x}
-const VIEWS={adhkar:vAdhkar,arbain:vArbain,qibla:vQibla,time:vTime,more:vMore,tafsir:vTafsir,mus:vMus,night:vNight,pick:vPick,plan:vPlan,library:vLibrary,book:vBook,home:vHome,prayer:vPrayer,reader:vReader,topics:vTopics,topic:vTopic,record:vRecord,settings:vSettings,about:vAbout,hifz:vHifz,ramadan:vRamadan,review:vReview,wird:vWird};
+const VIEWS={adhkar:vAdhkar,adhkar2:vAdhkar,arbain:vArbain,qibla:vQibla,time:vTime,more:vMore,tafsir:vTafsir,mus:vMus,night:vNight,pick:vPick,plan:vPlan,library:vLibrary,book:vBook,home:vHome,prayer:vPrayer,reader:vReader,topics:vTopics,topic:vTopic,record:vRecord,settings:vSettings,about:vAbout,hifz:vHifz,ramadan:vRamadan,review:vReview,wird:vWird};
 let BGW=-1,BGK=0;function bgwSet(v){if(typeof BGS==='undefined')return;let i;if(v==='home')i=BGP.home;else{const r=cur();if(r.bg==null||r.bg>=BGS.length){let k;do{k=Math.floor(Math.random()*BGS.length)}while(BGS.length>1&&(k===BGW||k===BGP.home));r.bg=k}i=r.bg}if(i===BGW)return;BGW=i;const L=document.querySelectorAll('#bgw i');if(!L.length)return;BGK^=1;L[BGK].style.backgroundImage='url('+BGS[i]+')';L[BGK].classList.add('on');L[BGK^1].classList.remove('on')}
 function render(){
   if(QT)return;applyTheme();
@@ -1703,15 +1703,17 @@ function vQibla(){
 
 /* ---- الأذكار: صباح ومساء من الكتاب والسنة ---- */
 const ADT=[['sabah','أذكار الصباح'],['masa','أذكار المساء'],['nawm','النوم'],['istiqaz','الاستيقاظ'],['salat','بعد الصلاة'],['munasabat','المناسبات']];
+const ADMAIN=['sabah','masa'];
 const adAuto=()=>new Date().getHours()<12?'sabah':'masa';
 function adSt(tab){const k=String(dayKey());if(!S.adk||S.adk.k!==k)S.adk={k:k,t:{}};return S.adk.t[tab]||(S.adk.t[tab]={})}
 function adLeft(tab,it){const m=adSt(tab);return m[it.i]==null?it.c:m[it.i]}
 function adDone(tab){const L=ADK[tab]||[];return L.filter(it=>adLeft(tab,it)<=0).length}
 function adTip(){const h=new Date().getHours();return h<12?'أذكار الصباح':'أذكار المساء'}
 function vAdhkar(r){
-  const tab=r.tab||adAuto();r.tab=tab;const L=ADK[tab],done=adDone(tab),n=L.length,pct=Math.round(done/n*100);
-  let x=topbar('الأذكار',{over:true})+hero('home','من الكتاب والسنة',ADT.find(a=>a[0]===tab)[1],tab==='sabah'?'من الفجر إلى الضحى':tab==='masa'?'من العصر إلى المغرب':'من حصن المسلم');
-  x+='<div class="adtabs">'+ADT.map(([k,l])=>'<button class="'+(k===tab?'on':'')+'" data-act="adtab" data-k="'+k+'">'+l+(adDone(k)===ADK[k].length?'<i>✓</i>':'')+'</button>').join('')+'</div>';
+  const misc=r.v==='adhkar2',TB=ADT.filter(a=>misc?!ADMAIN.includes(a[0]):ADMAIN.includes(a[0]));
+  const tab=(r.tab&&TB.some(a=>a[0]===r.tab))?r.tab:(misc?TB[0][0]:adAuto());r.tab=tab;const L=ADK[tab],done=adDone(tab),n=L.length,pct=Math.round(done/n*100);
+  let x=topbar(misc?'أذكار متفرقة':'الأذكار',{over:true})+hero('home','من الكتاب والسنة',ADT.find(a=>a[0]===tab)[1],tab==='sabah'?'من الفجر إلى الضحى':tab==='masa'?'من العصر إلى المغرب':'من حصن المسلم');
+  x+='<div class="adtabs">'+TB.map(([k,l])=>'<button class="'+(k===tab?'on':'')+'" data-act="adtab" data-k="'+k+'">'+l+(adDone(k)===ADK[k].length?'<i>✓</i>':'')+'</button>').join('')+'</div>';
   x+='<div class="adprog"><div class="adbar"><i style="width:'+pct+'%"></i></div><span>'+AR(done)+' من '+AR(n)+'</span></div>';
   if(done===n)x+='<div class="adfin"><b>تقبّل الله منك</b><span>أتممتَ '+ADT.find(a=>a[0]===tab)[1]+'، جعلها الله في ميزانك.</span></div>';
   x+='<p class="adhint">المس البطاقة لتعدّ المرّات</p>';
@@ -1889,6 +1891,7 @@ function vTopics(){
   const hj=hijri(new Date());
   TOPICS.forEach(t=>{if(t.occasion&&hj&&hj.m===t.occasion.m&&t.occasion.d-hj.d>=0&&t.occasion.d-hj.d<=2)x+='<button class="card banner go" data-act="topic" data-id="'+t.id+'"><span><small class="meta">مناسبة قريبة</small><b>'+t.occasion.name+': '+t.title+'</b></span></button>'});
   x+='<button class="vqcard" data-act="vqopen"><span class="vqi">'+ICON.play+'</span><span><b>اطلب بصوتك</b><small>مثل: «آيات عن المواساة» وأقرؤها لك آيةً آية</small></span></button>';
+  x+='<button class="vqcard" data-act="nav" data-v="adhkar2" style="background:linear-gradient(135deg,#F9E8A9,#E3BB5C);color:#2a2410;border-color:#C79B3B"><span class="vqi" style="background:#14352a;color:#F7E7B3">'+(ICON.sun||'')+'</span><span><b>أذكار النوم والاستيقاظ وبعد الصلاة</b><small style="opacity:.8">وأذكار المناسبات: عرفة والعيد والاستسقاء</small></span></button>';
   x+='<div class="opts" style="margin-bottom:12px">'+CATS.map(([k,l])=>'<button class="opt'+(catSel===k?' on':'')+'" data-act="cat" data-k="'+k+'">'+l+'</button>').join('')+'</div>';
   x+='<input class="search" id="tq" type="search" placeholder="ابحث: الرزق، الشكر، رمضان، موسى…" value="'+esc(tq)+'"><div id="tlist">'+topicItems()+'</div>';
   return x;
