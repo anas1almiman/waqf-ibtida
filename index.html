@@ -2470,7 +2470,7 @@ function sfNext(){
   const go=async()=>{let T;try{T=await tp}catch(e){if(ctx===AU.ctx)auFail();return}if(ctx!==AU.ctx||!AU.on)return;
     const st=r.a===1?0:Math.max(0,T.m[r.a][0]-0.12);AU.endT=(T.m[r.b]?T.m[r.b][1]:1e9)+0.3;
     const seek=()=>{try{AU.el.currentTime=st}catch(e){}};seek();
-    const ok=()=>{if(ctx!==AU.ctx)return;if(Math.abs(AU.el.currentTime-st)>1.5){seek();return}AU.el.removeEventListener('seeked',ok);AU.el.removeEventListener('canplay',ok);AU.T=T;AU.el.muted=false};
+    let tries=0;const fin=()=>{AU.el.removeEventListener('seeked',ok);AU.el.removeEventListener('canplay',ok);AU.T=T;AU.el.muted=false};const ok=()=>{if(ctx!==AU.ctx||AU.T)return;if(Math.abs(AU.el.currentTime-st)>1.5&&++tries<4){seek();return}fin()};if(st>0)setTimeout(()=>{if(ctx===AU.ctx&&AU.on&&!AU.T)fin()},7000);
     AU.el.addEventListener('seeked',ok);AU.el.addEventListener('canplay',ok);if(st===0)ok()};
   if(AU.el.readyState>=1)go();else AU.el.addEventListener('loadedmetadata',go,{once:true});
 }
