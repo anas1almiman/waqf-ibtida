@@ -13,11 +13,24 @@ jobs:
         run: |
           set +e +o pipefail
           mkdir -p out
-          curl -sSL --max-time 60 "https://mp3quran.net/api/v3/ayat_timing/reads" -o out/reads.json; wc -c out/reads.json
-          jq -c '.[]|[.id,.name,.rewaya,.folder_url]' out/reads.json | grep -viE "حفص|hafs" | head -80
-          echo "total $(jq length out/reads.json)"
-          curl -sSL --max-time 60 "https://mp3quran.net/api/v3/reciters?language=ar" -o out/rec.json
-          jq -c '.reciters[]|.name as $n|.moshaf[]|select(.name|test("حفص")|not)|[$n,.name,.server,.surah_total]' out/rec.json | head -120
+          python3 - <<'PY'
+          import json,urllib.request,time
+          R={'qalun':270,'warsh':120,'duri':269,'susi':65,'bazzi':296,'shuba':305}
+          for k,rid in R.items():
+              T={};cnt=[]
+              for s in range(1,115):
+                  for attempt in range(4):
+                      try:
+                          d=json.load(urllib.request.urlopen('https://mp3quran.net/api/v3/ayat_timing?surah=%d&read=%d'%(s,rid),timeout=40));break
+                      except Exception as e:
+                          d=None;time.sleep(2)
+                  if not d: cnt.append((s,'ERR'));continue
+                  T[str(s)]=[[x['ayah'],x['start_time'],x['end_time']] for x in d]
+                  if s in (1,2,3,112): cnt.append((s,len(d),d[0]['ayah'],d[-1]['ayah']))
+              json.dump(T,open('out/rw-%s.json'%k,'w'),separators=(',',':'))
+              print(k,rid,len(T),cnt)
+          PY
+          ls -la out
       - name: save
         if: always()
         run: |
