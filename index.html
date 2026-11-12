@@ -2359,16 +2359,17 @@ const LIB=[
  {id:'muktafa',open:false,col:['#4A1E12','#7A3520'],ct:'المكتفى في الوقف والابتداء',ca:'أبو عمرو الداني',t:'المكتفى في الوقف والابتداء',a:'أبو عمرو عثمان بن سعيد الداني (ت ٤٤٤هـ)',ed:'دراسة وتحقيق د. يوسف عبد الرحمن المرعشلي، مؤسسة الرسالة، الطبعة الثانية ١٤٠٧هـ / ١٩٨٧م'},
  {id:'ibnkathir',sec:'tf',kind:'ik',open:true,col:['#12343B','#1F5A66'],ct:'تفسير القرآن العظيم',ca:'الحافظ ابن كثير',short:'تفسير ابن كثير',t:'تفسير القرآن العظيم',a:'الحافظ عماد الدين إسماعيل بن عمر بن كثير الدمشقي (ت ٧٧٤هـ)',ed:'يُتصفَّح بالسورة والآية، ويُحمَّل من الإنترنت عند الفتح'},
  {id:'gharib',sec:'tf',kind:'gh',open:true,col:['#2B3A12','#4E6A1F'],ct:'الميسر في غريب القرآن الكريم',ca:'مجمع الملك فهد',short:'غريب القرآن',t:'الميسر في غريب القرآن الكريم',a:'مجمع الملك فهد لطباعة المصحف الشريف',ed:'معاني الكلمات الغريبة مرتبة على السور والآيات'},
+ {id:'arbain',sec:'hd',kind:'arb',open:true,col:['#7A5C14','#B8912E'],ct:'الأربعون النووية',ca:'للإمام النووي',short:'الأربعون النووية',t:'الأربعون النووية',a:'للإمام يحيى بن شرف النووي، وتتمّتها لابن رجب',ed:'٤٢ حديثًا'},
  {id:'qiraat',sec:'qr',kind:'qir',open:true,col:['#3B1230','#6A1F55'],ct:'مصاحف الروايات',ca:'بخط مجمع الملك فهد',short:'مصاحف الروايات',t:'مصاحف الروايات',a:'مصاحف مجمع الملك فهد بروايات قالون وورش والبزي وقنبل والدوري والسوسي وشعبة، نصًّا وصوتًا',ed:'سبع روايات نصًّا وصوتًا، وأربع صوتًا'},
  {id:'maalim',open:false,col:['#1B2848','#2E4372'],ct:'معالم الاهتداء إلى معرفة الوقف والابتداء',ca:'محمود خليل الحصري',t:'معالم الاهتداء إلى معرفة الوقف والابتداء',a:'الشيخ محمود خليل الحصري',ed:'مكتبة السنة، القاهرة، الطبعة الأولى ١٤٢٣هـ / ٢٠٠٢م'}];
-const LSEC=[['wq','الوقف والابتداء','المصادر التي استُخرجت منها مواضع الوقف'],['tf','التفسير','غريب القرآن وتفسير ابن كثير'],['qr','القراءات','مصحف القراءات العشر']];
+const LSEC=[['wq','الوقف والابتداء','المصادر التي استُخرجت منها مواضع الوقف'],['tf','التفسير','غريب القرآن وتفسير ابن كثير'],['qr','القراءات','مصحف القراءات العشر'],['hd','الحديث الشريف','متون وشروح']];
 function vLibrary(){
   let x=topbar('المكتبة',{over:true})+hero('library','علوم القرآن بين يديك','المكتبة','الوقف والابتداء · التفسير · القراءات');
   LSEC.forEach(sc=>{const L=LIB.filter(b=>(b.sec||'wq')===sc[0]);if(!L.length)return;
     x+='<div class="libsec"><b>'+sc[1]+'</b><small>'+sc[2]+'</small></div>';
     x+='<div class="shelf">'+L.map(b=>'<button class="b3d'+(b.open?'':' locked')+'" data-act="bkopen" data-id="'+b.id+'" style="--c1:'+b.col[0]+';--c2:'+b.col[1]+'" aria-label="'+b.t+'"><span class="pg"></span><span class="sp"></span><span class="cv"><i></i><b>'+b.ct+'</b><small>'+b.ca+'</small>'+(b.open?'':'<em>حقوق الطبع محفوظة</em>')+'</span></button>').join('')+'</div><div class="shelfwood"></div>';
     x+=L.map(b=>'<button class="card bkcard go" data-act="bkopen" data-id="'+b.id+'"><span><b style="font-size:17.5px;color:var(--em)">'+b.t+'</b><small class="meta" style="display:block;line-height:1.7">'+b.a+'</small><small class="meta" style="display:block;line-height:1.7">'+b.ed+'</small><span class="st '+(b.open?'ok':'no')+'">'+(b.open?(b.pages?'متاح للتصفح · '+AR(b.pages)+' صفحة':'متاح للتصفح'):'حقوق الطبع محفوظة للناشر')+'</span></span></button>').join('')});
-  return x+arbCard();
+  return x;
 }
 const IKPP=5;
 function arbCard(){return '<div class="libsec"><b>الحديث الشريف</b><small>متون وشروح</small></div><button class="card bkcard go" data-act="nav" data-v="arbain"><span><b style="font-size:17.5px;color:var(--em)">الأربعون النووية</b><small class="meta" style="display:block;line-height:1.7">للإمام يحيى بن شرف النووي، وتتمّتها لابن رجب</small><span class="st ok">متاح للقراءة · ٤٢ حديثًا</span></span></button>'}
@@ -2661,7 +2662,7 @@ document.addEventListener('click',ev=>{
   case 'tfpg':{const r=cur();if(r.v!=='tafsir')break;r.a=Math.max(1,(r.a||1)+(+b.dataset.d)*IKPP);show(+b.dataset.d,0);break}
   case 'tfsur':tfSurSheet();break;
   case 'tfs':{const r=cur();if(r.v!=='tafsir')break;r.s=+v;r.a=1;closeSheet();show(1,0);break}
-  case 'bkopen':{const bk=LIB.find(x=>x.id===b.dataset.id);if(!bk)break;if(!bk.open){lockedSheet(bk);break}if(bk.kind){const go=()=>navPush(bk.kind==='qir'?{v:'mus',pg:S.mus||1,rw:(S.riw&&S.riw!=='hafs'?S.riw:'warsh')}:{v:'tafsir',m:bk.kind,s:1,a:1});const cv=b.classList.contains('b3d')?b:null;if(cv&&!RM){cv.classList.add('opening');setTimeout(go,520)}else go();break}const cov=b.classList.contains('b3d')?b:null;if(cov&&!RM){cov.classList.add('opening');setTimeout(()=>navPush({v:'book',id:bk.id,p:bk.start}),520)}else navPush({v:'book',id:bk.id,p:bk.start});break}
+  case 'bkopen':{const bk=LIB.find(x=>x.id===b.dataset.id);if(!bk)break;if(!bk.open){lockedSheet(bk);break}if(bk.kind){const go=()=>navPush(bk.kind==='arb'?{v:'arbain'}:bk.kind==='qir'?{v:'mus',pg:S.mus||1,rw:(S.riw&&S.riw!=='hafs'?S.riw:'warsh')}:{v:'tafsir',m:bk.kind,s:1,a:1});const cv=b.classList.contains('b3d')?b:null;if(cv&&!RM){cv.classList.add('opening');setTimeout(go,520)}else go();break}const cov=b.classList.contains('b3d')?b:null;if(cov&&!RM){cov.classList.add('opening');setTimeout(()=>navPush({v:'book',id:bk.id,p:bk.start}),520)}else navPush({v:'book',id:bk.id,p:bk.start});break}
   case 'bkflip':bkFlip(+b.dataset.d);break;
   case 'bktoc':tocSheet();break;
   case 'bkgo':closeSheet();bkGo(+b.dataset.p);break;
