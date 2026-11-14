@@ -2564,16 +2564,24 @@ function auRanges(){const out=[];auBlocks().forEach((b,i)=>{let c=null;const bi=
 function eaUrl(x){const b=RC()[3];return (b.indexOf('/')>-1?b:'https://everyayah.com/data/'+b+'/')+pad3(x.s)+pad3(x.a)+'.mp3'}
 function auMarkAy(s,a){const old=document.querySelector('#app .ay.cur');const el=document.querySelector('#app .ay[data-s="'+s+'"][data-a="'+a+'"]');if(old===el)return;if(old)old.classList.remove('cur');if(el){el.classList.add('cur');try{el.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}}}
 function auClear(){document.querySelectorAll('#app .ay.cur').forEach(e=>e.classList.remove('cur'))}
-function auStop(){const was=AU.on;if(was&&AU.reps!=null)AU.reps=AU.left+1;if(was){try{const x=AU.mode==='ea'?AU.list[AU.k]:AU.ranges[AU.ri];if(x&&x.bi!=null)AU.lastBi=x.bi}catch(_){}}AU.on=false;AU.ctx++;if(AU.pre){try{AU.pre.el.pause()}catch(e){}AU.pre=null}AU.primed=0;AU.nxe=null;if(AU.el){try{AU.el.pause()}catch(e){}}if(AU.pool)AU.pool.forEach(e=>{try{e.pause()}catch(_){}});AU.k=-1;AU.ri=-1;AU.T=null;if(was){auClear();fabSync()}}
+function auStop(){const was=AU.on;if(AU.bu){Object.keys(AU.bu).forEach(u=>{try{URL.revokeObjectURL(AU.bu[u])}catch(_){}});AU.bu={};AU.bp={};if(AU.pool)AU.pool.forEach(e=>{e.dataset.u='';e.dataset.p=''})}if(was&&AU.reps!=null)AU.reps=AU.left+1;if(was){try{const x=AU.mode==='ea'?AU.list[AU.k]:AU.ranges[AU.ri];if(x&&x.bi!=null)AU.lastBi=x.bi}catch(_){}}AU.on=false;AU.ctx++;if(AU.pre){try{AU.pre.el.pause()}catch(e){}AU.pre=null}AU.primed=0;AU.nxe=null;if(AU.el){try{AU.el.pause()}catch(e){}}if(AU.pool)AU.pool.forEach(e=>{try{e.pause()}catch(_){}});AU.k=-1;AU.ri=-1;AU.T=null;if(was){auClear();fabSync()}}
 function auMk(){const e=new Audio();e.preload='auto';e.addEventListener('ended',()=>{if(!AU.on||AU.el!==e)return;if(AU.mode==='ea')eaNext();else sfNext()});e.addEventListener('error',()=>{if(AU.on&&AU.el===e)auFail()});e.addEventListener('timeupdate',()=>{if(AU.el===e)sfTick()});return e}
-function eaTick(){if(!AU.on||AU.mode!=='ea'||!AU.el)return;const e=AU.el;if(e.paused||!isFinite(e.duration)||e.duration<=0||e.currentTime<.3||e.dataset.early==='1')return;if(e.duration-e.currentTime<=.14){e.dataset.early='1';eaNext()}}
+function eaTick(){if(!AU.on||AU.mode!=='ea'||!AU.el)return;const e=AU.el;if(e.paused||!isFinite(e.duration)||e.duration<=0||e.currentTime<.3||e.dataset.early==='1')return;if(e.duration-e.currentTime<=.2){e.dataset.early='1';eaNext()}}
 setInterval(eaTick,40);
+function eaBlob(url){AU.bu=AU.bu||{};AU.bp=AU.bp||{};if(AU.bu[url])return Promise.resolve(AU.bu[url]);if(AU.bp[url])return AU.bp[url];
+  return AU.bp[url]=fetch(url).then(r=>r.ok?r.blob():Promise.reject()).then(b=>{const u=URL.createObjectURL(b);AU.bu[url]=u;return u}).catch(()=>{delete AU.bp[url];return null})}
+function eaPrep(){const ks=[AU.k+1,AU.k+2];ks.forEach((kk,n)=>{const x=AU.list[kk];if(!x)return;const url=eaUrl(x);eaBlob(url).then(bu=>{
+  if(!AU.on||AU.mode!=='ea')return;if(n===0){const o=AU.pool[0]===AU.el?AU.pool[1]:AU.pool[0];if(!o||o===AU.el||AU.k+1!==kk)return;
+    if(o.dataset.u!==url){o.src=bu||url;o.dataset.u=url;o.dataset.p='';try{o.load()}catch(_){}}
+    if(o.dataset.p!==url){o.dataset.p=url;o.muted=true;const q=o.play();const un=()=>setTimeout(()=>{if(o!==AU.el&&o.muted){try{o.pause();o.currentTime=0}catch(_){}o.muted=false}},80);if(q&&q.then)q.then(un,un);else un()}}})});
+  const keep=new Set();for(let d=-1;d<=3;d++){const x=AU.list[AU.k+d];if(x)keep.add(eaUrl(x))}
+  Object.keys(AU.bu||{}).forEach(u=>{if(!keep.has(u)){try{URL.revokeObjectURL(AU.bu[u])}catch(_){}delete AU.bu[u];if(AU.bp)delete AU.bp[u]}})}
 function eaNext(){AU.k++;if(AU.k>=AU.list.length){auEnd();return}const x=AU.list[AU.k],url=eaUrl(x);AU.lastBi=x.bi;
   if(!AU.pool){AU.pool=[AU.el||auMk(),auMk()];AU.el=AU.pool[0]}
   let e=AU.el;const idle=AU.pool[0]===e?AU.pool[1]:AU.pool[0];
-  if(idle.dataset.u===url){try{e.pause()}catch(_){}e=idle;AU.el=e}else{e.src=url;e.dataset.u=url}
-  e.dataset.early='';const at=x.bs?x.at:[x.s,x.a];auMarkAy(at[0],at[1]);try{e.currentTime=0}catch(_){}const p=e.play();if(p&&p.catch)p.catch(auFail);
-  const nx=AU.list[AU.k+1];if(nx){const o=AU.pool[0]===AU.el?AU.pool[1]:AU.pool[0],nu=eaUrl(nx);if(o.dataset.u!==nu){o.src=nu;o.dataset.u=nu;try{o.load()}catch(_){}if(AU.k===0){o.muted=true;const q=o.play();const un=()=>{try{o.pause();o.currentTime=0}catch(_){}o.muted=false};if(q&&q.then)q.then(un,un);else un()}}}}
+  if(idle.dataset.u===url){try{e.pause()}catch(_){}e=idle;AU.el=e}else{e.src=(AU.bu&&AU.bu[url])||url;e.dataset.u=url}
+  e.muted=false;e.dataset.early='';const at=x.bs?x.at:[x.s,x.a];auMarkAy(at[0],at[1]);try{e.currentTime=0}catch(_){}const p=e.play();if(p&&p.catch)p.catch(auFail);
+  eaPrep()}
 /* surah-file reciters: ayah timings bundled with the app (timing/<reciter>.json, milliseconds) */
 const TMF={},TMP={};
 function tmLoad(key){if(TMF[key])return Promise.resolve(TMF[key]);if(!TMP[key])TMP[key]=(key==='miman'?fetch('audio/miman/SOURCE.txt',{cache:'no-store'}).then(r=>r.ok?r.text():'1',()=>'1').then(t=>String(t).trim().slice(0,40)||'1'):Promise.resolve('1')).then(v=>fetch('timing/'+key+'.json?v='+encodeURIComponent(v))).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()}).then(j=>{TMF[key]=j;return j},e=>{TMP[key]=null;throw e});return TMP[key]}
