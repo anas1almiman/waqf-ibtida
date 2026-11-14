@@ -1283,13 +1283,13 @@ function show(dir,y){
   if(dir&&!RM){try{const E='cubic-bezier(.22,1,.36,1)';app.animate([{opacity:0,transform:'scale('+(dir>0?1.025:.97)+')'},{opacity:1,transform:'none'}],{duration:500,delay:90,fill:'backwards',easing:E});}catch(e){}}
   persist();
 }
-function navPush(r){persist();if(!(AU.on&&AU.keep&&AU.spec&&r.v!=='reader'))auStop();ayStop();rwStop();STACK.push(r);try{history.pushState({d:STACK.length},'')}catch(e){}show(1,0)}
-function navBack(){if(SH){closeSheet();return}if(STACK.length<=1)return;const st=history.state;if(st&&st.d===STACK.length){history.back()}else{const lv=listenCur()&&AU.on;STACK.pop();if(!lv)auStop();rwStop();show(-1,cur().y)}}
+function navPush(r){persist();if(!(AU.on&&AU.keep&&AU.spec))auStop();ayStop();rwStop();STACK.push(r);try{history.pushState({d:STACK.length},'')}catch(e){}show(1,0)}
+function navBack(){if(SH){closeSheet();return}if(STACK.length<=1)return;const st=history.state;if(st&&st.d===STACK.length){history.back()}else{const lv=AU.on&&(listenCur()||AU.keep);STACK.pop();if(!lv)auStop();rwStop();show(-1,cur().y)}}
 function goHome(){STACK=[{v:'home'}];try{history.replaceState({d:1},'')}catch(e){}show(-1,0)}
 window.addEventListener('popstate',e=>{
   if(SH){closeSheet(true);try{history.pushState({d:STACK.length},'')}catch(x){}return}
   const d=(e.state&&e.state.d)||1;
-  if(d<STACK.length){const lv=listenCur()&&AU.on;while(STACK.length>Math.max(1,d))STACK.pop();if(!lv)auStop();let y=cur().y;if(AFTER){AFTER();AFTER=null;y=0}show(-1,y)}
+  if(d<STACK.length){const lv=AU.on&&(listenCur()||AU.keep);while(STACK.length>Math.max(1,d))STACK.pop();if(!lv)auStop();let y=cur().y;if(AFTER){AFTER();AFTER=null;y=0}show(-1,y)}
 });
 /* ================= sheet ================= */
 let SH=null,SHF=null;
