@@ -735,6 +735,16 @@ html.dk .qstage img{filter:invert(.92) hue-rotate(180deg) brightness(.95)}
 .kahf .kh-b button{height:42px;border-radius:14px;font:inherit;font-size:15px;cursor:pointer}
 .kahf .kh-p{flex:1.4;background:#E3C877;color:#2A2410;border:none}
 .kahf .kh-r{flex:1;background:transparent;color:#F6EBC4;border:1px solid rgba(227,200,119,.6)}
+.adbc{margin:10px 0;padding:12px 14px;border-radius:14px;background:#F4EBCB;border:1px solid #D9C98F;line-height:1.8}
+.adbc .ah{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.adbc .ah b{font-size:14px;color:#14382C;font-weight:500}
+.adbc .ag{font-size:11px;padding:2px 9px;border-radius:999px;background:#14382C;color:#F6EBC4;white-space:nowrap}
+.adbc.nk .ag{background:#8A6D1F}
+.adbc.wk{background:#F1ECE4;border-color:#CFC6B4}.adbc.wk .ag{background:#7A7468}
+.adbc p{margin:0 0 4px;font-size:14px;color:#2A2410}
+.adbc .ax{font-size:12px;color:#7A6A33}
+.adbc small{display:block;font-size:12px;color:#7A6A33}
+.adbc .an2{margin-top:2px;color:#6B6048}
 body.musmode .fab{bottom:calc(156px + var(--sab))}
 .mbar{flex:none;display:flex;gap:8px;align-items:center;margin:6px 0 4px;min-width:0}
 .mrw{flex:none;display:inline-flex;align-items:center;gap:8px;padding:5px 14px 3px;border-radius:999px;border:1px solid var(--gold2);background:var(--chip);color:var(--ink);font:15px 'Amiri',serif}
@@ -1923,6 +1933,17 @@ function ayPlay(s,a,times){
     const ok=()=>{if(ctx!==AY.ctx)return;if(Math.abs(AY.el.currentTime-st)>1.5){seek();return}AY.el.removeEventListener('seeked',ok);AY.el.removeEventListener('canplay',ok);AY.el.muted=false};
     AY.el.addEventListener('seeked',ok);AY.el.addEventListener('canplay',ok);setTimeout(ok,1500)},fail);
 }
+const ADB=(()=>{const m={};
+const NK={g:'أثر عن السلف',c:'nk',h:'خفض الصوت قليلًا',t:'يُستحب خفض الصوت قليلًا عند قراءة ما حكاه الله من قول الكافرين في حقه سبحانه، تنزيهًا له. ذكر النووي عن إبراهيم النخعي أنه كان يفعله.',src:'النووي: التبيان (ص١٢٠) والمجموع (٢/١٦٨)',n:'هذا أثر عن السلف وليس حديثًا، ومن أهل العلم من لا يراه سنة مقررة، فهو من الأدب لا من الواجب.'};
+['9:30','5:64','19:88'].forEach(k=>m[k]=NK);
+const NK2=Object.assign({},NK,{x:'من نظائر ما ذكره النووي'});
+['2:116','3:181','5:17','5:72','5:73','10:68','18:4','21:26'].forEach(k=>m[k]=NK2);
+m['75:40']={g:'صحيح عند الألباني',c:'ok',h:'قل: سبحانك فبلى',t:'كان من الصحابة من يقول عند هذه الآية: «سبحانك فبلى»، وذكر أنه سمعه من رسول الله صلى الله عليه وسلم.',src:'أبو داود (٨٨٤)',n:'صححه الألباني، وأعلّه الأرناؤوط بأن موسى بن أبي عائشة قليل الرواية عن الصحابة.'};
+const WK={g:'ضعيف',c:'wk',src:'أبو داود (٨٨٧) والترمذي (٣٣٤٧)',n:'ضعفه الألباني، وفي إسناده أعرابي لم يُسمَّ. فلا يُنسب للنبي ﷺ، ويجوز قوله دعاءً.'};
+m['95:8']=Object.assign({h:'قل: بلى وأنا على ذلك من الشاهدين',t:'ورد في حديث أبي هريرة أن من انتهى إلى هذه الآية يقول: «بلى وأنا على ذلك من الشاهدين».'},WK);
+m['77:50']=Object.assign({h:'قل: آمنا بالله',t:'ورد في الحديث نفسه أن من انتهى إلى هذه الآية يقول: «آمنا بالله».'},WK);
+return m})();
+function adabCard(s,a){const d=ADB[s+':'+a];if(!d)return '';return '<div class="adbc '+d.c+'"><div class="ah"><b>أدب التلاوة · '+d.h+'</b><span class="ag">'+d.g+'</span></div><p>'+d.t+'</p>'+(d.x?'<p class="ax">'+d.x+'</p>':'')+'<small>المصدر: '+d.src+'</small><small class="an2">'+d.n+'</small></div>'}
 function ayaHTML(s,a){
   let h=shead('سورة '+D.N[s-1]+' · الآية '+AR(a))+'<div class="ayq">'+txt(s,a)+' <span class="an">'+AR(a)+'</span></div>';
   const on=AY.k===s+':'+a;
@@ -1931,6 +1952,7 @@ function ayaHTML(s,a){
   if(cur().v==='mus'&&!cur().hl&&!(cur().rw&&cur().rw!=='hafs')&&s>1)h+='<button class="btn outline prybtn" data-act="aypray" data-s="'+s+'" data-a="'+a+'">'+ICON.mosque+'اقرأ من هنا في الصلاة</button>';
   if(cur().v==='mus'&&cur().hl){const hh=hlAt(cur().hl,s,a);if(hh&&hh[4])h+='<div class="aystop rkl"><b>'+hh[4]+'</b>'+(hlEnd(cur().hl,s,a)?'<span>آخر آية في الركعة</span>':'')+'</div>'}
   if(cur().v==='mus'&&PEND.has(s*1000+a))h+='<div class="aystop">هذه الآية موضع وقف '+dalilBtn(PEND.get(s*1000+a),PEND.get(s*1000+a))+'</div>';
+  h+=adabCard(s,a);
   h+=tafTabs();
   if(S.tafm==='ik'){if(INART)return h+'<p class="note">تفسير ابن كثير يُحمَّل من الإنترنت، ولا تسمح به هذه المعاينة.</p>';let aa=a;while(aa>1&&IK.has(s+':'+aa)&&IK.get(s+':'+aa)==='')aa--;const k2=s+':'+aa;if(!IK.has(k2)){ikGet(s,aa).catch(()=>{IK.set(k2,null)}).then(()=>{if(SH==='aya')refreshSheet()});return h+'<div class="tload"><i class="tspin"></i>جارٍ تحميل تفسير ابن كثير…</div>'}const t=IK.get(k2);if(t===null)return h+'<p class="note">تعذّر تحميل التفسير الآن، فتحقّق من الاتصال.</p>';return h+'<div class="taf">'+(aa!==a?'<p class="note">فُسّرت هذه الآية مع الآية '+AR(aa)+'.</p>':'')+'<div class="ikt"><p>'+ikClean(t)+'</p></div><p class="tfoot">«تفسير القرآن العظيم» للحافظ ابن كثير.</p></div>'}
   if(!GH)return h+(GHERR?'<div class="tload">تعذّر تحميل المعاني الآن، فتحقّق من الاتصال.</div>':'<div class="tload"><i class="tspin"></i>جارٍ التحميل…</div>');
