@@ -2571,7 +2571,7 @@ setInterval(eaTick,40);
 function eaBlob(url){AU.bu=AU.bu||{};AU.bp=AU.bp||{};if(AU.bu[url])return Promise.resolve(AU.bu[url]);if(AU.bp[url])return AU.bp[url];
   return AU.bp[url]=fetch(url).then(r=>r.ok?r.blob():Promise.reject()).then(b=>{const u=URL.createObjectURL(b);AU.bu[url]=u;return u}).catch(()=>{delete AU.bp[url];return null})}
 function eaPrep(){const ks=[AU.k+1,AU.k+2];ks.forEach((kk,n)=>{const x=AU.list[kk];if(!x)return;const url=eaUrl(x);eaBlob(url).then(bu=>{
-  if(!AU.on||AU.mode!=='ea')return;if(n===0){const o=AU.pool[0]===AU.el?AU.pool[1]:AU.pool[0];if(!o||o===AU.el||AU.k+1!==kk)return;
+  if(!AU.on||AU.mode!=='ea')return;if(n===0){const o=AU.pool[0]===AU.el?AU.pool[1]:AU.pool[0];if(!o||o===AU.el||AU.k+1!==kk)return;if(!o.paused&&!o.ended&&o.currentTime>0){setTimeout(eaPrep,200);return}
     if(o.dataset.u!==url){o.src=bu||url;o.dataset.u=url;o.dataset.p='';try{o.load()}catch(_){}}
     if(o.dataset.p!==url){o.dataset.p=url;o.muted=true;const q=o.play();const un=()=>setTimeout(()=>{if(o!==AU.el&&o.muted){try{o.pause();o.currentTime=0}catch(_){}o.muted=false}},80);if(q&&q.then)q.then(un,un);else un()}}})});
   const keep=new Set();for(let d=-1;d<=3;d++){const x=AU.list[AU.k+d];if(x)keep.add(eaUrl(x))}
@@ -2579,7 +2579,7 @@ function eaPrep(){const ks=[AU.k+1,AU.k+2];ks.forEach((kk,n)=>{const x=AU.list[k
 function eaNext(){AU.k++;if(AU.k>=AU.list.length){auEnd();return}const x=AU.list[AU.k],url=eaUrl(x);AU.lastBi=x.bi;
   if(!AU.pool){AU.pool=[AU.el||auMk(),auMk()];AU.el=AU.pool[0]}
   let e=AU.el;const idle=AU.pool[0]===e?AU.pool[1]:AU.pool[0];
-  if(idle.dataset.u===url){try{e.pause()}catch(_){}e=idle;AU.el=e}else{e.src=(AU.bu&&AU.bu[url])||url;e.dataset.u=url}
+  if(idle.dataset.u===url){e=idle;AU.el=e}else if(AU.k>0&&!e.paused&&!e.ended){e=idle;e.src=(AU.bu&&AU.bu[url])||url;e.dataset.u=url;AU.el=e}else{e.src=(AU.bu&&AU.bu[url])||url;e.dataset.u=url}
   e.muted=false;e.dataset.early='';const at=x.bs?x.at:[x.s,x.a];auMarkAy(at[0],at[1]);try{e.currentTime=0}catch(_){}const p=e.play();if(p&&p.catch)p.catch(auFail);
   eaPrep()}
 /* surah-file reciters: ayah timings bundled with the app (timing/<reciter>.json, milliseconds) */
