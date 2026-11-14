@@ -721,7 +721,21 @@ html.dk .qstage img{filter:invert(.92) hue-rotate(180deg) brightness(.95)}
 .riws.sm{margin-top:8px}
 .qaud audio{width:100%;margin-top:10px;height:40px}
 .musv{display:flex;flex-direction:column;height:calc(100vh - 56px - var(--sat) - var(--sab) - 24px);height:calc(100dvh - 56px - var(--sat) - var(--sab) - 24px);min-height:420px}
-body.musmode .fab{display:none!important}
+.kahf{margin:12px 0 4px;background:#14382C;border:1px solid #C9A94F;border-radius:18px;padding:16px;color:#F6EBC4}
+.kahf .kh-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.kahf .kh-tag{font-size:12px;padding:3px 12px;border-radius:999px;background:#E3C877;color:#2A2410}
+.kahf .kh-top small,.kahf .kh-main small,.kahf .kh-h small{color:#CBBE94;font-size:12px}
+.kahf .kh-main{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.kahf .kh-main b{display:block;font-size:22px;font-weight:500}
+.kahf .kh-ic{width:48px;height:48px;border-radius:14px;background:#E3C877;color:#14382C;display:grid;place-items:center}
+.kahf .kh-ic svg{width:26px;height:26px}
+.kahf .kh-h{margin:0 0 12px;padding-top:10px;border-top:1px solid rgba(227,200,119,.35);font-size:15px;line-height:1.9}
+.kahf .kh-h small{display:block;margin-top:4px}
+.kahf .kh-b{display:flex;gap:8px}
+.kahf .kh-b button{height:42px;border-radius:14px;font:inherit;font-size:15px;cursor:pointer}
+.kahf .kh-p{flex:1.4;background:#E3C877;color:#2A2410;border:none}
+.kahf .kh-r{flex:1;background:transparent;color:#F6EBC4;border:1px solid rgba(227,200,119,.6)}
+body.musmode .fab{bottom:calc(156px + var(--sab))}
 .mbar{flex:none;display:flex;gap:8px;align-items:center;margin:6px 0 4px;min-width:0}
 .mrw{flex:none;display:inline-flex;align-items:center;gap:8px;padding:5px 14px 3px;border-radius:999px;border:1px solid var(--gold2);background:var(--chip);color:var(--ink);font:15px 'Amiri',serif}
 .mrw small{color:var(--muted);font-size:13px}.mrw b{color:var(--gold);font-weight:700}.mrw i{font-style:normal;color:var(--gold);font-size:13px}
@@ -1585,6 +1599,7 @@ function vHome(){
   else x+='<div class="hh-next"><small>الصلاة القادمة</small><b>'+PR[np.p].n+'</b><span>'+(np.t?clock(np.t)+' · '+until(np.t):'حدّد موقعك لتظهر المواقيت')+'</span>'+(planFor(np.day,np.p)?'<em class="hh-plan">في جدولك: '+planFor(np.day,np.p).title+'</em>':'')+'</div>';
   x+='</header>';
   {const tab=adAuto(),dn=adDone(tab),n=ADK[tab].length;x+='<button class="adban" data-act="nav" data-v="adhkar"><span class="ai">'+(tab==='sabah'?ICON.sun||'☀':ICON.moon||'☾')+'</span><span class="at"><b>'+adTip()+'</b><small>'+(dn>=n?'أتممتَها اليوم، تقبّل الله':dn?'أنجزتَ '+AR(dn)+' من '+AR(n):'من الكتاب والسنة · ابدأ الآن')+'</small></span><span class="ac">'+ICON.back+'</span></button>';}
+  if(new Date().getDay()===5)x+='<div class="kahf"><div class="kh-top"><span class="kh-tag">يوم الجمعة</span><small>نحو ٣٠ دقيقة</small></div><div class="kh-main"><span class="kh-ic">'+(ICON.sun||'☀')+'</span><div><b>سورة الكهف</b><small>نور ما بين الجمعتين</small></div></div><p class="kh-h">«مَنْ قَرَأَ سُورَةَ الْكَهْفِ يَوْمَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ مَا بَيْنَ الْجُمُعَتَيْنِ»<small>رواه الحاكم والبيهقي، وصححه الألباني</small></p><div class="kh-b"><button class="kh-p" data-act="kahfplay">'+'استمع الآن'+'</button><button class="kh-r" data-act="kahfread">اقرأ</button></div></div>';
   if(isWird()){
     const w=wirdRange();
     x+=sect('الختمة')+'<div class="ptiles'+(ENTER?' stag':'')+'">'+wresCard()+'<button class="ptile next" data-act="nav" data-v="wird"><span class="pi">'+ICON.read+'</span><span class="pn"><b>وِرد اليوم</b><small>'+(w?'من سورة '+D.N[D.P[w[0]][0]-1]+' إلى سورة '+D.N[D.P[w[1]][0]-1]:'أتممت الختمة')+'</small></span></button></div>';
@@ -1969,7 +1984,8 @@ function vReader(r){
   else if(RD.mode==='night')x+='<button class="btn goldb" data-act="ndone" data-k="'+RD.k+'" data-m="'+RD.m+'">'+ICON.check+'تمّت القراءة</button>';
   return x+'<div style="height:70px"></div>';
 }
-function fabSync(){const f=$('fab');const on=S.onb&&cur().v==='reader'&&!listenCur();f.hidden=!on;ldockSync();if(on){f.innerHTML=AU.on?ICON.pause:ICON.play;f.classList.toggle('on',AU.on);f.setAttribute('aria-label',AU.on?'إيقاف':'استماع')}aproxSync()}
+const isMusP=()=>{const r=cur();return !!r&&r.v==='mus'&&(!r.rw||r.rw==='hafs')};
+function fabSync(){const f=$('fab');const mp=isMusP();const on=S.onb&&((cur().v==='reader'&&!listenCur())||mp);f.hidden=!on;f.dataset.act=mp?'musplay':'play';ldockSync();if(on){f.innerHTML=AU.on?ICON.pause:ICON.play;f.classList.toggle('on',AU.on);f.setAttribute('aria-label',AU.on?'إيقاف':'استماع')}aproxSync()}
 /* ---- topics ---- */
 function topicStatus(t){return 'ok'}
 const TSEL={};function tCapF(){return RANGES[rgK()].fajr[3]}
@@ -2019,7 +2035,7 @@ function fmtDur(sec){const m=Math.max(1,Math.round(sec/60));if(m<60)return AR(m)
 function durSec(sp){const rc=RC();const T=rc[2]==='sf'?TMF[rc[4]]:null;if(rc[2]==='sf'&&!T)tmLoad(rc[4]).then(()=>{try{ldockSync()}catch(e){}},()=>{});let sec=0;
   sp.blocks.forEach(b=>{sec+=.3;blockAyat(b).forEach(([s,a])=>{const tt=T&&(T[s]||T[String(s)]);if(tt&&tt[a-1])sec+=(tt[a-1][1]-tt[a-1][0])/1000+.1;else sec+=W(txt(s,a)).length*1.37+.3})});return {sec:sec,exact:!!T}}
 function durLine(sp){const d=durSec(sp),n=S.rep||1;return (d.exact?'':'نحو ')+fmtDur(d.sec*n)}
-function ldockSync(){try{adSyncPlay()}catch(_){}const d=$('ldock');if(!d)return;if(AZ.act&&S.onb){azDock(d);return}const lc=listenCur(),rs=cur().v==='reader'&&cur().spec;if(AU.on&&(lc||rs)){AU.spec=lc||rs;AU.keep=true}const sp=lc||(!rs&&AU.keep&&AU.spec?AU.spec:null);if(!sp||!S.onb){d.hidden=true;document.body.classList.remove('hasdock','hasmini');return}
+function ldockSync(){try{adSyncPlay()}catch(_){}const d=$('ldock');if(!d)return;if(AZ.act&&S.onb){azDock(d);return}const lc=listenCur(),rs=(cur().v==='reader'&&cur().spec)||(isMusP()&&AU.spec);if(AU.on&&(lc||rs)){AU.spec=lc||rs;AU.keep=true}const sp=lc||(!rs&&AU.keep&&AU.spec?AU.spec:null);if(!sp||!S.onb){d.hidden=true;document.body.classList.remove('hasdock','hasmini');return}
   d.hidden=false;d.classList.toggle('mini',!lc);document.body.classList.toggle('hasmini',!lc);
   if(!lc){d.innerHTML='<div class="ld-top"><b>'+esc(sp.title||'')+'</b><small style="color:#E3BB5C;opacity:1">'+(AU.on?'يُتلى الآن':'متوقف')+(AU.reps>1?' · باقي '+AR(AU.on?AU.left+1:AU.reps)+' من '+AR(AU.reps0||AU.reps):'')+'</small></div><div class="ld-ctl"><button class="ld-p" data-act="ldplay" aria-label="'+(AU.on?'إيقاف':'تشغيل')+'">'+(AU.on?ICON.pause:ICON.play)+'</button><button class="ld-s" data-act="ldclose" aria-label="إغلاق">✕</button></div>';document.body.classList.add('hasdock');return}
   document.body.classList.add('hasdock');document.body.classList.add('hasdock');const q=AU.q&&AU.q.length?TOPICS.find(x=>x.id===AU.q[0]):null;
@@ -2747,6 +2763,14 @@ document.addEventListener('click',ev=>{
   case 'tmforce':{tmSaveAt(+b.dataset.pos,true);break}
   case 'qibon':qibStart();break
   case 'adtab':{cur().tab=b.dataset.k;const y=window.scrollY;render();window.scrollTo(0,0);break}
+  case 'musplay':{if(AU.on){auStop();AU.q=null;break}
+    const all=[...document.querySelectorAll('#app .ay[data-s]')];const hl=all.some(e=>e.classList.contains('hl'));const seen=new Set(),L=[];
+    all.forEach(e=>{if(e.classList.contains('hid'))return;if(hl&&!e.classList.contains('hl'))return;const s2=+e.dataset.s,a2=+e.dataset.a,k=s2*1000+a2;if(seen.has(k))return;seen.add(k);L.push([s2,a2])});
+    if(!L.length)break;L.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);const bl=[];L.forEach(([s2,a2])=>{const c=bl[bl.length-1];if(c&&c.s===s2&&a2===c.b+1)c.b=a2;else bl.push({label:'',s:s2,a:a2,b:a2})});
+    const r=cur();azStop();AU.spec={listen:true,title:(r.spec&&r.spec.title)||('صفحة '+AR(r.pg||'')),blocks:bl};AU.keep=true;AU.fb=0;AU.qt=1;AU.lastBi=null;AU.reps=null;AU.adk=null;auToggle();break}
+  case 'kahfplay':{if(AU.on&&AU.spec&&AU.spec.kahf){auStop();AU.spec=null;AU.keep=false;break}
+    azStop();AU.spec={listen:true,kahf:true,title:'سورة الكهف',blocks:[{label:'سورة الكهف',s:18,a:1,b:110}]};AU.keep=true;AU.fb=0;AU.qt=1;AU.lastBi=null;AU.reps=null;AU.adk=null;auToggle();break}
+  case 'kahfread':musOpen({s:18,a:1});break;
   case 'azstart':{const tab=cur().tab||adAuto();if(AZ.act&&AZ.tab===tab){azStop();break}azStart(tab);break}
   case 'azplay':azToggle();break
   case 'aznext':azNext(1);break
@@ -2787,7 +2811,8 @@ document.addEventListener('click',ev=>{
   case 'musrwset':{const r=cur();if(r.v!=='mus')break;const an=musAnchor(r);const was=r.rw&&RWT[r.rw]&&RWD[r.rw];closeSheet();r.rw=v||'';r.err=0;if(v){S.riw=v;saveLocal()}
     if(v&&RWT[v])r.anc=an;else{r.anc=null;if(was)r.pg=D.PG[an[0]-1][Math.min(an[1],D.PG[an[0]-1].length)-1]}
     if(!v||v!==RW.id)rwStop();render();window.scrollTo(0,0);break}
-  case 'musjump':{const r=cur();if(r.v!=='mus')break;closeSheet();const s2=+b.dataset.s;if(s2){if(r.rw&&RWT[r.rw]&&RWD[r.rw])r.pg=RWD[r.rw].S[s2-1].p[0];else r.pg=D.PG[s2-1][0]}else r.pg=+b.dataset.pg||1;r.anc=null;render();window.scrollTo(0,0);persist();break}
+  case 'filq':{const r=cur();closeSheet();if(r.v!=='mus')break;const F={s:105,a:1,b:5,label:'سورة الفيل'},Q={s:106,a:1,b:4,label:'سورة قريش'};const bl=v==='fil'?[F]:v==='qur'?[Q]:[F,Q];r.hl=hlOf(bl);r.ht=v==='fil'?'سورة الفيل':v==='qur'?'سورة قريش':'سورة الفيل مع قريش';r.spec=null;r.pg=D.PG[v==='qur'?105:104][0];r.anc=null;render();window.scrollTo(0,0);persist();break}
+  case 'musjump':{const r=cur();if(r.v!=='mus')break;if((+b.dataset.s===105||+b.dataset.s===106)&&!r.rw){openSheet(shead('الفيل وقريش')+'<p class="meta" style="margin:0 0 10px;line-height:1.9">عدّ بعض العلماء الفيل وقريش سورة واحدة، منهم أُبيّ بن كعب، ولا فصل بينهما في مصحفه، وقالوا إن «لإيلاف» متعلقة بما قبلها: أهلك الله أصحاب الفيل لتبقى قريش آمنة في رحلتيها (البغوي والقرطبي). وهما سورتان منفصلتان في المصحف العثماني، وهذا اقتراح للتدبر وليس حكمًا.</p><button class="card go" data-act="filq" data-v="both"><span><b>سورة الفيل مع سورة قريش</b></span></button><button class="card go" data-act="filq" data-v="fil"><span><b>سورة الفيل فقط</b></span></button><button class="card go" data-act="filq" data-v="qur"><span><b>سورة قريش فقط</b></span></button>');break}closeSheet();const s2=+b.dataset.s;if(s2){if(r.rw&&RWT[r.rw]&&RWD[r.rw])r.pg=RWD[r.rw].S[s2-1].p[0];else r.pg=D.PG[s2-1][0]}else r.pg=+b.dataset.pg||1;r.anc=null;render();window.scrollTo(0,0);persist();break}
   case 'rwplay':{const r=cur();closeSheet();rwPlay(r.rw,+b.dataset.s,+b.dataset.a,b.dataset.one==='1');break}
   case 'rwtog':{if(!RW.el)break;if(RW.el.paused){const p=RW.el.play();if(p&&p.catch)p.catch(()=>{})}else RW.el.pause();break}
   case 'rwseek':{if(!RW.el)break;try{RW.el.currentTime=Math.max(0,RW.el.currentTime+(+b.dataset.d))}catch(e){}break}
