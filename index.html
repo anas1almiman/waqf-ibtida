@@ -917,6 +917,9 @@ body.tabs #tabbar{display:flex}
 #tabbar button:active{transform:scale(.94)}
 body.tabs .wrap{padding-bottom:calc(74px)!important}
 body.tabs .fab{bottom:calc(86px + var(--sab))}
+.musim #app .bar,.musim .mbar,.musim .mchips,.musim .musv .mact,.musim .mnav{display:none}
+body.musim .musv{height:calc(100vh - var(--sat) - var(--sab));height:calc(100dvh - var(--sat) - var(--sab));min-height:0;margin:0 -16px;padding-top:var(--sat)}
+body.musim .mpage{margin:0;border-radius:0;padding:6px 14px 4px}
 .musv .mact{flex:none;margin:0 0 8px;padding-top:9px;padding-bottom:7px}
 .rsl{-webkit-appearance:none;appearance:none;display:block;width:100%;height:30px;margin:6px 0 0;background:transparent;direction:rtl}
 .rsl::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--gold2),var(--gold3))}
@@ -1511,7 +1514,8 @@ function juzOf(pg){return pg<22?1:Math.min(30,Math.floor((pg-2)/20)+1)}
 function hlOf(blocks){const o=[];blocks.forEach((b,bi)=>{if(b.s)o.push([b.s,b.a,b.b,bi,b.label||'']);else for(let x=b.i;x<=b.j;x++){const p=D.P[x];o.push([p[0],p[1],p[2],bi,b.label||''])}});const E={};o.forEach(h=>{E[h[3]]=h[0]*1000+h[2]});o.ends=new Set(Object.keys(E).map(k=>E[k]));o.many=blocks.length>1;return o}
 function inHl(hl,s,a){for(let i=0;i<hl.length;i++){const h=hl[i];if(h[0]===s&&a>=h[1]&&a<=h[2])return true}return false}
 function hlAt(hl,s,a){for(let i=0;i<hl.length;i++){const h=hl[i];if(h[0]===s&&a>=h[1]&&a<=h[2])return h}return null}
-let LP=null,LPX=0;
+let LP=null,LPX=0,MCH=false;function musChrome(){MCH=!MCH;document.body.classList.toggle('musim',cur().v==='mus'&&!MCH);requestAnimationFrame(()=>{if(cur().v==='mus')musFit()})}
+
 function lpClear(){if(!LP)return;clearTimeout(LP.t);document.querySelectorAll('#app .mlines .ay.lpd').forEach(e=>e.classList.remove('lpd'));LP=null}
 document.addEventListener('pointerdown',ev=>{if(cur().v!=='mus'||(ev.pointerType==='mouse'&&ev.button))return;const e=ev.target.closest&&ev.target.closest('#app .mlines .ay[data-act=ayt]');if(!e)return;lpClear();
   const s=e.dataset.s,a=e.dataset.a;LP={x:ev.clientX,y:ev.clientY,t:setTimeout(()=>{const r=cur();LPX=Date.now();try{navigator.vibrate&&navigator.vibrate(14)}catch(_){}
@@ -1593,7 +1597,7 @@ function vMus(r){
   if(r.hl&&!(r.rw&&r.rw!=='hafs')&&MUT){const n=mutScope({sc:'seg',blocks:r.hl.map(h=>({s:h[0],a:h[1],b:h[2]}))}).length;if(n){const c='<button class="mchip mtk" data-act="mutmus">'+ICON.mut+'المتشابه · '+AR(n)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
   if(S.mark&&!(r.rw&&r.rw!=='hafs')){const mp0=D.PG[S.mark.s-1][S.mark.a-1];if(mp0!==r.pg){const c='<button class="mchip mkb" data-act="markgo">'+ICBM+'تابع من حيث وقفتَ · '+D.N[S.mark.s-1]+' '+AR(S.mark.a)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
   const bar='<div class="mbar"><button class="mrw" data-act="musrw"><small>الرواية</small><b>'+(meta?meta[1]:'حفص عن عاصم')+'</b><i>▾</i></button>'+info+'</div>'+chips;
-  const shell=(inner,cls,pg,top)=>x+'<div class="musv">'+bar+'<div class="mpage '+cls+'" data-pg="'+pg+'"><div class="mtop"><span>'+(top||'')+'</span><span>'+(pg?'الجزء '+AR(juzOf(pg)):'')+'</span></div>'+inner+'<div class="mfoot">'+(pg?AR(pg):'')+'</div></div>'+mact+
+  const shell=(inner,cls,pg,top)=>x+'<div class="musv">'+bar+'<div class="mpage '+cls+'" data-act="mtap" data-pg="'+pg+'"><div class="mtop"><span>'+(top||'')+'</span><span>'+(pg?'الجزء '+AR(juzOf(pg)):'')+'</span></div>'+inner+'<div class="mfoot">'+(pg?AR(pg):'')+'</div></div>'+mact+
     '<div class="mnav"><button data-act="musgo" data-d="-1"'+(pg<=1?' disabled':'')+'>السابقة</button><button class="mpn" data-act="musidx">'+(pg?'صفحة '+AR(pg):'')+'</button><button data-act="musgo" data-d="1"'+(pg>=604?' disabled':'')+'>التالية</button></div></div>'+
     '<div id="rwbar" class="rwbar"><button class="ib" data-act="rwx" aria-label="إيقاف">'+ICON.x+'</button><div class="rwi"><b id="rwl"></b><small id="rwt"></small></div><button class="ib" data-act="rwseek" data-d="-10" aria-label="رجوع عشر ثوانٍ">−١٠</button><button class="ib rwp" data-act="rwtog" aria-label="تشغيل أو إيقاف مؤقت" id="rwp">'+ICON.pause+'</button><button class="ib" data-act="rwseek" data-d="10" aria-label="تقديم عشر ثوانٍ">+١٠</button></div>';
   const wait=(msg)=>shell('<div class="mlines mwait"><div class="tload"><i class="tspin"></i>'+msg+'</div></div>','ld',r.pg||0,'');
@@ -1863,7 +1867,7 @@ function render(){
   document.documentElement.classList.toggle('onb',!S.onb);
   if(!S.onb){document.body.classList.remove('bookmode');document.documentElement.classList.remove('bookmode');document.body.classList.remove('reading');$('app').innerHTML=vStart();fabSync();{const rl=document.querySelector('.reclist .rrow.on');if(rl){const L=rl.parentNode;L.scrollTop=Math.max(0,rl.offsetTop-L.clientHeight/2+rl.offsetHeight/2)}}return}
   const r=cur();document.body.classList.toggle('reading',r.v==='reader');document.body.classList.toggle('bookmode',r.v==='book');document.documentElement.classList.toggle('bookmode',r.v==='book');
-  $('app').innerHTML=(VIEWS[r.v]||vHome)(r);tabSync();bgwSet(r.v);setTimeout(ttSync,60);barSync();parallax();fabSync();if(r.v==='book')bkMount();document.body.classList.toggle('musmode',r.v==='mus');if(r.v==='mus'){musFit();RW.marked=false;rwSync();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(cur()===r)musFit()})}
+  $('app').innerHTML=(VIEWS[r.v]||vHome)(r);tabSync();bgwSet(r.v);setTimeout(ttSync,60);barSync();parallax();fabSync();if(r.v==='book')bkMount();document.body.classList.toggle('musmode',r.v==='mus');if(r.v!=='mus')MCH=false;document.body.classList.toggle('musim',r.v==='mus'&&!MCH);if(r.v==='mus'){musFit();RW.marked=false;rwSync();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(cur()===r)musFit()})}
 }
 function parallax(){if(RM)return;const h=document.querySelector('#app .hero,#app .hhero');if(h)h.style.backgroundPosition='center calc(50% + '+Math.min(120,window.scrollY*0.32).toFixed(1)+'px)'}
 window.addEventListener('scroll',()=>{requestAnimationFrame(parallax)},{passive:true});
@@ -3307,7 +3311,8 @@ document.addEventListener('click',ev=>{
   case 'rwseek':{if(!RW.el)break;try{RW.el.currentTime=Math.max(0,RW.el.currentTime+(+b.dataset.d))}catch(e){}break}
   case 'rwx':rwStop();break;
   case 'riw':{S.riw=v;saveLocal();const y=window.scrollY;render();window.scrollTo(0,y);break}
-  case 'ayt':{if(b.classList.contains('hid'))break;if(cur().v==='mus'){if(Date.now()-LPX<700)break;if((S.lph||0)<3){S.lph=(S.lph||0)+1;saveLocal();toast('اضغط مطوّلًا على الآية لفتح تفاصيلها')}break}const sel=window.getSelection&&String(window.getSelection());if(sel&&sel.length>1)break;const r0=cur();if(r0.v==='mus'&&r0.rw&&r0.rw!=='hafs')rwSheet(+b.dataset.s,+b.dataset.a);else ayaSheet(+b.dataset.s,+b.dataset.a);break}
+  case 'mtap':{if(Date.now()-LPX<700)break;musChrome();break}
+  case 'ayt':{if(b.classList.contains('hid'))break;if(cur().v==='mus'){if(Date.now()-LPX<700)break;musChrome();if(!MCH&&(S.lph||0)<2){S.lph=(S.lph||0)+1;saveLocal();toast('المس الشاشة لإظهار الخيارات · اضغط مطوّلًا على الآية لتفاصيلها')}break}const sel=window.getSelection&&String(window.getSelection());if(sel&&sel.length>1)break;const r0=cur();if(r0.v==='mus'&&r0.rw&&r0.rw!=='hafs')rwSheet(+b.dataset.s,+b.dataset.a);else ayaSheet(+b.dataset.s,+b.dataset.a);break}
   case 'ayplay':ayPlay(+b.dataset.s,+b.dataset.a);break;
   case 'ayrep':ayPlay(+b.dataset.s,+b.dataset.a,3);break;
   case 'ayfrom':{const s2=+b.dataset.s,a2=+b.dataset.a;closeSheet();ayStop();if(AU.on)auStop();AU.from=[s2,a2];auToggle();break}
@@ -3467,7 +3472,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=112;
+const APPV=113;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
