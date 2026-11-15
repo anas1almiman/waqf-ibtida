@@ -2742,6 +2742,7 @@ function icsPrayers(){
     const AF={fajr:35,dhuhr:35,asr:35,maghrib:25,isha:35},mk=(uid,when,title,desc)=>{if(!when||when<new Date())return;ev.push('BEGIN:VEVENT','UID:'+uid+'-'+n+'-'+Date.now()+'@waqf-ibtida','DTSTAMP:'+z,'DTSTART:'+U(when),'DURATION:PT10M','SUMMARY:'+title+' · '+APP,'DESCRIPTION:'+esc2(desc),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(title),'TRIGGER:PT0M','END:VALARM','END:VEVENT')};
     Object.keys(AF).forEach(p=>{if(tm[p])mk('af-'+p,new Date(tm[p].getTime()+AF[p]*60000),'أذكار بعد صلاة '+NM[p],'حان وقت أذكار ما بعد صلاة '+NM[p])});
     if(tm.fajr){let w2=new Date(tm.fajr.getTime()+55*60000);if(tm.sunrise&&w2>tm.sunrise)w2=new Date(tm.sunrise.getTime()-10*60000);mk('sabah',w2,'أذكار الصباح','وقت أذكار الصباح')}
+    if(d.getDay()===5){const wk=new Date(d);wk.setHours(8,0,0,0);mk('kahf',wk,'سورة الكهف','لا تنسَ قراءة سورة الكهف')}
     if(tm.asr)mk('masa',new Date(tm.asr.getTime()+50*60000),'أذكار المساء','وقت أذكار المساء');
     const a=ayahOfDay(n),w=new Date(d);w.setHours(7,30,0,0);if(w>new Date())ev.push('BEGIN:VEVENT','UID:ay-'+n+'-'+Date.now()+'@waqf-ibtida','DTSTAMP:'+z,'DTSTART:'+U(w),'DURATION:PT5M','SUMMARY:آية اليوم · '+APP,'DESCRIPTION:'+esc2(a.r),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(a.r),'TRIGGER:PT0M','END:VALARM','END:VEVENT')}
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//waqf-ibtida//AR','CALSCALE:GREGORIAN'].concat(ev,['END:VCALENDAR']).join('\r\n');
@@ -2754,6 +2755,7 @@ function ntfEvents(d){const tm=todayTimes(d);if(!tm)return[];const NM={fajr:'ا�
   Object.keys(NM).forEach(p=>{if(!tm[p])return;ev.push({k:k+'pre'+p,t:new Date(tm[p].getTime()-10*60000),h:'باقي ١٠ دقائق على صلاة '+NM[p],b:'استعدّ للصلاة، وراجع مقطعك.'});ev.push({k:k+'at'+p,t:tm[p],h:'حان وقت صلاة '+NM[p],b:'تقبّل الله منك.'});ev.push({k:k+'af'+p,t:new Date(tm[p].getTime()+AF[p]*60000),h:'أذكار بعد صلاة '+NM[p],b:'لا تفوّت أذكار ما بعد الصلاة.'})});
   if(tm.fajr){let w=new Date(tm.fajr.getTime()+55*60000);if(tm.sunrise&&w>tm.sunrise)w=new Date(tm.sunrise.getTime()-10*60000);ev.push({k:k+'sab',t:w,h:'أذكار الصباح',b:'ابدأ يومك بذكر الله.'})}
   if(tm.asr)ev.push({k:k+'mas',t:new Date(tm.asr.getTime()+50*60000),h:'أذكار المساء',b:'وقت أذكار المساء.'});
+  if(d.getDay()===5){const wk=new Date(d);wk.setHours(8,0,0,0);ev.push({k:k+'kah',t:wk,h:'يوم الجمعة',b:'لا تنسَ قراءة سورة الكهف'})}
   const a=ayahOfDay(0),w7=new Date(d);w7.setHours(7,30,0,0);ev.push({k:k+'ayd',t:w7,h:'آية اليوم',b:a.r});
   if(S.remOn&&S.remT){const m=/^(\d+):(\d+)/.exec(S.remT);if(m){const w=new Date(d);w.setHours(+m[1],+m[2],0,0);ev.push({k:k+'wrd',t:w,h:'وردك اليوم',b:'خصّص وقتًا لقراءتك اليوم.'})}}
   return ev}
@@ -3538,7 +3540,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=117;
+const APPV=118;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
