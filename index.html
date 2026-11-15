@@ -929,7 +929,8 @@ body.musmode .mdk{bottom:0;border-top:1px solid var(--line);padding:8px 16px cal
 body.musim .mtg{transform:translateY(-104%);opacity:0;pointer-events:none}
 body.musim .mdk{transform:translateY(104%);opacity:0;pointer-events:none}
 body.musmode .musv{height:calc(100vh - var(--sat) - var(--sab));height:calc(100dvh - var(--sat) - var(--sab));min-height:0;margin:0 -16px;padding-top:var(--sat)}
-body.musmode .mpage{margin:0;border-radius:0;padding:6px 14px 4px}
+body.musmode .mpage{margin:0;border-radius:0;padding:6px 14px 4px;transform-origin:50% 50%;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+body.musmode:not(.musim) .mpage{transform:translateY(var(--mty,0px)) scale(var(--msc,1))}
 body.musmode .mdk .mact{margin:0 0 8px}body.musmode .mdk .mnav{margin:0}
 .musv .mact{flex:none;margin:0 0 8px;padding-top:9px;padding-bottom:7px}
 .rsl{-webkit-appearance:none;appearance:none;display:block;width:100%;height:30px;margin:6px 0 0;background:transparent;direction:rtl}
@@ -1525,7 +1526,8 @@ function juzOf(pg){return pg<22?1:Math.min(30,Math.floor((pg-2)/20)+1)}
 function hlOf(blocks){const o=[];blocks.forEach((b,bi)=>{if(b.s)o.push([b.s,b.a,b.b,bi,b.label||'']);else for(let x=b.i;x<=b.j;x++){const p=D.P[x];o.push([p[0],p[1],p[2],bi,b.label||''])}});const E={};o.forEach(h=>{E[h[3]]=h[0]*1000+h[2]});o.ends=new Set(Object.keys(E).map(k=>E[k]));o.many=blocks.length>1;return o}
 function inHl(hl,s,a){for(let i=0;i<hl.length;i++){const h=hl[i];if(h[0]===s&&a>=h[1]&&a<=h[2])return true}return false}
 function hlAt(hl,s,a){for(let i=0;i<hl.length;i++){const h=hl[i];if(h[0]===s&&a>=h[1]&&a<=h[2])return h}return null}
-let LP=null,LPX=0,MCH=false;function musChrome(){MCH=!MCH;document.body.classList.toggle('musim',cur().v==='mus'&&!MCH)}
+let LP=null,LPX=0,MCH=false;function musVars(){const m=document.querySelector('#app .mtg'),d=document.querySelector('#app .mdk'),v=document.querySelector('#app .musv');if(!m||!d||!v)return;const H=v.clientHeight||innerHeight,t=m.offsetHeight,b=d.offsetHeight;const sc=Math.max(.5,(H-t-b-6)/H);const R=document.documentElement.style;R.setProperty('--msc',sc.toFixed(4));R.setProperty('--mty',((t-b)/2).toFixed(1)+'px')}
+function musChrome(){musVars();MCH=!MCH;document.body.classList.toggle('musim',cur().v==='mus'&&!MCH)}
 
 function lpClear(){if(!LP)return;clearTimeout(LP.t);document.querySelectorAll('#app .mlines .ay.lpd').forEach(e=>e.classList.remove('lpd'));LP=null}
 document.addEventListener('pointerdown',ev=>{if(cur().v!=='mus'||(ev.pointerType==='mouse'&&ev.button))return;const e=ev.target.closest&&ev.target.closest('#app .mlines .ay[data-act=ayt]');if(!e)return;lpClear();
@@ -1692,7 +1694,7 @@ document.addEventListener('change',e=>{const b=e.target;if(!b.classList||!b.clas
 let MSW=null;
 document.addEventListener('touchstart',e=>{const t=e.target.closest&&e.target.closest('.mpage');MSW=t&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});
 document.addEventListener('touchend',e=>{if(!MSW||SH)return;const c=e.changedTouches[0],dx=c.clientX-MSW.x,dy=c.clientY-MSW.y;MSW=null;if(Math.abs(dx)>64&&Math.abs(dy)<46)musGo(dx>0?1:-1)},{passive:true});
-window.addEventListener('resize',()=>{if(cur()&&cur().v==='mus')musFit()});
+window.addEventListener('resize',()=>{if(cur()&&cur().v==='mus'){musFit();musVars()}});
 /* ================= views ================= */
 const TABV={home:'home',topics:'topics',library:'library',more:'more',plan:'more',ramadan:'more',record:'more',settings:'more'};
 const TABS=[['home','اليوم','mosque'],['mus','المصحف','book'],['topics','المختارات','star'],['library','المكتبة','shelf'],['more','المزيد','list']];
@@ -1887,7 +1889,7 @@ function render(){
   document.documentElement.classList.toggle('onb',!S.onb);
   if(!S.onb){document.body.classList.remove('bookmode');document.documentElement.classList.remove('bookmode');document.body.classList.remove('reading');$('app').innerHTML=vStart();fabSync();{const rl=document.querySelector('.reclist .rrow.on');if(rl){const L=rl.parentNode;L.scrollTop=Math.max(0,rl.offsetTop-L.clientHeight/2+rl.offsetHeight/2)}}return}
   const r=cur();document.body.classList.toggle('reading',r.v==='reader');document.body.classList.toggle('bookmode',r.v==='book');document.documentElement.classList.toggle('bookmode',r.v==='book');
-  $('app').innerHTML=(VIEWS[r.v]||vHome)(r);tabSync();bgwSet(r.v);setTimeout(ttSync,60);barSync();parallax();fabSync();if(r.v==='book')bkMount();document.body.classList.toggle('musmode',r.v==='mus');if(r.v!=='mus')MCH=false;document.body.classList.toggle('musim',r.v==='mus'&&!MCH);if(r.v==='mus'){musFit();RW.marked=false;rwSync();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(cur()===r)musFit()})}
+  $('app').innerHTML=(VIEWS[r.v]||vHome)(r);tabSync();bgwSet(r.v);setTimeout(ttSync,60);barSync();parallax();fabSync();if(r.v==='book')bkMount();document.body.classList.toggle('musmode',r.v==='mus');if(r.v!=='mus')MCH=false;document.body.classList.toggle('musim',r.v==='mus'&&!MCH);if(r.v==='mus'){musFit();musVars();RW.marked=false;rwSync();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(cur()===r)musFit()})}
 }
 function parallax(){if(RM)return;const h=document.querySelector('#app .hero,#app .hhero');if(h)h.style.backgroundPosition='center calc(50% + '+Math.min(120,window.scrollY*0.32).toFixed(1)+'px)'}
 window.addEventListener('scroll',()=>{requestAnimationFrame(parallax)},{passive:true});
@@ -3553,7 +3555,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=121;
+const APPV=122;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
