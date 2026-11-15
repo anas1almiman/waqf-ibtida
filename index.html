@@ -2793,7 +2793,7 @@ function ttsSay(b){
   speechSynthesis.cancel();
   parts.forEach((p,i)=>{const u=new SpeechSynthesisUtterance(p.trim());u.lang='ar-SA';if(v)u.voice=v;u.rate=.92;if(i===parts.length-1)u.onend=()=>{if(TTS.on)ttsStop()};u.onerror=()=>{};speechSynthesis.speak(u)})
 }
-function ttsBtn(){return ('speechSynthesis' in window)?'<button class="btn outline ttsb" data-act="ttsplay">'+ICON.play+'استمع للتفسير</button>':''}
+function ttsBtn(){return ''}
 function tafTabs(){const m=tfMode()?'tf':'gh',id=tfId();let h=(m==='tf'&&!tfNeedPick()?ttsBtn():'')+'<div class="seg taftabs"><button class="'+(m==='gh'?'on':'')+'" data-act="tafm" data-v="gh">معاني الكلمات</button><button class="'+(m==='tf'?'on':'')+'" data-act="tafm" data-v="tf">التفسير</button></div>';
   if(m==='tf'){if(tfNeedPick())h+='<p class="tfq">اختر التفسير الذي تريد القراءة منه</p>'+tfPicker();else h+='<button class="tfcur" data-act="tfchg"><span>'+TFM[id].name+'</span><small>تغيير</small></button>'}
   return h}
@@ -3438,7 +3438,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=108;
+const APPV=109;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
