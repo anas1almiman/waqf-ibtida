@@ -923,8 +923,9 @@ body.tabs #tabbar{display:flex}
 body.tabs .wrap{padding-bottom:calc(74px)!important}
 body.tabs .fab{bottom:calc(86px + var(--sab))}
 body.musmode .mtg,body.musmode .mdk{position:fixed;left:0;right:0;z-index:20;max-width:520px;margin:0 auto;background:var(--barbg);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);transition:transform .5s cubic-bezier(.22,1,.36,1),opacity .35s ease;will-change:transform,opacity}
+body.musmode .mtg .bar .t{font-size:17px;min-width:0}body.musmode .mtg .bar .end .ib{width:38px}body.musmode .mtg .bar .bk span{display:none}
 body.musmode .mtg{top:0;border-bottom:1px solid var(--line);padding:0 16px 4px}
-body.musmode .mtg .bar{position:static;margin:0 -16px;box-shadow:none;border-bottom:0}
+body.musmode .mtg .bar{grid-template-columns:auto minmax(0,1fr) auto;gap:4px;position:static;margin:0 -16px;box-shadow:none;border-bottom:0}
 body.musmode .mdk{bottom:0;border-top:1px solid var(--line);padding:8px 16px calc(8px + var(--sab))}
 body.musim .mtg{transform:translateY(-104%);opacity:0;pointer-events:none}
 body.musim .mdk{transform:translateY(104%);opacity:0;pointer-events:none}
@@ -3555,7 +3556,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=122;
+const APPV=123;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
