@@ -3006,10 +3006,11 @@ const LIB=[
  {id:'h_tirmidhi',sec:'hd',kind:'hdb',open:true,col:HDB.tirmidhi[3],ct:HDB.tirmidhi[0],ca:HDB.tirmidhi[1],short:HDB.tirmidhi[0],t:HDB.tirmidhi[0],a:HDB.tirmidhi[1],ed:'يُحمَّل من الإنترنت عند أول فتح ثم يُحفظ على جوالك'},
  {id:'h_nasai',sec:'hd',kind:'hdb',open:true,col:HDB.nasai[3],ct:HDB.nasai[0],ca:HDB.nasai[1],short:HDB.nasai[0],t:HDB.nasai[0],a:HDB.nasai[1],ed:'يُحمَّل من الإنترنت عند أول فتح ثم يُحفظ على جوالك'},
  {id:'h_ibnmajah',sec:'hd',kind:'hdb',open:true,col:HDB.ibnmajah[3],ct:HDB.ibnmajah[0],ca:HDB.ibnmajah[1],short:HDB.ibnmajah[0],t:HDB.ibnmajah[0],a:HDB.ibnmajah[1],ed:'يُحمَّل من الإنترنت عند أول فتح ثم يُحفظ على جوالك'},
+ {id:'tawhid',sec:'aq',open:true,pages:168,dir:'books/tawhid/',ext:'webp',start:1,col:['#12343F','#1F6075'],ct:'كتاب التوحيد',ca:'محمد بن عبد الوهاب',short:'كتاب التوحيد',t:'كتاب التوحيد الذي هو حقّ الله على العبيد',a:'الإمام محمد بن عبد الوهاب',ed:'نسخة مصوّرة · ١٦٨ صفحة'},
  {id:'qiraat',sec:'qr',kind:'qir',open:true,col:['#3B1230','#6A1F55'],ct:'مصاحف الروايات',ca:'بخط مجمع الملك فهد',short:'مصاحف الروايات',t:'مصاحف الروايات',a:'مصاحف مجمع الملك فهد بروايات قالون وورش والبزي وقنبل والدوري والسوسي وشعبة، نصًّا وصوتًا',ed:'سبع روايات نصًّا وصوتًا، وأربع صوتًا'},
 ];
 LIB.splice(LIB.findIndex(b=>b.id==='gharib'),0,...TFL.flatMap(g=>g[2].map(z=>({id:'tf_'+z[0],sec:'tf',kind:z[0],open:true,col:z[4],ct:z[2],ca:z[3],short:z[2],t:z[2],a:z[3],ed:'يُتصفَّح بالسورة والآية، ويُحمَّل من الإنترنت عند الفتح'}))));
-const LSEC=[['wq','الوقف والابتداء','المصادر التي استُخرجت منها مواضع الوقف'],['mt','المتشابه','ضبط متشابهات القرآن'],['tf','التفسير','التفاسير وغريب القرآن'],['qr','القراءات','مصحف القراءات العشر'],['hd','الحديث الشريف','متون وشروح']];
+const LSEC=[['wq','الوقف والابتداء','المصادر التي استُخرجت منها مواضع الوقف'],['mt','المتشابه','ضبط متشابهات القرآن'],['tf','التفسير','التفاسير وغريب القرآن'],['qr','القراءات','مصحف القراءات العشر'],['hd','الحديث الشريف','متون وشروح'],['aq','العقيدة','متون التوحيد']];
 function vLibrary(){
   let x=topbar('المكتبة',{over:true})+hero('library','','المكتبة','');
   LSEC.forEach(sc=>{const L=LIB.filter(b=>(b.sec||'wq')===sc[0]);if(!L.length)return;
@@ -3537,7 +3538,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=116;
+const APPV=117;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
