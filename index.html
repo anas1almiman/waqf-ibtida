@@ -264,6 +264,8 @@ textarea.note-in{width:100%;min-height:70px;border:1px solid var(--line);border-
 .sh::before,.sh::after{content:'';width:16px;height:16px;background:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MCA0MCI+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjQzhBMjUzIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIi8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHRyYW5zZm9ybT0icm90YXRlKDQ1IDIwIDIwKSIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjQuNSIgZmlsbD0iI0M4QTI1MyIgc3Ryb2tlPSJub25lIi8+PC9nPjwvc3ZnPg==) center/contain no-repeat}
 .bs{text-align:center;font-family:'KFGQPC Hafs','Amiri Quran',serif;font-size:calc(var(--qs) - 2px);margin:4px 0 2px}
 
+.tsseg{display:flex;gap:6px;background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:16px;padding:4px;margin:2px 0 10px}.tsseg button{flex:1;height:40px;border:0;border-radius:12px;background:transparent;font:inherit;font-weight:700;color:var(--muted)}.tsseg button.on{background:var(--gg);color:#2A1E06}
+.tstx .sh{margin:14px 0 8px}
 .tsopts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:4px 0 12px}
 .tstx .tw{border-radius:6px;transition:color .2s,background .2s}
 .tstx .tw:not(.v){color:transparent;background:linear-gradient(transparent 80%,rgba(148,112,31,.26) 80%,rgba(148,112,31,.26) 86%,transparent 86%);-webkit-user-select:none;user-select:none}
@@ -1681,7 +1683,7 @@ const TABS=[['home','اليوم','mosque'],['mus','المصحف','book'],['topic
 function tabSync(){const r=cur();const on=!!S.onb&&STACK.length<=2&&!!TABV[r.v];let b=$('tabbar');if(!b){b=document.createElement('nav');b.id='tabbar';b.setAttribute('aria-label','التنقل الرئيسي');document.body.appendChild(b)}document.body.classList.toggle('tabs',on);if(!on){b.innerHTML='';return}const act=TABV[r.v];b.innerHTML=TABS.map(x=>'<button class="'+(x[0]===act?'on':'')+'" data-act="tab" data-v="'+x[0]+'">'+ICON[x[2]]+'<span>'+x[1]+'</span></button>').join('')}
 function vMore(){let x=topbar('المزيد')+'<div style="height:12px"></div><div class="group">'+srow('mut','ضبط المتشابه','','muthub')+srow('sun','الأذكار','','nav','data-v="adhkar"')+srow('cal','جدولي','','nav','data-v="plan"')+srow('moon','رمضان','','nav','data-v="ramadan"')+srow('book','السجل','','nav','data-v="record"')+srow('gear','الإعدادات','','nav','data-v="settings"')+'</div>';return x}
 /*TS_BEGIN*/
-/* ---- tasmi engine ---- */
+/* ---- tasmi engine v2: live global alignment ---- */
 function tsK(w){
   w=String(w).replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ࣓-ࣿ]/g,'')
    .replace(/[ٱأإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ء/g,'')
@@ -1691,139 +1693,165 @@ function tsK(w){
 }
 function tsLev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=[];for(let j=0;j<=n;j++)p[j]=j;for(let i=1;i<=m;i++){let c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a.charCodeAt(i-1)===b.charCodeAt(j-1)?0:1));p=c}return p[n]}
 function tsM(a,b,strict){if(!a||!b)return false;if(a===b)return true;const L=Math.max(a.length,b.length);if(L<=3)return false;const d=tsLev(a,b);if(L===4)return d<=1;return d<=Math.floor(L*(strict?0.2:0.3))}
-/* one step: returns {used,marks:[[i,st]],pos,err,hold,noise} */
-function tsOne(E,p,r,nx,cfg){
-  const M=(i,w)=>!!(E[i]&&w&&tsM(w,E[i].k,cfg.strict));
-  const marks=[];
-  let q=p;while(E[q]&&E[q].opt&&!M(q,r))q++;
-  if(q>p){for(let i=p;i<q;i++)marks.push([i,'op']);p=q}
-  if(!E[p])return {used:1,marks,pos:p};
-  if(M(p,r)){marks.push([p,'ok']);return {used:1,marks,pos:p+1}}
-  if(nx&&M(p,r+nx)){marks.push([p,'ok']);return {used:2,marks,pos:p+1}}
-  if(E[p+1]&&tsM(r,E[p].k+E[p+1].k,cfg.strict)){marks.push([p,'ok'],[p+1,'ok']);return {used:1,marks,pos:p+2}}
-  for(let d=1;d<=3;d++){if(M(p+d,r)&&(E[p+d].k.length>=3||d===1)){
-    if(cfg.sens!=='strict'&&d===1){marks.push([p,'sk'],[p+1,'ok']);return {used:1,marks,pos:p+2}}
-    if(cfg.stop)return {used:1,marks,pos:p,err:{p,heard:r,type:'skip',d}};
-    for(let i=0;i<d;i++)marks.push([p+i,'er']);marks.push([p+d,'ok']);return {used:1,marks,pos:p+d+1}}}
-  if(nx==null&&!cfg.flush&&cfg.sens!=='strict')return {used:0,marks,pos:p,hold:true};
-  if(nx&&M(p,nx))return {used:1,marks,pos:p,noise:true};
-  if(E[p].k.length<=2&&!cfg._sk&&cfg.sens!=='strict'){const o=tsOne(E,p+1,r,nx,Object.assign({},cfg,{_sk:1}));if(!o.hold){marks.push([p,'sk']);return {used:o.used,marks:marks.concat(o.marks),pos:o.pos,err:o.err,noise:o.noise}}}
-  const sub=nx&&M(p+1,nx);
-  if(sub&&cfg.sens==='low'){marks.push([p,'sk']);return {used:1,marks,pos:p+1}}
-  if(cfg.stop)return {used:1,marks,pos:p,err:{p,heard:r,type:'bad'}};
-  marks.push([p,'er']);return {used:1,marks,pos:p+1};
+function tsNear(a,b){if(!a||!b)return false;const L=Math.max(a.length,b.length);if(L<5)return false;return tsLev(a,b)<=Math.floor(L*0.5)}
+/* align recognized words R to expected E[base..]; returns {j,ops,ri} */
+function tsAlign(E,base,R,cfg){
+  const m=R.length,n=Math.min(E.length-base,m*2+14);
+  if(!m||n<=0)return {j:0,ops:[],ri:[]};
+  const INS=0.8,INF=1e9,strict=!!cfg.strict;
+  const dc=e=>e.k.length<=2?0.4:0.9;
+  const D=[],B=[];for(let i=0;i<=m;i++){D.push(new Float64Array(n+1).fill(INF));B.push(new Int8Array(n+1))}
+  D[0][0]=0;for(let j=1;j<=n;j++){D[0][j]=D[0][j-1]+dc(E[base+j-1]);B[0][j]=2}
+  for(let i=1;i<=m;i++){D[i][0]=D[i-1][0]+INS;B[i][0]=1;const r=R[i-1];
+    for(let j=1;j<=n;j++){const e=E[base+j-1];
+      let best=D[i-1][j]+INS,b=1,c=D[i][j-1]+dc(e);if(c<best){best=c;b=2}
+      const sc=tsM(r,e.k,strict)?0:(!strict&&tsNear(r,e.k)?0.4:1.2);c=D[i-1][j-1]+sc;if(c<=best){best=c;b=3}
+      if(j>=2&&tsM(r,E[base+j-2].k+e.k,strict)){c=D[i-1][j-2]+0.1;if(c<best){best=c;b=4}}
+      if(i>=2&&tsM(R[i-2]+r,e.k,strict)){c=D[i-2][j-1]+0.1;if(c<best){best=c;b=5}}
+      D[i][j]=best;B[i][j]=b}}
+  let jb=0,bv=INF;for(let j=0;j<=n;j++){if(D[m][j]<=bv+1e-9){bv=Math.min(bv,D[m][j]);jb=j}}
+  const ops=new Array(jb),ri=new Array(jb);let i=m,j=jb;
+  while(i>0||j>0){const b=B[i][j];
+    if(b===1){i--}
+    else if(b===2){ops[j-1]='del';ri[j-1]=i;j--}
+    else if(b===3){const e=E[base+j-1],r=R[i-1];ops[j-1]=tsM(r,e.k,strict)?'ok':(!strict&&tsNear(r,e.k)?'nr':'sub');ri[j-1]=i;i--;j--}
+    else if(b===4){ops[j-1]='ok';ops[j-2]='ok';ri[j-1]=i;ri[j-2]=i;i--;j-=2}
+    else if(b===5){ops[j-1]='ok';ri[j-1]=i;i-=2;j--}
+    else break}
+  return {j:jb,ops,ri};
 }
-function tsRun(E,pos,words,cfg){
-  const marks=[];let i=0,err=null,hold=0;
-  while(i<words.length&&pos<E.length){
-    const o=tsOne(E,pos,words[i],words[i+1],cfg);
-    o.marks.forEach(m=>marks.push(m));
-    if(o.hold){hold=words.length-i;break}
-    i+=o.used;pos=o.pos;
-    if(o.err){err=o.err;break}
-  }
-  while(E[pos]&&E[pos].opt&&pos>=E.length)pos++;
-  return {pos,marks,err,hold,rest:words.slice(words.length-hold)};
+/* T={E,base,cut,st:[],err:null,lv:[],done:false}; Rall = all recognized words of this session */
+function tsLive(T,Rall,cfg){
+  if(T.done)return;
+  const isOk=o=>o==='ok'||o==='nr'&&!cfg.strict;
+  let guard=0;
+  while(guard++<4){
+    const R=Rall.slice(T.cut);const al=tsAlign(T.E,T.base,R,cfg);const ops=al.ops;
+    const okIdx=[];ops.forEach((o,j)=>{if(isOk(o))okIdx.push(j)});
+    const after=j=>{let c=0;for(const x of okIdx)if(x>j)c++;return c};
+    /* error classification for stable positions */
+    const cls=new Array(ops.length).fill('');
+    for(let j=0;j<ops.length;j++){const o=ops[j];if(isOk(o))continue;if(after(j)<2)continue;
+      if(o==='sub')cls[j]=cfg.sens==='low'?'sk':'er';
+      else if(o==='del'){const run=(ops[j-1]==='del'&&!isOk(ops[j-1]))||(ops[j+1]==='del');cls[j]=(run||cfg.sens==='strict')?'er':'sk'}
+      else cls[j]='sk'}
+    /* active error handling */
+    if(T.err){const p=T.err.p-T.base;
+      if(ops.length&&isOk(ops[0])){T.st[T.base]='ok';T.base++;T.cut+=al.ri[0];T.err=null;continue}
+      if(ops.length&&ops[0]==='del'&&after(0)>=2){T.st[T.base]='er';T.base++;T.err=null;continue}
+      T.lv=[];return}
+    /* stop at first hard error (stop mode) */
+    if(cfg.stop){const j=cls.indexOf('er');if(j>=0){for(let k=0;k<j;k++)T.st[T.base+k]=isOk(ops[k])?'ok':(cls[k]||'');const rcut=ops[j]==='sub'?al.ri[j]:(j>0?al.ri[j-1]:0);
+      T.base+=j;T.cut+=rcut;T.err={p:T.base,type:ops[j]==='sub'?'bad':'skip'};T.lv=[];return}}
+    /* commit stable prefix */
+    if(okIdx.length>=5){const cj=okIdx[okIdx.length-4];
+      for(let k=0;k<cj;k++)T.st[T.base+k]=isOk(ops[k])?'ok':(cls[k]||'sk');
+      T.cut+=cj>0?al.ri[cj-1]:0;T.base+=cj;continue}
+    /* live view */
+    T.lv=[];for(let k=0;k<ops.length;k++){const e=T.base+k;T.lv[e]=isOk(ops[k])?'tn':(cls[k]&&!cfg.stop?cls[k]:'')}
+    T.liveEnd=T.base+ops.length;
+    if(T.base+ops.length>=T.E.length&&okIdx.length&&okIdx[okIdx.length-1]>=ops.length-2){tsCommitAll(T,ops,isOk,cls);}
+    return}
 }
-/* tentative: count of consecutive direct matches from pos */
-function tsTent(E,pos,words,cfg){let p=pos,n=0;for(let i=0;i<words.length;i++){let q=p;while(E[q]&&E[q].opt&&!tsM(words[i],E[q].k,cfg.strict))q++;if(!E[q])break;if(tsM(words[i],E[q].k,cfg.strict)){n+=q-p+1;p=q+1}else if(E[q+1]&&tsM(words[i],E[q].k+E[q+1].k,cfg.strict)){n+=q-p+2;p=q+2}else if(i+1<words.length&&tsM(words[i]+words[i+1],E[q].k,cfg.strict)){n+=q-p+1;p=q+1;i++}else break}return n}
+function tsCommitAll(T,ops,isOk,cls){for(let k=0;k<ops.length;k++)T.st[T.base+k]=isOk(ops[k])?'ok':(cls[k]||'');T.base+=ops.length;T.lv=[];T.done=true}
+/* end of a recognition session: commit whatever is aligned */
+function tsFlush(T,Rall,cfg){
+  if(T.done||T.err){T.cut=0;return}
+  const R=Rall.slice(T.cut),al=tsAlign(T.E,T.base,R,cfg),isOk=o=>o==='ok'||o==='nr'&&!cfg.strict;
+  const okIdx=[];al.ops.forEach((o,j)=>{if(isOk(o))okIdx.push(j)});
+  const last=okIdx.length?okIdx[okIdx.length-1]+1:0;
+  for(let k=0;k<last;k++){if(isOk(al.ops[k]))T.st[T.base+k]='ok';else if(!T.st[T.base+k])T.st[T.base+k]='sk'}
+  T.base+=last;T.cut=0;T.lv=[];if(T.base>=T.E.length)T.done=true
+}
 
-/* ---- tasmi ui ---- */
-const TSS={on:false,E:[],DW:[],st:[],pos:0,carry:[],fin:0,rec:null,err:null,hide:true,stop:true,sens:'normal',tent:0,hint:{},cls:[],spec:null,cu:-1,wl:null,done:false};
+/* ---- tasmi ui v2 ---- */
+const TSS={on:false,spec:null,bi:0,E:[],DW:[],base:0,cut:0,st:[],lv:[],err:null,done:false,rec:null,hide:true,stop:true,sens:'normal',hint:{},cls:[],wl:null,sess:[]};
 const TSSENS={low:'متسامح',normal:'عادي',strict:'دقيق'};
-function tsBuild(spec){const E=[],DW=[];const BS=D.Q[0][0];spec.blocks.forEach(b=>{blockAyat(b).forEach(([s,a])=>{if(a===1&&s!==1&&s!==9)W(BS).forEach(w=>{const k=tsK(w);if(k){DW.push({w,e:E.length,bs:1});E.push({w,k,opt:true,s,a})}else DW.push({w,e:-1,bs:1})});const ws=W(txt(s,a));ws.forEach((w,i)=>{const k=tsK(w);DW.push({w,e:k?E.length:-1});if(k)E.push({w,k,s,a})});DW.push({n:a,e:-2,s,a})})});return {E,DW}}
-function tsInit(spec){const o=tsBuild(spec);Object.assign(TSS,{spec,E:o.E,DW:o.DW,st:[],pos:0,carry:[],fin:0,err:null,tent:0,hint:{},cls:[],cu:-1,done:false});while(TSS.E[TSS.pos]&&TSS.E[TSS.pos].opt)TSS.pos++}
-const tsCfg=f=>({sens:TSS.sens,stop:TSS.stop,strict:TSS.sens==='strict',flush:!!f});
+const tsCfg=()=>({sens:TSS.sens,stop:TSS.stop,strict:TSS.sens==='strict'});
+function tsBuild(spec,bi){const E=[],DW=[];const BS=D.Q[0][0];const b=spec.blocks[bi];let ls=0;
+  blockAyat(b).forEach(([s,a],k)=>{
+    if(k===0||s!==ls||a===1){DW.push({hd:'سورة '+D.N[s-1],e:-3});ls=s;if(a===1&&s!==1&&s!==9)W(BS).forEach(w=>DW.push({w,e:-1,bs:1}))}
+    W(txt(s,a)).forEach(w=>{const kk=tsK(w);DW.push({w,e:kk?E.length:-1});if(kk)E.push({w,k:kk,s,a})});DW.push({n:a,e:-2,s,a})});
+  return {E,DW}}
+function tsInit(spec,bi){const o=tsBuild(spec,bi||0);Object.assign(TSS,{spec,bi:bi||0,E:o.E,DW:o.DW,base:0,cut:0,st:[],lv:[],err:null,done:false,hint:{},cls:[],sess:[]});tsOptSkip()}
+/* the optional basmala words are skipped silently when the reciter starts with the first real word */
+function tsOptSkip(){/* optional words (basmala) are simply allowed: engine treats them as normal words, reciter may say them */}
 function vTasmi(r){
-  if(TSS.spec!==r.spec)tsInit(r.spec);
-  const tot=TSS.E.filter(e=>!e.opt).length;
+  if(TSS.spec!==r.spec)tsInit(r.spec,0);
+  const nb=r.spec.blocks.length;
   let x=topbar('التسميع',{end:'<button class="ib" data-act="tsreset" aria-label="من البداية">'+IC2.rep+'</button>'});
+  if(nb>1)x+='<div class="tsseg">'+r.spec.blocks.map((b,i)=>'<button class="'+(i===TSS.bi?'on':'')+'" data-act="tsblk" data-b="'+i+'">'+(b.label||('المقطع '+AR(i+1)))+'</button>').join('')+'</div>';
   x+='<div class="tsopts"><button class="chipb'+(TSS.hide?'':' plain')+'" data-act="tsopt" data-v="hide">'+(TSS.hide?'النص مخفيّ':'النص ظاهر')+'</button><button class="chipb'+(TSS.stop?'':' plain')+'" data-act="tsopt" data-v="stop">'+(TSS.stop?'أوقفني عند الخطأ':'علّم الخطأ فقط')+'</button><button class="chipb plain" data-act="tsopt" data-v="sens">الدقّة: '+TSSENS[TSS.sens]+'</button></div>';
   x+='<div class="tstx" style="--qs:'+S.fs+'px"><div class="ayt" id="tstx">';
-  let open=false,lastS=0;
   TSS.DW.forEach((d,i)=>{
+    if(d.hd){x+='<div class="sh" data-i="'+i+'">'+d.hd+'</div>';return}
     if(d.n!=null){x+='<span class="tw nm" data-i="'+i+'"> ﴿'+AR(d.n)+'﴾</span> ';return}
-    if(d.s==null&&!d.bs&&false)return;
     x+='<span class="tw" data-i="'+i+'">'+d.w+'</span> ';
   });
-  x+='</div></div><div id="tsend"></div><div style="height:150px"></div>';
-  x+='<div id="tsbar" class="tsbar"></div>';
+  x+='</div></div><div id="tsend"></div><div style="height:160px"></div><div id="tsbar" class="tsbar"></div>';
   setTimeout(()=>{tsPaint(true);tsBar();if(TSS.done)tsEnd()},0);
   return x;
 }
-function tsStateOf(d){if(d.e>=0)return TSS.st[d.e]||'';return ''}
 function tsPaint(force){
   const root=document.getElementById('tstx');if(!root)return;const els=root.children;let prevV=false;
   TSS.DW.forEach((d,i)=>{
-    const el=els[i];if(!el)return;let c;
-    if(d.e>=0||d.e===-1&&false){
-      const st=TSS.st[d.e]||'';const tn=!TSS.err&&d.e>=TSS.pos&&d.e<TSS.pos+TSS.tent;const ht=!!TSS.hint[d.e];const er=TSS.err&&TSS.err.p===d.e;
-      const vis=!TSS.hide||st==='ok'||st==='sk'||st==='er'||tn||ht||er;prevV=vis;
-      c='tw'+(vis?' v':'')+(st==='ok'?' ok':st==='sk'?' sk':st==='er'||er?' er':'')+(tn&&!st?' tn':'')+(ht&&!st?' ht':'')+(d.e===TSS.pos&&!TSS.done?' cu':'')+(d.bs?' bsm':'');
-    }else if(d.e===-2){c='tw nm'+(prevV?' v':'')}
-    else{c='tw'+(prevV||!TSS.hide?' v':'')}
+    const el=els[i];if(!el||d.hd)return;let c;
+    if(d.e>=0){
+      const st=TSS.st[d.e]||'',lv=TSS.lv[d.e]||'';const er=TSS.err&&TSS.err.p===d.e;const ht=!!TSS.hint[d.e];
+      const vis=!TSS.hide||st==='ok'||st==='sk'||st==='er'||lv||ht||er;prevV=vis;
+      c='tw'+(vis?' v':'')+(st==='ok'?' ok':st==='sk'?' sk':st==='er'||er?' er':lv==='tn'?' tn':lv==='er'?' er':lv==='sk'?' sk':'')+(ht&&!st&&!lv?' ht':'')+(d.e===TSS.base&&!TSS.done?' cu':'')+(d.bs?' bsm':'');
+    }else if(d.e===-2)c='tw nm'+(prevV?' v':'');
+    else c='tw'+(prevV||!TSS.hide?' v':'');
     if(force||TSS.cls[i]!==c){el.className=c;TSS.cls[i]=c}
   });
-  const cu=root.querySelector('.cu');if(cu&&TSS.on){const rc=cu.getBoundingClientRect(),H=window.innerHeight;if(rc.top<H*0.18||rc.bottom>H*0.58)window.scrollBy({top:rc.top-H*0.32,behavior:'smooth'})}
+  const cu=root.querySelector('.cu');if(cu&&TSS.on){const rc=cu.getBoundingClientRect(),H=window.innerHeight;if(rc.top<H*0.18||rc.bottom>H*0.55)window.scrollBy({top:rc.top-H*0.3,behavior:'smooth'})}
 }
 function tsBar(){
-  const b=document.getElementById('tsbar');if(!b)return;const tot=TSS.E.filter(e=>!e.opt).length;const dn=TSS.E.filter((e,i)=>!e.opt&&TSS.st[i]).length;
+  const b=document.getElementById('tsbar');if(!b)return;const tot=TSS.E.length;const dn=Math.min(tot,TSS.liveEnd&&!TSS.done?Math.max(TSS.liveEnd,TSS.base):TSS.base);
   let m='';
-  if(TSS.err){const e=TSS.E[TSS.err.p];m='<div class="tserr"><div><small>'+(TSS.err.type==='skip'?'فاتتك كلمة':'لم أسمع هذه الكلمة صحيحة')+'</small><b>'+e.w+'</b></div><button class="chipb" data-act="tsskip">تجاوز</button></div>'}
-  else if(TSS.done){m='<div class="tsok">أتممت المقطع</div>'}
-  else m='<div class="tsinfo">'+(TSS.on?'أسمعك… ابدأ القراءة':'اضغط الميكروفون وابدأ القراءة')+'<br><b>'+AR(dn)+'</b> من '+AR(tot)+' كلمة</div>';
+  if(TSS.err){const e=TSS.E[TSS.err.p];m='<div class="tserr"><div><small>'+(TSS.err.type==='skip'?'فاتتك كلمة':'لم أسمعها صحيحة')+'</small><b>'+e.w+'</b></div><button class="chipb" data-act="tsskip">تجاوز</button></div>'}
+  else if(TSS.done)m='<div class="tsok">أتممت '+(TSS.spec.blocks.length>1?(TSS.spec.blocks[TSS.bi].label||'المقطع'):'المقطع')+'</div>';
+  else m='<div class="tsinfo">'+(TSS.on?'أسمعك… اقرأ باسترسال':'اضغط الميكروفون وابدأ القراءة')+'<br><b>'+AR(dn)+'</b> من '+AR(tot)+' كلمة</div>';
   b.innerHTML=m+'<div class="tsctl"><button class="chipb plain" data-act="tshint"'+(TSS.done?' disabled':'')+'>تلميح</button><button class="tsmic'+(TSS.on?' on':'')+'" data-act="tsmic" aria-label="'+(TSS.on?'إيقاف':'ابدأ')+'">'+(TSS.on?ICON.pause:ICON.mic)+'</button><button class="chipb plain" data-act="tsfwd"'+(TSS.done?' disabled':'')+'>كلمة تالية</button></div>';
 }
 function tsSR(){return window.SpeechRecognition||window.webkitSpeechRecognition}
 function tsStart(){
   const SR=tsSR();if(!SR){toast('التعرّف على الصوت غير متاح في هذا المتصفح. جرّب Safari أو Chrome.');return}
-  if(TSS.done)tsInit(TSS.spec);
-  TSS.on=true;TSS.fin=0;tsWL();
-  const r=new SR();TSS.rec=r;r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=3;
+  if(TSS.done)tsInit(TSS.spec,TSS.bi);
+  TSS.on=true;TSS.cut=0;TSS.sess=[];tsWL();
+  const r=new SR();TSS.rec=r;r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
   r.onresult=tsRes;
   r.onerror=e=>{const er=e&&e.error;if(er==='not-allowed'||er==='service-not-allowed'){TSS.on=false;toast('لم يُسمح باستخدام الميكروفون أو التعرّف على الصوت. فعّلهما من إعدادات الجهاز.')}else if(er==='network'){TSS.on=false;toast('التعرّف على الصوت يحتاج اتصالًا بالإنترنت.')}else if(er==='audio-capture'){TSS.on=false;toast('لم أجد ميكروفونًا.')}tsBar()};
-  r.onend=()=>{TSS.rec=null;if(TSS.on&&cur().v==='tasmi'){setTimeout(()=>{if(TSS.on&&!TSS.rec&&cur().v==='tasmi')tsStartRec()},200)}else{TSS.on=false;tsBar()}};
+  r.onend=()=>{TSS.rec=null;tsFlush(TSS,TSS.sess,tsCfg());TSS.sess=[];TSS.cut=0;if(TSS.on&&cur().v==='tasmi'&&!TSS.done){setTimeout(()=>{if(TSS.on&&!TSS.rec&&cur().v==='tasmi')tsStartRec()},150)}else{TSS.on=false}tsPaint();tsBar()};
   try{r.start()}catch(e){TSS.on=false;toast('تعذّر تشغيل الميكروفون.')}
   tsBar();
 }
 function tsStartRec(){TSS.on=false;tsStart()}
 function tsWL(){try{if(navigator.wakeLock&&!TSS.wl)navigator.wakeLock.request('screen').then(l=>{TSS.wl=l;l.addEventListener('release',()=>{TSS.wl=null})}).catch(()=>{})}catch(e){}}
-function tsStop(flush){
-  const was=TSS.on;TSS.on=false;const r=TSS.rec;TSS.rec=null;if(r){try{r.onend=null;r.stop()}catch(e){}}
+function tsStop(){
+  TSS.on=false;const r=TSS.rec;TSS.rec=null;if(r){try{r.onend=null;r.stop()}catch(e){}}
   try{if(TSS.wl){TSS.wl.release();TSS.wl=null}}catch(e){}
-  if(flush&&TSS.carry.length&&!TSS.err&&!TSS.done){tsApply(TSS.carry,true);TSS.carry=[]}
-  TSS.tent=0;if(document.getElementById('tsbar')){tsPaint();tsBar()}
+  tsFlush(TSS,TSS.sess,tsCfg());TSS.sess=[];TSS.cut=0;
+  if(TSS.done)tsEnd();
+  if(document.getElementById('tsbar')){tsPaint();tsBar()}
 }
 const tsWords=t=>(t||'').split(/\s+/).map(tsK).filter(Boolean);
+let TSRAF=0;
 function tsRes(e){
-  const res=e.results;let inter=[];
-  for(let i=TSS.fin;i<res.length;i++){const R=res[i];if(R.isFinal){const alts=[];for(let j=0;j<R.length;j++)alts.push(tsWords(R[j].transcript));tsCommit(alts);TSS.fin=i+1}else inter=inter.concat(tsWords(R[0].transcript))}
-  if(TSS.done)return;
-  TSS.tent=TSS.err?0:tsTent(TSS.E,TSS.pos,TSS.carry.concat(inter),tsCfg());
-  tsPaint();tsBar();
-}
-function tsCommit(alts){
-  if(TSS.err){const p=TSS.err.p,c=tsCfg();for(const w of alts){const ix=w.findIndex(x=>tsM(x,TSS.E[p].k,c.strict));if(ix>=0){TSS.st[p]='ok';TSS.pos=p+1;TSS.err=null;TSS.carry=[];tsFinishCheck();if(!TSS.done&&w.length>ix+1)tsApply(w.slice(ix+1));return}}return}
-  let best=null,bs=-1e9;alts.forEach(w=>{const ww=TSS.carry.concat(w);const r=tsRun(TSS.E,TSS.pos,ww,tsCfg());const sc=r.pos*2-(r.err?3:0)-r.marks.filter(m=>m[1]==='er').length;if(sc>bs){bs=sc;best=ww}});
-  if(best)tsApply(best);
-}
-function tsApply(words,flush){
-  const r=tsRun(TSS.E,TSS.pos,words,tsCfg(flush));
-  r.marks.forEach(m=>{TSS.st[m[0]]=m[1]});TSS.pos=r.pos;TSS.carry=r.rest||[];
-  if(r.err){TSS.err=r.err;TSS.st[r.err.p]='';TSS.carry=[];try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}}
-  tsFinishCheck();
-}
-function tsFinishCheck(){
-  while(TSS.E[TSS.pos]&&TSS.E[TSS.pos].opt)TSS.pos++;
-  if(TSS.pos>=TSS.E.length&&!TSS.done){TSS.done=true;TSS.err=null;tsStop();tsEnd()}
+  let w=[];const res=e.results;for(let i=0;i<res.length;i++)w=w.concat(tsWords(res[i][0].transcript));
+  TSS.sess=w;
+  const was=TSS.err;tsLive(TSS,w,tsCfg());
+  if(TSS.err&&!was)try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}
+  if(TSS.done){tsStop();return}
+  if(!TSRAF)TSRAF=requestAnimationFrame(()=>{TSRAF=0;tsPaint();tsBar()});
 }
 function tsEnd(){
   const el=document.getElementById('tsend');if(!el)return;
-  let ok=0,sk=0,er=0,bad=[];TSS.E.forEach((e,i)=>{if(e.opt)return;const s=TSS.st[i];if(s==='ok')ok++;else if(s==='sk'){sk++;bad.push(e)}else if(s==='er'){er++;bad.push(e)}});
-  const hn=Object.keys(TSS.hint).length;
-  let h='<div class="card tssum"><b>'+(er||sk?'أتممت المقطع، وهذه ملاحظاتي':'أتممت المقطع، وكانت قراءتك مطابقة')+'</b><p class="meta">'+AR(ok)+' كلمة مطابقة'+(sk?'، '+AR(sk)+' محتملة':'')+(er?'، '+AR(er)+' تحتاج مراجعة':'')+(hn?'، '+AR(hn)+' بتلميح':'')+'</p>';
+  let ok=0,sk=0,er=0,bad=[];TSS.E.forEach((e,i)=>{const s=TSS.st[i];if(s==='ok')ok++;else if(s==='sk'){sk++;bad.push(e)}else if(s==='er'){er++;bad.push(e)}});
+  const hn=Object.keys(TSS.hint).length;const nb=TSS.spec.blocks.length;
+  let h='<div class="card tssum"><b>'+(er||sk?'أتممت، وهذه ملاحظاتي':'أتممت، وقراءتك مطابقة')+'</b><p class="meta">'+AR(ok)+' كلمة مطابقة'+(sk?'، '+AR(sk)+' محتملة':'')+(er?'، '+AR(er)+' تحتاج مراجعة':'')+(hn?'، '+AR(hn)+' بتلميح':'')+'</p>';
   if(bad.length)h+='<div class="tsbad">'+bad.map(e=>'<span class="chipb">'+e.w+' <small>'+D.N[e.s-1]+' '+AR(e.a)+'</small></span>').join('')+'</div>';
-  h+='<p class="note" style="margin:10px 0 0">التعرّف الصوتي قد يخطئ أحيانًا، فراجع الملاحظات على مصحفك. ولا يحكم على التجويد.</p><button class="btn outline" data-act="tsreset">إعادة المقطع</button></div>';
+  h+='<p class="note" style="margin:10px 0 0">التعرّف الصوتي قد يخطئ أحيانًا، فراجع الملاحظات على مصحفك. ولا يحكم على التجويد.</p><div class="row2"><button class="btn outline" data-act="tsreset">إعادة</button>'+(nb>1&&TSS.bi<nb-1?'<button class="btn goldb" data-act="tsblk" data-b="'+(TSS.bi+1)+'">'+(TSS.spec.blocks[TSS.bi+1].label||'التالي')+'</button>':'')+'</div></div>';
   el.innerHTML=h;tsPaint(true);tsBar();
 }
 
@@ -3168,13 +3196,14 @@ document.addEventListener('click',ev=>{
   case 'tfretry':{[...IK.keys()].forEach(k=>{if(IK.get(k)===null)IK.delete(k)});if(SH==='taf')refreshSheet();break}
   case 'lpunlock':{const r=cur(),id=b.dataset.id,pw=($('lpw')||{}).value||'';if(!pw){r.err='اكتب كلمة السر.';render();break}b.disabled=true;b.textContent='جارٍ الفتح…';lpUnlock(id,pw).then(()=>{r.st=1;r.err='';render();toast('أُضيف الكتاب إلى مكتبتك على هذا الجهاز')},e=>{r.err=e.message==='pw'?'كلمة السر غير صحيحة.':'تعذّر تحميل الكتاب. تأكد من الإنترنت وأعد المحاولة.';render()});break}
   case 'upd':updNow();break;
-  case 'tasmi':{const r=cur();let sp=null;if(r.v==='reader'||r.v==='mus')sp=r.spec;else if(r.v==='pick'&&r.A)sp={mode:'view',title:'صلاة '+PR[r.p].n,blocks:[{label:'الركعة الأولى',i:r.A.i,j:r.A.j},{label:'الركعة الثانية',i:r.B.i,j:r.B.j}]};if(!sp||!sp.blocks)break;auStop();ayStop();navPush({v:'tasmi',spec:sp});break}
-  case 'tsmic':if(TSS.on)tsStop(true);else tsStart();break;
+  case 'tsmic':if(TSS.on)tsStop();else tsStart();break;
   case 'tsopt':{if(v==='hide')TSS.hide=!TSS.hide;else if(v==='stop')TSS.stop=!TSS.stop;else TSS.sens=TSS.sens==='normal'?'strict':TSS.sens==='strict'?'low':'normal';render();break}
-  case 'tsskip':{if(TSS.err){TSS.st[TSS.err.p]='sk';TSS.pos=TSS.err.p+1;TSS.err=null;TSS.carry=[];tsFinishCheck();tsPaint();tsBar()}break}
-  case 'tshint':{if(TSS.err){TSS.hint[TSS.err.p]=1}else TSS.hint[TSS.pos]=1;tsPaint();break}
-  case 'tsfwd':{if(TSS.err)TSS.err=null;if(TSS.E[TSS.pos]){TSS.st[TSS.pos]='sk';TSS.pos++;TSS.carry=[];tsFinishCheck();tsPaint();tsBar()}break}
-  case 'tsreset':{tsStop();tsInit(TSS.spec);const el=document.getElementById('tsend');if(el)el.innerHTML='';tsPaint(true);tsBar();window.scrollTo(0,0);break}
+  case 'tsblk':{tsStop();tsInit(TSS.spec,+b.dataset.b);window.scrollTo(0,0);render();break}
+  case 'tsskip':{if(TSS.err){TSS.st[TSS.err.p]='sk';TSS.base=TSS.err.p+1;TSS.err=null;tsPaint();tsBar()}break}
+  case 'tshint':{TSS.hint[TSS.err?TSS.err.p:TSS.base]=1;tsPaint();break}
+  case 'tsfwd':{TSS.err=null;if(TSS.E[TSS.base]){TSS.st[TSS.base]='sk';TSS.base++;TSS.cut=TSS.sess.length;if(TSS.base>=TSS.E.length){TSS.done=true;tsStop()}tsPaint();tsBar()}break}
+  case 'tsreset':{tsStop();tsInit(TSS.spec,TSS.bi);const el=document.getElementById('tsend');if(el)el.innerHTML='';tsPaint(true);tsBar();window.scrollTo(0,0);break}
+  case 'tasmi':{const r=cur();let sp=null;if(r.v==='reader'||r.v==='mus')sp=r.spec;else if(r.v==='pick'&&r.A)sp={mode:'view',title:'صلاة '+PR[r.p].n,blocks:[{label:'الركعة الأولى',i:r.A.i,j:r.A.j},{label:'الركعة الثانية',i:r.B.i,j:r.B.j}]};if(!sp||!sp.blocks)break;auStop();ayStop();navPush({v:'tasmi',spec:sp});break}
   case 'nav':if(v==='hifz')hifzDraft=null;closeSheet();navPush({v:v});break;
   case 'tab':{closeSheet();const r=cur();if(v==='mus'){musOpen({});break}if(v==='home'){if(STACK.length>1)navBack();break}if(r.v===v)break;if(STACK.length===2&&TABV[r.v]){persist();STACK[1]={v:v};render();window.scrollTo(0,0);persist()}else navPush({v:v});break}
   case 'openp':navPush({v:'prayer',p:b.dataset.p});break;
@@ -3438,7 +3467,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=111;
+const APPV=112;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
