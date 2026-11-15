@@ -334,6 +334,7 @@ body.reading{background:var(--paper)}
 .about .abfoot{margin-top:18px;padding-top:10px;border-top:1px solid var(--line)}
 .about .abfoot h4{font-size:15px;color:var(--muted)}
 .about .abfoot p{font-size:14.5px;line-height:1.95;color:var(--muted)}
+.updbar{position:fixed;top:calc(8px + env(safe-area-inset-top));left:12px;right:12px;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0E2A21;color:#F3E8CC;border:1px solid #8E7232;border-radius:16px;padding:10px 16px 8px;box-shadow:0 10px 24px -10px rgba(0,0,0,.6)}.updbar button{border:0;background:var(--gg);color:#2A1E06;font:700 15px 'Amiri',serif;border-radius:12px;padding:6px 14px 4px}
 .toast{position:fixed;left:50%;bottom:calc(30px + var(--sab));transform:translate(-50%,10px);background:#0E2A21;color:#F3E8CC;border:1px solid #8E7232;padding:10px 18px 8px;border-radius:16px;font-size:15.5px;line-height:1.75;width:max-content;max-width:88%;text-align:center;opacity:0;transition:opacity .25s,transform .25s var(--ease);pointer-events:none;z-index:60}
 .body-tabs-fix{}body.tabs .toast{bottom:calc(84px + var(--sab))}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -2517,7 +2518,7 @@ function trow(ic,lab,k,sub){const v=k.indexOf('.')>0?S[k.split('.')[0]][k.split(
 function hifzLabel(){const c=S.hifz.length,n=(S.hifzS||[]).length;let a=c===30?'القرآن كاملًا':c?pl(c,'جزء واحد','جزآن','أجزاء','جزءًا'):'';if(c<30&&n)a=(a?a+' و':'')+pl(n,'سورة واحدة','سورتان','سور','سورة');return a||'لم يُحدَّد'}
 function vSettings(){
   let x=topbar('الإعدادات',{over:true})+hero('settings','','الإعدادات','');const W=isWird();
-  x+='<div class="gtitle">إعدادات المستخدم</div><div class="group">'+srow('user','صفة المستخدم',ROLEN[S.role],'pick','data-k="role"');
+  x+='<div class="gtitle">التطبيق</div><div class="card" style="margin-bottom:12px"><b>النسخة الحالية: '+AR(APPV)+'</b><p class="meta" style="margin:4px 0 0">إن لم تظهر لك الميزات الجديدة، اضغط للتحديث.</p><button class="btn outline" data-act="upd">تحديث التطبيق الآن</button></div><div class="gtitle">إعدادات المستخدم</div><div class="group">'+srow('user','صفة المستخدم',ROLEN[S.role],'pick','data-k="role"');
   if(S.role==='imam')x+=srow('mosque','نوع المسجد',MOSQUE[S.mosque],'pick','data-k="mosque"');
   if(S.role==='home')x+=srow('list','ترتيب القراءة',pval('homeMode'),'pick','data-k="homeMode"');
   x+=srow('pin','المدينة ومواقيت الصلاة',S.loc?esc(S.loc.name):'لم تُحدَّد','locsheet')+srow('juz','الأجزاء المحفوظة',hifzLabel(),'nav','data-v="hifz"')+'</div>';
@@ -3150,6 +3151,7 @@ document.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,v=b.dataset.v,k=b.dataset.k;
   switch(a){
   case 'back':navBack();break;
+  case 'upd':updNow();break;
   case 'tasmi':{const r=cur();let sp=null;if(r.v==='reader'||r.v==='mus')sp=r.spec;else if(r.v==='pick'&&r.A)sp={mode:'view',title:'صلاة '+PR[r.p].n,blocks:[{label:'الركعة الأولى',i:r.A.i,j:r.A.j},{label:'الركعة الثانية',i:r.B.i,j:r.B.j}]};if(!sp||!sp.blocks)break;auStop();ayStop();navPush({v:'tasmi',spec:sp});break}
   case 'tsmic':if(TSS.on)tsStop(true);else tsStart();break;
   case 'tsopt':{if(v==='hide')TSS.hide=!TSS.hide;else if(v==='stop')TSS.stop=!TSS.stop;else TSS.sens=TSS.sens==='normal'?'strict':TSS.sens==='strict'?'low':'normal';render();break}
@@ -3420,6 +3422,11 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
+const APPV=105;
+async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
+function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
+function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
+updCheck();document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});
 const restored=restore();
 if(restored&&STACK.length>1){try{history.replaceState({d:1},'');for(let d=2;d<=STACK.length;d++)history.pushState({d:d},'')}catch(e){}}else{try{history.replaceState({d:1},'')}catch(e){}}
 if(restored){const sp=$('splash');if(sp){sp.style.display='none';sp.innerHTML=''}}else splash(false);
