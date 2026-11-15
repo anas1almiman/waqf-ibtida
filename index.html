@@ -1389,14 +1389,17 @@ function pickB(A,L){
   if(S.bmode==='next'){const nx=later.filter(B=>B[0]===A[1]+1&&D.P[B[0]][0]===D.P[A[1]][0]);if(nx.length)return rand(nx);const f=Math.min.apply(null,later.map(B=>B[0]));return rand(later.filter(B=>B[0]===f))}
   return rand(later);
 }
+const isTail=j=>{const u=D.P[j];return !!u&&u[0]<QISAR&&u[0]!==1&&u[1]===u[2]&&u[2]===D.Q[u[0]-1].length&&u[1]>1};
+const tailNext=sg=>{const j=sg[1];return j+1<NP&&D.P[j+1][0]===D.P[j][0]&&isTail(j+1)&&avail([sg[0],j+1])};
+const ext=sg=>tailNext(sg)?[sg[0],sg[1]+1]:sg;
 function suggest(p,avoid){
   const L=pool(p);if(!L.length)return null;
   const order=S.ordered?L.slice().sort((x,y)=>x[0]-y[0]||x[1]-y[1]):shuffle(L.slice());
-  for(const A of order){if(!stAbs(A[0]))continue;if(avoid&&order.length>1&&same(A,avoid))continue;const B=pickB(A,L);if(B)return {a:A,b:B}}
+  for(const A0 of order){if(!stAbs(A0[0]))continue;if(avoid&&order.length>1&&same(A0,avoid))continue;const A=ext(A0);let B=pickB(A,L);if(B&&B[0]===B[1]&&isTail(B[0])&&p!=='maghrib')B=null;if(B)return {a:A,b:ext(B)}}
   return null;
 }
 function endOK(j){return !noEnd(j)||restDone(j)}
-function valid(p,sg){if(!(Array.isArray(sg)&&sg.length===2&&sg[0]<=sg[1]&&sg[1]<NP&&avail(sg)&&allowed(p,sg)))return false;const s=D.P[sg[0]][0];if(s>=QISAR)return fits(p,sg[0],sg[1]);return D.P[sg[1]][0]===s&&endOK(sg[1])&&inCap(p,segLines(sg[0],sg[1]))}
+function valid(p,sg){if(!(Array.isArray(sg)&&sg.length===2&&sg[0]<=sg[1]&&sg[1]<NP&&avail(sg)&&allowed(p,sg)))return false;if(tailNext(sg))return false;if(sg[1]>sg[0]&&isTail(sg[1])&&D.P[sg[1]-1][0]===D.P[sg[1]][0])sg=[sg[0],sg[1]-1];const s=D.P[sg[0]][0];if(s>=QISAR)return fits(p,sg[0],sg[1]);return D.P[sg[1]][0]===s&&endOK(sg[1])&&inCap(p,segLines(sg[0],sg[1]))}
 function current(p){const c=S.sug[p];if(c&&c.custom&&Array.isArray(c.a)&&Array.isArray(c.b)&&c.a[1]<NP&&c.b[1]<NP)return c;if(c&&valid(p,c.a)&&valid(p,c.b)&&c.b[0]>c.a[1]&&stAbs(c.a[0])&&(stAbs(c.b[0])||c.b[0]===c.a[1]+1))return c;const n=suggest(p);S.sug[p]=n;save();return n}
 const FRI={a:surahRange(32),b:surahRange(76)};
 function fridayFajr(np){return !!(np&&np.p==='fajr'&&np.day&&np.day.getDay()===5)}
@@ -3556,7 +3559,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=126;
+const APPV=127;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
