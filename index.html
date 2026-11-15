@@ -2581,7 +2581,7 @@ function vSettings(){
   }
   x+='</div>';
   x+='<div class="gtitle">إعدادات العرض والاستماع</div><div class="group">'+trow('taf','إظهار معاني الكلمات','taf')+trow('book','القراءات العشر','qir',S.qir?'تظهر مصاحف الروايات قراءةً وسماعًا':'الأصل رواية حفص عن عاصم')+(S.qir?srow('shelf','مصاحف الروايات','','qir','data-pg="'+(()=>{try{const c=S.sug[nextPrayer().p];return c?D.P[c.a[0]][4]:1}catch(e){return 1}})()+'"'):'')+srow('mic','القارئ المفضّل',(RECK[S.reciter]||RECK.dosari)[1],'pick','data-k="reciter"')+srow('moon','الوضع الليلي',pval('theme'),'pick','data-k="theme"')+trow('font','تكبير الخط','big')+'</div>';
-  x+='<div class="gtitle">التنبيهات</div><div class="group">'+srow('cal','التذكير بالقراءة',S.remOn?esc(S.remT):'','remsheet')+'</div>';
+  x+='<div class="gtitle">التنبيهات</div><div class="group">'+srow('cal','إشعارات التطبيق',ntfOn()?'مفعّلة':'','ntfsheet')+srow('cal','التذكير بالقراءة (التقويم)',S.remOn?esc(S.remT):'','remsheet')+'</div>';
   x+='<div class="gtitle">أخرى</div><div class="group">'+srow('moon','ختمة رمضان','','nav','data-v="ramadan"')+srow('wand','شاشة الترحيب','','restart')+srow('info','عن التطبيق','','nav','data-v="about"')+'</div>';
   x+='<div class="gtitle">البيانات</div><div class="group"><button class="row dangerrow" data-act="resetsheet"><span class="ic">'+ICON.trash+'</span><span class="lab">البدء من جديد</span><i class="chev"></i></button></div>';
   x+='<p class="foot">الحفظ: '+(sync==='account'?'على حسابك، فيظهر تقدّمك على كل جهاز':'على هذا الجهاز')+'<br>البيانات: '+AR(D.meta.stops)+' موضع وقف · الإصدار '+AR(D.meta.ver)+'</p>';
@@ -2719,6 +2719,23 @@ function icsPrayers(){
     const a=ayahOfDay(n),w=new Date(d);w.setHours(7,30,0,0);if(w>new Date())ev.push('BEGIN:VEVENT','UID:ay-'+n+'-'+Date.now()+'@waqf-ibtida','DTSTAMP:'+z,'DTSTART:'+U(w),'DURATION:PT5M','SUMMARY:آية اليوم · '+APP,'DESCRIPTION:'+esc2(a.r),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(a.r),'TRIGGER:PT0M','END:VALARM','END:VEVENT')}
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//waqf-ibtida//AR','CALSCALE:GREGORIAN'].concat(ev,['END:VCALENDAR']).join('\r\n');
   try{const u=URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='prayers.ics';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},5000);toast('افتح الملف ثم اختر «إضافة إلى التقويم»: مواقيت ٣٠ يومًا: تنبيه قبل كل صلاة بعشر دقائق، وتنبيه أذكار بعد الصلاة، وأذكار الصباح والمساء.')}catch(e){toast('تعذّر إنشاء ملف التقويم.')}}
+
+/* ---- إشعارات التطبيق (تعمل والتطبيق مفتوح أو في الخلفية القريبة) ---- */
+function ntfOn(){try{return localStorage.getItem('wi_ntf')==='1'&&typeof Notification!=='undefined'&&Notification.permission==='granted'}catch(e){return false}}
+async function ntfShow(title,body,tag){try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();const o={body:body,tag:tag||undefined,icon:'icon-192.png',badge:'icon-192.png',lang:'ar',dir:'rtl'};if(reg&&reg.showNotification)await reg.showNotification(title,o);else new Notification(title,o);return true}catch(e){return false}}
+function ntfEvents(d){const tm=todayTimes(d);if(!tm)return[];const NM={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'},AF={fajr:35,dhuhr:35,asr:35,maghrib:25,isha:35},k=dayKey(d),ev=[];
+  Object.keys(NM).forEach(p=>{if(!tm[p])return;ev.push({k:k+'pre'+p,t:new Date(tm[p].getTime()-10*60000),h:'باقي ١٠ دقائق على صلاة '+NM[p],b:'استعدّ للصلاة، وراجع مقطعك.'});ev.push({k:k+'at'+p,t:tm[p],h:'حان وقت صلاة '+NM[p],b:'تقبّل الله منك.'});ev.push({k:k+'af'+p,t:new Date(tm[p].getTime()+AF[p]*60000),h:'أذكار بعد صلاة '+NM[p],b:'لا تفوّت أذكار ما بعد الصلاة.'})});
+  if(tm.fajr){let w=new Date(tm.fajr.getTime()+55*60000);if(tm.sunrise&&w>tm.sunrise)w=new Date(tm.sunrise.getTime()-10*60000);ev.push({k:k+'sab',t:w,h:'أذكار الصباح',b:'ابدأ يومك بذكر الله.'})}
+  if(tm.asr)ev.push({k:k+'mas',t:new Date(tm.asr.getTime()+50*60000),h:'أذكار المساء',b:'وقت أذكار المساء.'});
+  const a=ayahOfDay(0),w7=new Date(d);w7.setHours(7,30,0,0);ev.push({k:k+'ayd',t:w7,h:'آية اليوم',b:a.r});
+  if(S.remOn&&S.remT){const m=/^(\d+):(\d+)/.exec(S.remT);if(m){const w=new Date(d);w.setHours(+m[1],+m[2],0,0);ev.push({k:k+'wrd',t:w,h:'وردك اليوم',b:'خصّص وقتًا لقراءتك اليوم.'})}}
+  return ev}
+function ntfTick(){if(!ntfOn())return;let fired;try{fired=JSON.parse(localStorage.getItem('wi_nf')||'[]')}catch(e){fired=[]}const now=Date.now(),kd=dayKey();let ch=false;
+  ntfEvents(new Date()).forEach(e=>{const dt=now-e.t.getTime();if(dt>=0&&dt<=20*60000&&fired.indexOf(e.k)<0){fired.push(e.k);ch=true;ntfShow(e.h,e.b,e.k)}});
+  if(ch){fired=fired.filter(x=>String(x).slice(0,8)>=String(kd-1)).slice(-80);try{localStorage.setItem('wi_nf',JSON.stringify(fired))}catch(e){}}}
+setInterval(ntfTick,20000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)ntfTick()});setTimeout(ntfTick,2500);
+function ntfSheet(){const f=()=>{const st=typeof Notification==='undefined'?'unsup':Notification.permission;const on=ntfOn();
+  return shead('إشعارات التطبيق')+'<p class="note" style="text-align:right;margin:0 4px 12px">'+(st==='unsup'?'<b style="color:#B3261E">متصفحك لا يدعم الإشعارات. في الآيفون: افتح التطبيق من Safari ثم «مشاركة» ثم «إضافة إلى الشاشة الرئيسية»، وافتحه من الأيقونة.</b>':st==='denied'?'<b style="color:#B3261E">الإشعارات محظورة لهذا التطبيق، فعّلها من إعدادات الجوال.</b>':'تصلك إشعارات قبل الصلاة بعشر دقائق، وعند دخول الوقت، وبعد الصلاة للأذكار، وأذكار الصباح والمساء، وآية اليوم، ووردك.')+'<br>تعمل الإشعارات ما دام التطبيق مفتوحًا أو في الخلفية القريبة؛ لا يرسل التطبيق إشعارات من خادم. للتنبيه المضمون وهو مغلق استخدم تنبيهات التقويم.</p><div class="remrow" style="flex-direction:column;gap:8px">'+(on?'<button class="remb" data-act="ntftest" style="flex:1">'+ICON.check+'إشعار تجريبي الآن</button><button class="remb" data-act="ntftest10" style="flex:1">إشعار تجريبي بعد ١٠ ثوانٍ (اقفل الشاشة)</button><button class="remb" data-act="ntfoff" style="flex:1">إيقاف الإشعارات</button>':'<button class="remb" data-act="ntfon" style="flex:1">'+ICON.check+'تفعيل الإشعارات</button>')+'</div>'+(S.loc?'':'<p class="note" style="text-align:right">حدّد مدينتك ليُحسب موعد الصلاة.</p>')};openSheet(f(),'ntf',f)}
 function remRow(){return '<div class="remlab">موعد التذكير:</div><div class="remrow"><input type="time" id="remt" value="'+esc(S.remT||'21:00')+'" aria-label="موعد التذكير"><button class="remb" data-act="ics">'+ICON.cal+'إضافة إلى التقويم</button></div><div class="remlab" style="margin-top:14px">تنبيهات الصلاة وآية اليوم:</div><div class="remrow"><button class="remb" data-act="icspr" style="flex:1">'+ICON.cal+'مواقيت الصلاة وتنبيهات الأذكار بعدها</button></div>'}
 function remSheet(){const f=()=>shead('التذكير بالقراءة')+'<p class="note" style="text-align:right;margin:0 4px 12px">تُضاف إلى تقويم جوالك تذكيرات يومية لـ٤٥ يومًا في الوقت الذي تختاره، بعبارات تحفيزية'+(isWird()?' وما بقي على ختمتك':'')+'، فتصلك ولو كان التطبيق مغلقًا.'+(S.remOn?'<br><b style="color:var(--gold)">أضفتَ تذكيرًا من قبل، ويمكنك حذفه أو تعديله من التقويم.</b>':'')+'</p>'+remRow();openSheet(f(),'rem',f)}
 function segB(key,opts){return '<div class="obseg">'+opts.map(([v,l])=>'<button class="'+(String(S[key])===String(v)||(v==='1'&&S[key]===true)||(v==='0'&&S[key]===false)?'on':'')+'" data-act="obset" data-key="'+key+'" data-v="'+v+'">'+l+'</button>').join('')+'</div>'}
@@ -3411,6 +3428,11 @@ const R=pkFrom(sN);if(+k===0){r.A=R;if(!r.B||r.B.auto)r.B=pkAfter(R)}else{let R2
   case 'obset':{const kk=b.dataset.key;S[kk]=v==='1'?true:v==='0'?false:v;if(kk==='homeAmt'){S.sug={}}save();render();break}
   case 'ics':icsAdd();break;
   case 'remsheet':remSheet();break;
+  case 'ntfsheet':ntfSheet();break;
+  case 'ntfon':{if(typeof Notification==='undefined'){ntfSheet();break}Notification.requestPermission().then(p=>{if(p==='granted'){try{localStorage.setItem('wi_ntf','1')}catch(e){}ntfShow('تم تفعيل الإشعارات','سيصلك التنبيه في أوقاته بإذن الله.','t0')}ntfSheet()});break}
+  case 'ntftest':ntfShow('إشعار تجريبي','هكذا ستصلك الإشعارات.','t1');toast('أُرسل الإشعار');break;
+  case 'ntftest10':toast('اقفل الشاشة الآن…');setTimeout(()=>ntfShow('إشعار تجريبي','وصل بعد ١٠ ثوانٍ.','t2'),10000);break;
+  case 'ntfoff':try{localStorage.removeItem('wi_ntf')}catch(e){}ntfSheet();break;
   case 'hlisten':{const sp=homeSpec();if(!sp){toast('لا قراءة مقترحة الآن.');break}sp.text=true;openReader(sp);auToggle();break}
   case 'hmean':{const sp=homeSpec();if(!sp){toast('لا قراءة مقترحة الآن.');break}let L=[];sp.blocks.forEach(bb=>{L=L.concat(blockAyat(bb))});openTafList(L);break}
   case 'hzsug':{if(!hasHz()){hifzDraft=null;navPush({v:'hifz'});toast('حدّد محفوظك، فنقترح عليك منه.');break}const np=nextPrayer(),p=np.p;const keep=S.hifzOnly;S.hifzOnly=true;let n=null;try{n=suggest(p)}finally{S.hifzOnly=keep}if(!n){toast('اكتملت المقاطع الجديدة من محفوظك لهذه الصلاة.');break}S.sug[p]=n;save();navPush({v:'prayer',p:p});toast('مقطع لصلاة '+PR[p].n+' من محفوظك');break}
@@ -3478,7 +3500,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=114;
+const APPV=115;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}

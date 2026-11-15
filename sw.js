@@ -1,4 +1,4 @@
-const V='maqati-v114',DATA='maqati-data-1';
+const V='maqati-v115',DATA='maqati-data-1';
 const CORE=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-180.png','apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(CORE)).then(()=>caches.open(DATA)).then(c=>c.match('gharib.json?v=1').then(m=>m||c.add('gharib.json?v=1')).catch(()=>{})).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!==DATA).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
@@ -14,3 +14,4 @@ self.addEventListener('fetch',e=>{
     e.respondWith(caches.match(e.request).then(m=>m||fetch(e.request).then(r=>{if(r.ok){const c=r.clone();caches.open(data?DATA:V).then(x=>x.put(e.request,c))}return r})));
   }
 });
+self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{for(const c of cs){if('focus' in c)return c.focus()}return self.clients.openWindow('./')}))});
