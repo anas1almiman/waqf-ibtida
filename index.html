@@ -2757,7 +2757,9 @@ function ghLoad(){if(GH)return Promise.resolve(GH);if(!GHP)GHP=fetch('gharib.jso
 function plN(n,one,two,few,many,hund){if(n===1)return one;if(n===2)return two;const r=n%100;return AR(n)+' '+(r>=3&&r<=10?few:r>=11?many:hund)}
 function tafList(d){if(d.i!=null)return ayatOf(+d.i,+d.j);const o=[];for(let a=+d.a;a<=+d.b;a++)o.push([+d.s,a]);return o}
 /* ---- tafsir Ibn Kathir (loaded per ayah) ---- */
-const TFB='https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/';
+const TFBS=['https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/','https://cdn.statically.io/gh/spa5k/tafsir_api/main/tafsir/','https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/'];let TFI=0;
+function tfFetch(p){const go=n=>fetch(TFBS[(TFI+n)%TFBS.length]+p).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{TFI=(TFI+n)%TFBS.length;return j}).catch(e=>{if(n+1<TFBS.length)return go(n+1);throw e});return go(0)}
+const IKP=new Map();
 const TFL=[
  ['التفسير بالمأثور','ما نُقل عن النبي ﷺ والصحابة والتابعين',[['tabari','ar-tafsir-al-tabari','تفسير الطبري','جامع البيان · أبو جعفر الطبري (ت ٣١٠هـ)',['#3A2A0B','#6B4E17']],['ik','ar-tafsir-ibn-kathir','تفسير ابن كثير','تفسير القرآن العظيم · الحافظ ابن كثير (ت ٧٧٤هـ)',['#12343B','#1F5A66']],['baghawi','ar-tafsir-al-baghawi','تفسير البغوي','معالم التنزيل · الحسين بن مسعود البغوي (ت ٥١٦هـ)',['#2B3A12','#4E6A1F']]]],
  ['التفاسير الفقهية','عناية بأحكام الآيات واستنباطها',[['qurtubi','ar-tafseer-al-qurtubi','تفسير القرطبي','الجامع لأحكام القرآن · أبو عبد الله القرطبي (ت ٦٧١هـ)',['#4A1E12','#7A3520']]]],
@@ -2771,7 +2773,9 @@ function tfMode(){return S.tafm==='tf'||S.tafm==='ik'}
 function tfId(){return S.tafm==='ik'?'ik':(S.tafm==='tf'&&TFM[S.tafs]?S.tafs:null)}
 function tfNeedPick(){return tfMode()&&(!tfId()||TFP)}
 function ikClean(t){return esc(String(t||'').replace(/\[\[[^\]]*\]\]/g,'').trim()).replace(/﴿([^﴾]*)﴾/g,'<span class="tq">﴿$1﴾</span>').replace(/\n+/g,'</p><p>')}
-function ikGet(id,s,a){const k=id+'|'+s+':'+a;if(IK.has(k))return Promise.resolve(IK.get(k));return fetch(TFB+TFM[id].slug+'/'+s+'/'+a+'.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{const t=(j&&j.text)||'';IK.set(k,t);return t})}
+function ikGet(id,s,a){const k=id+'|'+s+':'+a;if(IK.has(k))return Promise.resolve(IK.get(k));return tfFetch(TFM[id].slug+'/'+s+'/'+a+'.json').then(async j=>{const t=(j&&j.text)||'';IK.set(k,t);
+  if(!t.trim()){for(let b=a-1;b>=1&&b>=a-25;b--){const kb=id+'|'+s+':'+b;let tb=IK.get(kb);if(tb===undefined){try{const jb=await tfFetch(TFM[id].slug+'/'+s+'/'+b+'.json');tb=(jb&&jb.text)||'';IK.set(kb,tb)}catch(e){break}}if(tb&&tb.trim()){IKP.set(k,{b:b,t:tb});break}}}
+  return t})}
 function ikLoad(id,list){const need=list.filter(([s,a])=>!IK.has(id+'|'+s+':'+a)).slice(0,TFCAP);if(!need.length)return Promise.resolve();return Promise.all(need.map(([s,a])=>ikGet(id,s,a).catch(()=>{IK.set(id+'|'+s+':'+a,null)})))}
 const TFCAP=12;
 function tfFoot(id){return '<p class="tfoot">'+TFM[id].name+' · '+TFM[id].au+'</p>'}
@@ -2798,8 +2802,11 @@ function ikHTML(id,list){
   if(miss)return '<div class="tload"><i class="tspin"></i>جارٍ تحميل '+TFM[id].name+'…</div>';
   let ps=0;
   list.slice(0,TFCAP).forEach(([s,a])=>{const t=IK.get(id+'|'+s+':'+a);if(s!==ps){h+='<div class="tsh">سورة '+D.N[s-1]+'</div>';ps=s}
-    if(t===null){h+='<div class="ikb"><span class="tan">'+AR(a)+'</span><p class="note">تعذّر تحميل تفسير هذه الآية الآن.</p></div>';return}
-    if(!t){h+='<div class="ikb mini"><span class="tan">'+AR(a)+'</span><p class="note">لا تفسير مستقلًّا لهذه الآية في هذا الكتاب، فقد تكون فُسّرت مع ما قبلها.</p></div>';return}
+    if(t===null){h+='<div class="ikb"><span class="tan">'+AR(a)+'</span><p class="note">تعذّر تحميل تفسير هذه الآية الآن. تحقّق من الاتصال.</p><button class="chipb" data-act="tfretry">إعادة المحاولة</button></div>';return}
+    if(!t||!String(t).trim()){const pr=IKP.get(id+'|'+s+':'+a);
+      if(pr){if(list.some(x=>x[0]===s&&x[1]===pr.b)){h+='<div class="ikb mini"><span class="tan">'+AR(a)+'</span><p class="note">فُسّرت هذه الآية مع الآية '+AR(pr.b)+'، فانظر شرحها هناك.</p></div>';return}
+        h+='<div class="ikb"><span class="tan">'+AR(a)+'</span><div class="ayq sm">'+txt(s,a)+'</div><p class="note" style="margin:0 0 6px">شرحٌ مشترك مع الآية '+AR(pr.b)+':</p><div class="ikt"><p>'+ikClean(pr.t)+'</p></div></div>';return}
+      h+='<div class="ikb mini"><span class="tan">'+AR(a)+'</span><p class="note">لا تفسير مستقلًّا لهذه الآية في هذا الكتاب، فقد تكون فُسّرت مع ما قبلها.</p></div>';return}
     h+='<div class="ikb"><span class="tan">'+AR(a)+'</span><div class="ayq sm">'+txt(s,a)+'</div><div class="ikt"><p>'+ikClean(t)+'</p></div></div>'});
   if(list.length>TFCAP)h+='<p class="note">عُرض تفسير أول '+AR(TFCAP)+' آية، وللباقي المس الآية نفسها في القراءة.</p>';
   return h+tfFoot(id);
@@ -3158,6 +3165,7 @@ document.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,v=b.dataset.v,k=b.dataset.k;
   switch(a){
   case 'back':navBack();break;
+  case 'tfretry':{[...IK.keys()].forEach(k=>{if(IK.get(k)===null)IK.delete(k)});if(SH==='taf')refreshSheet();break}
   case 'lpunlock':{const r=cur(),id=b.dataset.id,pw=($('lpw')||{}).value||'';if(!pw){r.err='اكتب كلمة السر.';render();break}b.disabled=true;b.textContent='جارٍ الفتح…';lpUnlock(id,pw).then(()=>{r.st=1;r.err='';render();toast('أُضيف الكتاب إلى مكتبتك على هذا الجهاز')},e=>{r.err=e.message==='pw'?'كلمة السر غير صحيحة.':'تعذّر تحميل الكتاب. تأكد من الإنترنت وأعد المحاولة.';render()});break}
   case 'upd':updNow();break;
   case 'tasmi':{const r=cur();let sp=null;if(r.v==='reader'||r.v==='mus')sp=r.spec;else if(r.v==='pick'&&r.A)sp={mode:'view',title:'صلاة '+PR[r.p].n,blocks:[{label:'الركعة الأولى',i:r.A.i,j:r.A.j},{label:'الركعة الثانية',i:r.B.i,j:r.B.j}]};if(!sp||!sp.blocks)break;auStop();ayStop();navPush({v:'tasmi',spec:sp});break}
@@ -3430,7 +3438,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=106;
+const APPV=107;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
