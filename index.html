@@ -1482,7 +1482,7 @@ function vPick(r){
   if(!r.A)return x+'<button class="btn primary" data-act="pksurah" data-k="0">'+ICON.juz+'اختر سورة الركعة الأولى</button>';
   x+=pkCard(0,r.A)+pkCard(1,r.B);
   if(r.B.i<=r.A.j&&D.P[r.B.i][0]<=D.P[r.A.j][0])x+='<p class="note">الأولى أن تكون قراءة الركعة الثانية بعد الأولى في ترتيب المصحف.</p>';
-  x+='<button class="btn primary" data-act="pkread">'+ICON.read+'قراءة المقطع</button><button class="btn outline tsgo" data-act="tasmi">'+ICON.mic+'اسمّعه عليّ</button><button class="btn goldb" data-act="pkok">'+ICON.check+'اعتماد المقاطع</button>';
+  x+='<button class="btn primary" data-act="pkread">'+ICON.read+'قراءة المقطع</button><button class="btn outline tsgo" data-act="tasmi">'+ICON.mic+'سمّع المقطع</button><button class="btn goldb" data-act="pkok">'+ICON.check+'اعتماد المقاطع</button>';
   return x;
 }
 function pkSurahSheet(k){const f=()=>shead('اختر سورة الركعة '+(k?'الثانية':'الأولى'))+'<input class="search" id="pkq" type="search" placeholder="اسم السورة أو رقمها"><div class="citylist" id="pklist" data-k="'+k+'">'+pkItems('',k)+'</div>';openSheet(f(),'pks')}
@@ -1584,7 +1584,7 @@ function musRiw(id,pg){return rwLines(id,pg).map(l=>l[0]==='h'?'<div class="ml m
 function musSurahs(pg,rw){const o=[];if(rw&&RWT[rw]&&RWD[rw]){const J=RWD[rw];for(let s=1;s<=114;s++){const P=J.S[s-1].p;if(P[0]<=pg&&P[P.length-1]>=pg)o.push(s)}}else for(let s=1;s<=114;s++){const A=D.PG[s-1];if(A[0]<=pg&&A[A.length-1]>=pg)o.push(s)}return o}
 function vMus(r){
   const rw=r.rw&&r.rw!=='hafs'?r.rw:'';const meta=rw?RIW.find(x=>x[0]===rw):null;const hasT=!!(rw&&RWT[rw]);
-  let x=topbar(r.spec?esc(r.spec.title||'القراءة'):'المصحف',{end:(rw?'':'<button class="ib mplay'+(AU.on?' on':'')+'" id="mplay" data-act="musplay" aria-label="استماع">'+(AU.on?ICON.pause:ICON.play)+'</button>')+(r.spec&&r.spec.blocks?'<button class="ib" data-act="tasmi" aria-label="اسمّعه عليّ">'+ICON.mic+'</button>':'')+(r.spec?'<button class="ib" data-act="mtext" aria-label="عرض نصّي مع الاستماع">'+ICON.aa+'</button>':'')+'<button class="ib" data-act="musidx" aria-label="الانتقال إلى سورة أو جزء">'+ICON.juz+'</button>'});
+  let x=topbar(r.spec?esc(r.spec.title||'القراءة'):'المصحف',{end:(rw?'':'<button class="ib mplay'+(AU.on?' on':'')+'" id="mplay" data-act="musplay" aria-label="استماع">'+(AU.on?ICON.pause:ICON.play)+'</button>')+(r.spec&&r.spec.blocks?'<button class="ib" data-act="tasmi" aria-label="سمّع المقطع">'+ICON.mic+'</button>':'')+(r.spec?'<button class="ib" data-act="mtext" aria-label="عرض نصّي مع الاستماع">'+ICON.aa+'</button>':'')+'<button class="ib" data-act="musidx" aria-label="الانتقال إلى سورة أو جزء">'+ICON.juz+'</button>'});
   const SP=r.spec;const mact=!SP?'':SP.mode==='prayer'?'<button class="btn goldb mact" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button>':SP.mode==='fri'?'<button class="btn goldb mact" data-act="prayedfri">'+ICON.check+'تمّت قراءة المقترح</button>':SP.mode==='wird'?'<button class="btn goldb mact" data-act="wdone">'+ICON.check+'أتممت الورد</button>':SP.mode==='topic'?'<button class="btn goldb mact" data-act="tprayed">'+ICON.check+'تمّت قراءة المقترح</button>':SP.mode==='night'?'<button class="btn goldb mact" data-act="ndone" data-k="'+SP.k+'" data-m="'+SP.m+'">'+ICON.check+'تمّت القراءة</button>':'';
   let info='';if(r.hl&&!hasT)info='<span class="mhl"><b>'+esc(r.ht||'المقطع')+'</b>'+(r.hl.some(h=>h[3]>0)?'':' · مظلَّل')+'</span>';else if(rw&&!hasT)info='<span class="mhl">النص حفص · الصوت بالرواية</span>';
   let chips='';if(r.hl&&!hasT&&r.hl.some(h=>h[3]>0)){const ORD=['الأولى','الثانية','الثالثة','الرابعة','الخامسة','السادسة','السابعة','الثامنة'];const seen={};r.hl.forEach(h=>{if(!seen[h[3]])seen[h[3]]=h});const ks=Object.keys(seen);const pgNow=r.pg;chips='<div class="mchips">'+ks.map(k=>{const h=seen[k],p1=D.PG[h[0]-1][h[1]-1],p2=D.PG[h[0]-1][h[2]-1];const on=pgNow>=p1&&pgNow<=Math.max(p1,p2);return '<button class="mchip k'+(k%2)+(on?' on':'')+'" data-act="musblk" data-i="'+k+'"><i></i>'+(r.hl.many&&ks.length>1&&(h[4]||'')?esc(h[4]):((SP&&SP.listen?'المقطع ':'الركعة ')+(ORD[k]||AR(+k+1))))+'</button>'}).join('')+'</div>'}
@@ -2271,7 +2271,7 @@ function vMutQuiz(r){const L=mutIdx().L;if(!r.qz)mutQuizNew(r);const Z=r.qz;
   x+='</div>';
   if(Z.ans>=0){x+='<div class="mqf '+(Z.ans===ci?'ok':'bad')+'">'+(Z.ans===ci?'صحيح':'الصواب: '+Q.ok)+' · وفي الموضع الآخر: '+Q.bad+'</div>'+muCard(p,z[1],{noact:1})+'<button class="btn goldb" data-act="mqn">'+(Z.i+1<Z.q.length?'التالي':'النتيجة')+'</button>'}
   return x+'</div>'}
-function mutChip(spec){if(!MUT||!spec||!spec.blocks)return '';const n=mutScope({sc:'seg',blocks:spec.blocks}).length;return n?'<button class="mtchip" data-act="mutseg">'+ICON.mut+'<span>المتشابه في المقطع · '+AR(n)+'</span></button>':''}
+function mutChip(spec,bi){if(!MUT||!spec||!spec.blocks)return '';const bl=bi==null?spec.blocks:[spec.blocks[bi]];const n=mutScope({sc:'seg',blocks:bl}).length;return n?'<button class="mtchip" data-act="mutseg"'+(bi==null?'':' data-b="'+bi+'"')+'>'+ICON.mut+'<span>المتشابه في '+(bi==null?'المقطع':'هذه الركعة')+' · '+AR(n)+'</span></button>':''}
 /* ---------- كتاب من جهاز المستخدم (يبقى على جهازه ولا يُنشر) ---------- */
 const LPDF={ighatha:{off:2,n:852}};
 function lpDB(){return new Promise((res,rej)=>{const q=indexedDB.open('waqf-books',1);q.onupgradeneeded=()=>q.result.createObjectStore('f');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
@@ -2363,9 +2363,9 @@ function ayaSheet(s,a){const f=()=>ayaHTML(s,a);openSheet(f(),'aya',f);setTimeou
 function vReader(r){
   const RD=r.spec;if(RD.p)prayer=RD.p;const BS=D.Q[0][0];const rc=RECK[S.reciter]||RECK.dosari;
   let x=topbar(RD.title||'القراءة',{end:'<button class="ib" data-act="rmus" aria-label="القراءة من المصحف">'+ICON.book+'</button><button class="ib" data-act="ropts" aria-label="خيارات القراءة">'+ICON.aa+'</button>'});
-  if(RD.note)x+='<div class="fdn"><p>'+RD.note.h+'</p><small>'+(RD.note.ij?'':'الدليل: ')+RD.note.s+'</small></div>';x+='<div class="rmeta"><button class="rpick" data-act="pick" data-k="reciter">القارئ: <b>'+rc[1]+'</b><i>‹</i></button>'+mutChip(RD)+'</div><div style="--qs:'+S.fs+'px">';let idx=0;
+  if(RD.note)x+='<div class="fdn"><p>'+RD.note.h+'</p><small>'+(RD.note.ij?'':'الدليل: ')+RD.note.s+'</small></div>';x+='<div class="rmeta"><button class="rpick" data-act="pick" data-k="reciter">القارئ: <b>'+rc[1]+'</b><i>‹</i></button>'+(RD.blocks.length>1?'':mutChip(RD))+'</div><div style="--qs:'+S.fs+'px">';let idx=0;
   RD.blocks.forEach((b,bi)=>{
-    if(b.label)x+='<div class="rh">'+b.label+'</div>';
+    if(b.label)x+='<div class="rh">'+b.label+'</div>';if(RD.blocks.length>1){const mc=mutChip(RD,bi);if(mc)x+='<div class="rmeta" style="margin-top:-4px">'+mc+'</div>'}
     let open=false,ls=0;
     blockAyat(b).forEach(([s,a],k)=>{
       if(k===0||s!==ls||a===1){if(open)x+='</div>';x+='<div class="sh">سورة '+D.N[s-1]+'</div>';if(a===1&&s!==1&&s!==9)x+='<div class="bs">'+BS+'</div>';x+='<div class="ayt">';open=true;ls=s}
@@ -2378,7 +2378,7 @@ function vReader(r){
   x+='</div>';
   if(revMode)x+='<div class="revbar"><button class="btn sm goldb" data-act="reveal">الآية التالية</button><button class="btn sm outline" data-act="revealall">إظهار الكل</button></div><p class="note">'+AR(Math.min(revealN,idx))+' من '+AR(idx)+'</p>';
   if(!S.ayHint){S.ayHint=1;setTimeout(()=>{toast('المس أي آية لتستمع إليها وحدها، أو تقرأ معاني كلماتها.');saveLocal()},900)}
-  x+='<button class="btn outline tsgo" data-act="tasmi">'+ICON.mic+'اسمّعه عليّ</button>';
+  x+='<button class="btn outline tsgo" data-act="tasmi">'+ICON.mic+'سمّع المقطع</button>';
   if(RD.mode==='prayer')x+='<button class="btn goldb" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button>';
   else if(RD.mode==='fri')x+='<button class="btn goldb" data-act="prayedfri">'+ICON.check+'تمّت قراءة المقترح</button>';
   else if(RD.mode==='wird')x+='<button class="btn goldb" data-act="wdone">'+ICON.check+'أتممت الورد</button>';
@@ -3217,7 +3217,7 @@ document.addEventListener('click',ev=>{
   case 'lpopen':navPush({v:'lpdf',id:'ighatha',p:+b.dataset.pg+LPDF.ighatha.off});break;
   case 'mutmus':{const r=cur();if(!r.hl)break;navPush({v:'mut',sc:'seg',blocks:r.hl.map(h=>({s:h[0],a:h[1],b:h[2]})),title:r.ht||'المقطع',m:'c'});break}
   case 'mutopen':closeSheet();navPush({v:'mut',sc:'ay',s:+b.dataset.s,a:+b.dataset.a,m:'c'});break;
-  case 'mutseg':{const r=cur();if(!r.spec)break;navPush({v:'mut',sc:'seg',blocks:r.spec.blocks,title:r.spec.title,m:'c'});break}
+  case 'mutseg':{const r=cur();if(!r.spec)break;const bb=b.dataset.b;navPush({v:'mut',sc:'seg',blocks:bb!=null&&bb!==''?[r.spec.blocks[+bb]]:r.spec.blocks,title:r.spec.title,m:'c'});break}
   case 'muthub':navPush({v:'mut'});break;
   case 'mutsu':navPush({v:'mut',sc:'su',s:+b.dataset.s,m:'c'});break;
   case 'muthz':navPush({v:'mut',sc:'hz',m:'c'});break;
@@ -3438,7 +3438,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=110;
+const APPV=111;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
