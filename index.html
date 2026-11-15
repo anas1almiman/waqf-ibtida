@@ -276,6 +276,9 @@ textarea.note-in{width:100%;min-height:70px;border:1px solid var(--line);border-
 .tstx .tw.bsm.v{opacity:.8}
 .tsbar{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:10px 16px calc(12px + var(--sab));background:var(--barbg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
 .tsinfo,.tsok{text-align:center;color:var(--muted);font-size:14.5px;margin-bottom:8px}.tsok{color:var(--em);font-weight:700}
+.tsnote{display:flex;align-items:center;justify-content:center;background:#FBE9E7;color:#B3261E;border:1px solid #E8B4AE;border-radius:14px;padding:8px 14px;margin-bottom:8px;animation:tsn .35s cubic-bezier(.22,1,.36,1)}.tsnote.sk{background:var(--warn2);color:var(--warn);border-color:transparent}.tsnote small{display:block;font-size:12.5px;text-align:center}.tsnote b{font:400 26px 'KFGQPC Hafs','Amiri Quran','Amiri',serif}.tsne{color:#B3261E;font-weight:700}
+@keyframes tsn{from{transform:translateY(10px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.tstx .tw.er{animation:tssh .4s}@keyframes tssh{0%,100%{transform:none}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
 .tserr{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--warn2);color:var(--warn);border-radius:14px;padding:8px 14px;margin-bottom:8px}.tserr small{display:block;font-size:12.5px}.tserr b{font:400 24px 'KFGQPC Hafs','Amiri Quran','Amiri',serif}
 .tsctl{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:520px;margin:0 auto}
 .tsmic{width:68px;height:68px;border-radius:50%;border:none;background:linear-gradient(145deg,#1d6a51,#123f31);color:#F7E7B3;display:grid;place-items:center;box-shadow:0 10px 22px -10px rgba(10,60,45,.7)}.tsmic svg{width:28px;height:28px}.tsmic.on{background:linear-gradient(145deg,#B3262E,#7f1a20);animation:pulse 1.2s infinite}
@@ -1777,7 +1780,7 @@ function tsFlush(T,Rall,cfg){
 }
 
 /* ---- tasmi ui v2 ---- */
-const TSS={on:false,spec:null,bi:0,E:[],DW:[],base:0,cut:0,st:[],lv:[],err:null,done:false,rec:null,hide:true,stop:true,sens:'normal',hint:{},cls:[],wl:null,sess:[]};
+const TSS={on:false,spec:null,bi:0,E:[],DW:[],base:0,cut:0,st:[],lv:[],err:null,done:false,rec:null,hide:true,stop:false,sens:'normal',al:{},note:null,nerr:0,hint:{},cls:[],wl:null,sess:[]};
 const TSSENS={low:'متسامح',normal:'عادي',strict:'دقيق'};
 const tsCfg=()=>({sens:TSS.sens,stop:TSS.stop,strict:TSS.sens==='strict'});
 function tsBuild(spec,bi){const E=[],DW=[];const BS=D.Q[0][0];const b=spec.blocks[bi];let ls=0;
@@ -1785,7 +1788,7 @@ function tsBuild(spec,bi){const E=[],DW=[];const BS=D.Q[0][0];const b=spec.block
     if(k===0||s!==ls||a===1){DW.push({hd:'سورة '+D.N[s-1],e:-3});ls=s;if(a===1&&s!==1&&s!==9)W(BS).forEach(w=>DW.push({w,e:-1,bs:1}))}
     W(txt(s,a)).forEach(w=>{const kk=tsK(w);DW.push({w,e:kk?E.length:-1});if(kk)E.push({w,k:kk,s,a})});DW.push({n:a,e:-2,s,a})});
   return {E,DW}}
-function tsInit(spec,bi){const o=tsBuild(spec,bi||0);Object.assign(TSS,{spec,bi:bi||0,E:o.E,DW:o.DW,base:0,cut:0,st:[],lv:[],err:null,done:false,hint:{},cls:[],sess:[]});tsOptSkip()}
+function tsInit(spec,bi){const o=tsBuild(spec,bi||0);Object.assign(TSS,{spec,bi:bi||0,E:o.E,DW:o.DW,base:0,cut:0,st:[],lv:[],err:null,done:false,hint:{},cls:[],sess:[],al:{},note:null,nerr:0});tsOptSkip()}
 /* the optional basmala words are skipped silently when the reciter starts with the first real word */
 function tsOptSkip(){/* optional words (basmala) are simply allowed: engine treats them as normal words, reciter may say them */}
 function vTasmi(r){
@@ -1793,7 +1796,7 @@ function vTasmi(r){
   const nb=r.spec.blocks.length;
   let x=topbar('التسميع',{end:'<button class="ib" data-act="tsreset" aria-label="من البداية">'+IC2.rep+'</button>'});
   if(nb>1)x+='<div class="tsseg">'+r.spec.blocks.map((b,i)=>'<button class="'+(i===TSS.bi?'on':'')+'" data-act="tsblk" data-b="'+i+'">'+(b.label||('المقطع '+AR(i+1)))+'</button>').join('')+'</div>';
-  x+='<div class="tsopts"><button class="chipb'+(TSS.hide?'':' plain')+'" data-act="tsopt" data-v="hide">'+(TSS.hide?'النص مخفيّ':'النص ظاهر')+'</button><button class="chipb'+(TSS.stop?'':' plain')+'" data-act="tsopt" data-v="stop">'+(TSS.stop?'أوقفني عند الخطأ':'علّم الخطأ فقط')+'</button><button class="chipb plain" data-act="tsopt" data-v="sens">الدقّة: '+TSSENS[TSS.sens]+'</button></div>';
+  x+='<div class="tsopts"><button class="chipb'+(TSS.hide?'':' plain')+'" data-act="tsopt" data-v="hide">'+(TSS.hide?'النص مخفيّ':'النص ظاهر')+'</button><button class="chipb'+(TSS.stop?'':' plain')+'" data-act="tsopt" data-v="stop">'+(TSS.stop?'أوقفني عند الخطأ':'نبّهني ولا توقفني')+'</button><button class="chipb plain" data-act="tsopt" data-v="sens">الدقّة: '+TSSENS[TSS.sens]+'</button></div>';
   x+='<div class="tstx" style="--qs:'+S.fs+'px"><div class="ayt" id="tstx">';
   TSS.DW.forEach((d,i)=>{
     if(d.hd){x+='<div class="sh" data-i="'+i+'">'+d.hd+'</div>';return}
@@ -1823,7 +1826,7 @@ function tsBar(){
   let m='';
   if(TSS.err){const e=TSS.E[TSS.err.p];m='<div class="tserr"><div><small>'+(TSS.err.type==='skip'?'فاتتك كلمة':'لم أسمعها صحيحة')+'</small><b>'+e.w+'</b></div><button class="chipb" data-act="tsskip">تجاوز</button></div>'}
   else if(TSS.done)m='<div class="tsok">أتممت '+(TSS.spec.blocks.length>1?(TSS.spec.blocks[TSS.bi].label||'المقطع'):'المقطع')+'</div>';
-  else m='<div class="tsinfo">'+(TSS.on?'أسمعك… اقرأ باسترسال':'اضغط الميكروفون وابدأ القراءة')+'<br><b>'+AR(dn)+'</b> من '+AR(tot)+' كلمة</div>';
+  else m=(TSS.note&&TSS.E[TSS.note.i]?'<div class="tsnote'+(TSS.note.type==='sk'?' sk':'')+'"><div><small>'+(TSS.note.type==='sk'?'فاتتك كلمة':'أخطأت · الصواب')+'</small><b>'+TSS.E[TSS.note.i].w+'</b></div></div>':'')+'<div class="tsinfo">'+(TSS.on?'أسمعك… اقرأ باسترسال':'اضغط الميكروفون وابدأ القراءة')+(TSS.nerr?' · <span class="tsne">الأخطاء: '+AR(TSS.nerr)+'</span>':'')+'<br><b>'+AR(dn)+'</b> من '+AR(tot)+' كلمة</div>';
   b.innerHTML=m+'<div class="tsctl"><button class="chipb plain" data-act="tshint"'+(TSS.done?' disabled':'')+'>تلميح</button><button class="tsmic'+(TSS.on?' on':'')+'" data-act="tsmic" aria-label="'+(TSS.on?'إيقاف':'ابدأ')+'">'+(TSS.on?ICON.pause:ICON.mic)+'</button><button class="chipb plain" data-act="tsfwd"'+(TSS.done?' disabled':'')+'>كلمة تالية</button></div>';
 }
 function tsSR(){return window.SpeechRecognition||window.webkitSpeechRecognition}
@@ -1831,7 +1834,7 @@ function tsStart(){
   const SR=tsSR();if(!SR){toast('التعرّف على الصوت غير متاح في هذا المتصفح. جرّب Safari أو Chrome.');return}
   if(TSS.done)tsInit(TSS.spec,TSS.bi);
   TSS.on=true;TSS.cut=0;TSS.sess=[];tsWL();
-  const r=new SR();TSS.rec=r;r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
+  const r=new SR();TSS.rec=r;r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=5;
   r.onresult=tsRes;
   r.onerror=e=>{const er=e&&e.error;if(er==='not-allowed'||er==='service-not-allowed'){TSS.on=false;toast('لم يُسمح باستخدام الميكروفون أو التعرّف على الصوت. فعّلهما من إعدادات الجهاز.')}else if(er==='network'){TSS.on=false;toast('التعرّف على الصوت يحتاج اتصالًا بالإنترنت.')}else if(er==='audio-capture'){TSS.on=false;toast('لم أجد ميكروفونًا.')}tsBar()};
   r.onend=()=>{TSS.rec=null;tsFlush(TSS,TSS.sess,tsCfg());TSS.sess=[];TSS.cut=0;if(TSS.on&&cur().v==='tasmi'&&!TSS.done){setTimeout(()=>{if(TSS.on&&!TSS.rec&&cur().v==='tasmi')tsStartRec()},150)}else{TSS.on=false}tsPaint();tsBar()};
@@ -1849,11 +1852,19 @@ function tsStop(){
 }
 const tsWords=t=>(t||'').split(/\s+/).map(tsK).filter(Boolean);
 let TSRAF=0;
+let TSAC=null;
+function tsBeep(){try{if(!TSAC)return;const o=TSAC.createOscillator(),g=TSAC.createGain(),t=TSAC.currentTime;o.type='sine';o.frequency.setValueAtTime(420,t);o.frequency.exponentialRampToValueAtTime(240,t+.2);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.24);o.connect(g);g.connect(TSAC.destination);o.start(t);o.stop(t+.26)}catch(x){}}
+function tsPickAlt(item){const n=item.length;if(n<2)return tsWords(item[0].transcript);const win=TSS.E.slice(TSS.base,TSS.base+60).map(e=>e.k);let best=null,bs=-1;
+  for(let a=0;a<n;a++){const w=tsWords(item[a].transcript);let sc=0;w.forEach(x=>{if(win.some(k=>tsM(x,k,false)))sc++});sc=sc/(w.length||1)+(a===0?0.001:0);if(sc>bs){bs=sc;best=w}}return best}
+function tsAlert(){const lo=Math.max(0,TSS.base-80),hi=Math.min(TSS.E.length,TSS.base+40);let hit=null;
+  for(let i=lo;i<hi;i++){const sv=TSS.st[i]||TSS.lv[i];if((sv==='er'||sv==='sk')&&!TSS.al[i]){TSS.al[i]=1;TSS.nerr++;hit={i:i,type:sv}}}
+  if(hit){TSS.note={i:hit.i,type:hit.type,t:Date.now()};tsBeep();try{navigator.vibrate&&navigator.vibrate([70,40,70])}catch(x){}setTimeout(()=>{if(TSS.note&&Date.now()-TSS.note.t>=3900){TSS.note=null;tsBar()}},4000)}}
 function tsRes(e){
-  let w=[];const res=e.results;for(let i=0;i<res.length;i++)w=w.concat(tsWords(res[i][0].transcript));
+  let w=[];const res=e.results;for(let i=0;i<res.length;i++)w=w.concat(i<res.length-1||res[i].isFinal?tsPickAlt(res[i]):tsWords(res[i][0].transcript));
   TSS.sess=w;
   const was=TSS.err;tsLive(TSS,w,tsCfg());
-  if(TSS.err&&!was)try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}
+  if(TSS.err&&!was){tsBeep();try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}}
+  if(!TSS.stop)tsAlert();
   if(TSS.done){tsStop();return}
   if(!TSRAF)TSRAF=requestAnimationFrame(()=>{TSRAF=0;tsPaint();tsBar()});
 }
@@ -3540,7 +3551,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=118;
+const APPV=119;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
