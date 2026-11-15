@@ -1257,7 +1257,7 @@ function gdate(t){try{return new Date(t).toLocaleDateString('ar-SA-u-ca-gregory'
 function clock(d){try{return d.toLocaleTimeString('ar-SA',{hour:'numeric',minute:'2-digit'})}catch(e){return ''}}
 let HF1=null,HF2=null;
 function hijri(d){try{if(!HF1){HF1=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'});HF2=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric',month:'numeric',year:'numeric'})}const t=HF1.format(d);const ps=HF2.formatToParts(d);const g=k=>+((ps.find(x=>x.type===k)||{}).value||0);return {t:t,d:g('day'),m:g('month'),y:g('year')}}catch(e){return null}}
-function until(t){const m=Math.round((t.getTime()-Date.now())/60000);if(m<=0)return 'حان وقتها';if(m<60)return 'بعد '+(m===1?'دقيقة':m===2?'دقيقتين':m<=10?AR(m)+' دقائق':AR(m)+' دقيقة');const h=Math.floor(m/60),mm=m%60;const hs=h===1?'ساعة':h===2?'ساعتين':h<=10?AR(h)+' ساعات':AR(h)+' ساعة';return 'بعد '+hs+(mm>=5?' و'+(mm<=10?AR(mm)+' دقائق':AR(mm)+' دقيقة'):'')}
+function until(t){const m=Math.round((t.getTime()-Date.now())/60000);if(m<=0){const e=Math.floor((Date.now()-t.getTime())/60000);return e<1?'حان وقتها الآن':'حان وقتها منذ '+(e===1?'دقيقة':e===2?'دقيقتين':e<=10?AR(e)+' دقائق':AR(e)+' دقيقة')}if(m<60)return 'بعد '+(m===1?'دقيقة':m===2?'دقيقتين':m<=10?AR(m)+' دقائق':AR(m)+' دقيقة');const h=Math.floor(m/60),mm=m%60;const hs=h===1?'ساعة':h===2?'ساعتين':h<=10?AR(h)+' ساعات':AR(h)+' ساعة';return 'بعد '+hs+(mm>=5?' و'+(mm<=10?AR(mm)+' دقائق':AR(mm)+' دقيقة'):'')}
 /* ================= passages & segments ================= */
 const NP=D.P.length;
 const txt=(s,a)=>D.Q[s-1][a-1];
@@ -1362,7 +1362,7 @@ function defaultPrayer(){const d=new Date();const h=d.getHours()+d.getMinutes()/
 function nextPrayer(){
   const now=new Date();
   if(!S.loc){const p=defaultPrayer();const day=new Date(now);if(p==='fajr'&&now.getHours()>=12)day.setDate(day.getDate()+1);return {p:p,t:null,day:day}}
-  const G=40*60e3;const t0=todayTimes(now);
+  const G=35*60e3;const t0=todayTimes(now);
   for(const p of ORDER){const t=t0[p];if(now.getTime()<t.getTime()+G)return {p:p,t:t,day:new Date(t)}}
   const tm=new Date(now.getTime()+864e5);const t1=todayTimes(tm);return {p:'fajr',t:t1.fajr,day:new Date(t1.fajr)};
 }
@@ -2755,7 +2755,7 @@ function icsPrayers(){
     Object.keys(NM).forEach(p=>{const when=tm[p];if(!when||when<new Date())return;
       ev.push('BEGIN:VEVENT','UID:pr-'+p+'-'+n+'-'+Date.now()+'@waqf-ibtida','DTSTAMP:'+z,'DTSTART:'+U(when),'DURATION:PT15M','SUMMARY:صلاة '+NM[p]+' · '+APP,'DESCRIPTION:حان الآن وقت صلاة '+NM[p],
         'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:باقي ١٠ دقائق على صلاة '+NM[p],'TRIGGER:-PT10M','END:VALARM','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:حان الآن وقت صلاة '+NM[p],'TRIGGER:PT0M','END:VALARM','END:VEVENT')});
-    const AF={fajr:35,dhuhr:35,asr:35,maghrib:25,isha:35},mk=(uid,when,title,desc)=>{if(!when||when<new Date())return;ev.push('BEGIN:VEVENT','UID:'+uid+'-'+n+'-'+Date.now()+'@waqf-ibtida','DTSTAMP:'+z,'DTSTART:'+U(when),'DURATION:PT10M','SUMMARY:'+title+' · '+APP,'DESCRIPTION:'+esc2(desc),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(title),'TRIGGER:PT0M','END:VALARM','END:VEVENT')};
+    const AF={fajr:35,dhuhr:35,asr:35,maghrib:35,isha:35},mk=(uid,when,title,desc)=>{if(!when||when<new Date())return;ev.push('BEGIN:VEVENT','UID:'+uid+'-'+n+'-'+Date.now()+'@waqf-ibtida','DTSTAMP:'+z,'DTSTART:'+U(when),'DURATION:PT10M','SUMMARY:'+title+' · '+APP,'DESCRIPTION:'+esc2(desc),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(title),'TRIGGER:PT0M','END:VALARM','END:VEVENT')};
     Object.keys(AF).forEach(p=>{if(tm[p])mk('af-'+p,new Date(tm[p].getTime()+AF[p]*60000),'أذكار بعد صلاة '+NM[p],'حان وقت أذكار ما بعد صلاة '+NM[p])});
     if(tm.fajr){let w2=new Date(tm.fajr.getTime()+55*60000);if(tm.sunrise&&w2>tm.sunrise)w2=new Date(tm.sunrise.getTime()-10*60000);mk('sabah',w2,'أذكار الصباح','وقت أذكار الصباح')}
     if(d.getDay()===5){const wk=new Date(d);wk.setHours(8,0,0,0);mk('kahf',wk,'سورة الكهف','لا تنسَ قراءة سورة الكهف')}
@@ -2767,7 +2767,7 @@ function icsPrayers(){
 /* ---- إشعارات التطبيق (تعمل والتطبيق مفتوح أو في الخلفية القريبة) ---- */
 function ntfOn(){try{return localStorage.getItem('wi_ntf')==='1'&&typeof Notification!=='undefined'&&Notification.permission==='granted'}catch(e){return false}}
 async function ntfShow(title,body,tag){try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();const o={body:body,tag:tag||undefined,icon:'icon-192.png',badge:'icon-192.png',lang:'ar',dir:'rtl'};if(reg&&reg.showNotification)await reg.showNotification(title,o);else new Notification(title,o);return true}catch(e){return false}}
-function ntfEvents(d){const tm=todayTimes(d);if(!tm)return[];const NM={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'},AF={fajr:35,dhuhr:35,asr:35,maghrib:25,isha:35},k=dayKey(d),ev=[];
+function ntfEvents(d){const tm=todayTimes(d);if(!tm)return[];const NM={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'},AF={fajr:35,dhuhr:35,asr:35,maghrib:35,isha:35},k=dayKey(d),ev=[];
   Object.keys(NM).forEach(p=>{if(!tm[p])return;ev.push({k:k+'pre'+p,t:new Date(tm[p].getTime()-10*60000),h:'باقي ١٠ دقائق على صلاة '+NM[p],b:'استعد للصلاة، وحضّر لتلاوتك'});ev.push({k:k+'at'+p,t:tm[p],h:'حان وقت صلاة '+NM[p],b:'تقبّل الله منك.'});ev.push({k:k+'af'+p,t:new Date(tm[p].getTime()+AF[p]*60000),h:'أذكار بعد صلاة '+NM[p],b:'لا تفوّت أذكار ما بعد الصلاة.'})});
   if(tm.fajr){let w=new Date(tm.fajr.getTime()+55*60000);if(tm.sunrise&&w>tm.sunrise)w=new Date(tm.sunrise.getTime()-10*60000);ev.push({k:k+'sab',t:w,h:'أذكار الصباح',b:'ابدأ يومك بذكر الله.'})}
   if(tm.asr)ev.push({k:k+'mas',t:new Date(tm.asr.getTime()+50*60000),h:'أذكار المساء',b:'وقت أذكار المساء.'});
@@ -3556,7 +3556,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=125;
+const APPV=126;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
