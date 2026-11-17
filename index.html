@@ -2238,14 +2238,14 @@ const qyCnt=(i,j)=>D.P[i][0]===D.P[j][0]?D.P[j][2]-D.P[i][1]+1:0;
 function qyEnd(){try{const v=+localStorage.getItem('wi_qyend');return v>0&&v<NP?v:0}catch(e){return 0}}
 const QYP={10:[['خفيفة',4],['متوسطة',2],['مطوّلة',1]],100:[['خفيفة',18],['متوسطة',10],['مطوّلة',6]],1000:[['خفيفة',30],['متوسطة',20],['مطوّلة',10]]};
 const QYM={10:10,100:30,1000:40};
-function qyBuild(lv,rk,cont,ds){let best=null,bs=1e9;for(let t=0;t<(cont?1:14);t++){const pl=qyBuild1(lv,rk,cont,ds),ns=pl.bl.map(b=>qyCnt(b.i,b.j)),m=pl.tot/ns.length;let sc=Math.abs(pl.bl.length-rk)*500+Math.sqrt(ns.reduce((a,n)=>a+(n-m)*(n-m),0)/ns.length)*(ds&&ds!=='e'?.3:1)+(pl.tot<lv?300:0);if(sc<bs){bs=sc;best=pl}}return best}
-function qyBuild1(lv,rk,cont,ds){const tg=lv;const wf=k=>rk<2||k>=rk?1:ds==='a'?.5+k/(rk-1):ds==='d'?1.5-k/(rk-1):1;let sw=0;for(let k=0;k<rk;k++)sw+=wf(k);let st=-1;
+function qyBuild(lv,rk,cont,ds){let best=null,bs=1e9;for(let t=0;t<(cont?6:42);t++){const pl=qyBuild1(lv,rk,cont,ds,[1.08,1.25,1.5,1.9,2.5,3.2][t%6]),ns=pl.bl.map(b=>qyCnt(b.i,b.j)),m=pl.tot/ns.length;let sc=Math.abs(pl.bl.length-rk)*500+Math.sqrt(ns.reduce((a,n)=>a+(n-m)*(n-m),0)/ns.length)*(ds&&ds!=='e'?.3:1)+(pl.tot<lv?300+(lv-pl.tot):0)+(pl.tot>lv?(pl.tot-lv)*.5:0);if(sc<bs){bs=sc;best=pl}}return best}
+function qyBuild1(lv,rk,cont,ds,mu){const tg=lv;const wf=k=>rk<2||k>=rk?1:ds==='a'?.5+k/(rk-1):ds==='d'?1.5-k/(rk-1):1;let sw=0;for(let k=0;k<rk;k++)sw+=wf(k);let st=-1;
   if(cont&&qyEnd()){st=qyEnd();while(st<NP&&D.P[st][8]&&D.P[st][0]===D.P[st-1][0])st++}
   if(st<0){const c=[];for(let i=0;i<NP;i++){const sr=D.P[i][0];if(sr>1&&sr<78&&stAbs(i)&&D.P[i][1]===1&&avail([i,i]))c.push(i)}if(!c.length){for(let i=0;i<NP;i++)if(D.P[i][0]>1&&D.P[i][0]<78&&stAbs(i))c.push(i)}
     // ابدأ من بداية سورة أو من موضع ابتداء صحيح
     const c2=[];for(let i=0;i<NP;i++){if(D.P[i][0]>1&&D.P[i][0]<78&&stAbs(i)&&avail([i,i]))c2.push(i)}st=rand(c2.length?c2:c)}
   const bl=[];let cur=st,tot=0,k=0;
-  while((k<rk||tot<tg)&&k<60){if(cur>=NP)cur=0;const q=Math.max(1,Math.ceil(tg*1.08*wf(k)/sw));const i=cur;let j=i,n=qyCnt(i,j);
+  while(k<rk){if(cur>=NP)cur=0;const q=Math.max(1,Math.ceil(tg*mu*wf(k)/sw));const i=cur;let j=i,n=qyCnt(i,j);
     while((n<q||!endOK(j))&&j+1<NP&&D.P[j+1][0]===D.P[i][0]){j++;n=qyCnt(i,j)}
     while(j+1<NP&&D.P[j+1][0]===D.P[j][0]&&isTail(j+1)){j++;n=qyCnt(i,j)}
     bl.push({label:'الركعة '+AR(++k),i:i,j:j});tot+=n;cur=j+1}
@@ -3656,7 +3656,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=135;
+const APPV=136;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
