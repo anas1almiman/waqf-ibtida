@@ -31,6 +31,11 @@ body.sheet-open{overflow:hidden}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;transition:transform .16s var(--ease),opacity .16s,background-color .2s,border-color .2s,box-shadow .2s}
 button:active{transform:scale(.975)}
+.card[data-act]:active,.rrow[data-act]:active,.qyrow:active,.adban:active,.mkban:active,.opt:active{transform:scale(.982);transition-duration:.07s}
+.card[data-act],.rrow[data-act],.adban,.mkban,.hcard,.ptile{transition:transform .32s var(--ease),box-shadow .25s,background-color .2s}
+@media(hover:none){*{-webkit-tap-highlight-color:transparent}}
+html{scroll-behavior:auto}
+button,[data-act],.card,a{touch-action:manipulation}
 p{margin:6px 0;line-height:1.9}
 svg{display:block}
 .wrap{max-width:520px;margin:0 auto;padding:0 16px 10px;min-height:calc(100vh - 12px - var(--sab));box-sizing:border-box}
@@ -1416,11 +1421,17 @@ let ENTER=false,AFTER=null,prayer='fajr',revSurah=2,revFilter='all',catSel='all'
 function persist(){try{cur().y=window.scrollY;const js=JSON.stringify({s:STACK,rs:revSurah,rf:revFilter});sessionStorage.setItem(VKEY,js);try{localStorage.setItem('waqf-nav-ls',JSON.stringify({t:Date.now(),d:js}))}catch(e){}}catch(e){}}
 function restore(){try{let raw=sessionStorage.getItem(VKEY);if(!raw){try{const l=JSON.parse(localStorage.getItem('waqf-nav-ls')||'null');if(l&&Date.now()-l.t<180000)raw=l.d}catch(e){}}const o=JSON.parse(raw||'null');if(o&&Array.isArray(o.s)&&o.s.length&&o.s[0].v==='home'){STACK=o.s;revSurah=o.rs||2;revFilter=o.rf||'all';return true}}catch(e){}return false}
 function show(dir,y){
-  const app=$('app');
+  const app=$('app');const IOS='cubic-bezier(.32,.72,0,1)',OUT='cubic-bezier(.4,0,.6,1)';
+  /* RTL: دفع = تدخل الصفحة من اليسار، رجوع = تدخل من اليمين */
+  const sx=dir>0?-1:1;
   if(dir&&!RM&&app.firstChild){const g=app.cloneNode(true);g.removeAttribute('id');g.classList.add('ghost');g.style.top=(-window.scrollY)+'px';document.body.appendChild(g);
-    try{g.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale('+(dir>0?.965:1.025)+')'}],{duration:260,easing:'cubic-bezier(.4,0,.9,.6)',fill:'forwards'}).onfinish=()=>g.remove()}catch(e){g.remove()}}
+    try{g.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translate3d('+(-sx*34)+'px,0,0) scale(.985)',offset:1}],{duration:300,easing:OUT,fill:'forwards'}).onfinish=()=>g.remove()}catch(e){g.remove()}}
   ENTER=false;render();window.scrollTo(0,y||0);parallax();
-  if(dir&&!RM){try{const E='cubic-bezier(.22,1,.36,1)';app.animate([{opacity:0,transform:'scale('+(dir>0?1.025:.97)+')'},{opacity:1,transform:'none'}],{duration:500,delay:90,fill:'backwards',easing:E});}catch(e){}}
+  if(dir&&!RM){try{
+    app.animate([{opacity:0,transform:'translate3d('+(sx*58)+'px,0,0)'},{opacity:1,transform:'none'}],{duration:480,delay:50,fill:'backwards',easing:IOS});
+    const w=app.querySelector('.wrap')||app,kids=[...w.children].filter(e=>!/^(HEADER|NAV)$/.test(e.tagName)&&!e.classList.contains('bar')&&!e.classList.contains('hhero')).slice(0,9);
+    kids.forEach((e,k)=>{try{e.animate([{opacity:0,transform:'translate3d(0,16px,0)'},{opacity:1,transform:'none'}],{duration:520,delay:90+k*42,fill:'backwards',easing:IOS})}catch(_){}})
+  }catch(e){}}
   persist();
 }
 function navPush(r){persist();if(r.v==='reader'&&AZ.act)azStop();if(r.v==='reader'||!(AU.on&&AU.keep&&AU.spec)){auStop();AU.keep=false;AU.spec=null;AU.reps=null;AU.adk=null}ayStop();rwStop();STACK.push(r);try{history.pushState({d:STACK.length},'')}catch(e){}show(1,0)}
@@ -3658,7 +3669,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=139;
+const APPV=140;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
