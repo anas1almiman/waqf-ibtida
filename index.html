@@ -35,6 +35,7 @@ button:active{transform:scale(.975)}
 .card[data-act],.rrow[data-act],.adban,.mkban,.hcard,.ptile{transition:transform .32s var(--ease),box-shadow .25s,background-color .2s}
 @media(hover:none){*{-webkit-tap-highlight-color:transparent}}
 html{scroll-behavior:auto}
+.swedge{position:fixed;top:0;bottom:0;right:0;width:26px;z-index:40;pointer-events:none;opacity:0;background:linear-gradient(270deg,rgba(40,28,6,.28),transparent)}
 button,[data-act],.card,a{touch-action:manipulation}
 p{margin:6px 0;line-height:1.9}
 svg{display:block}
@@ -1420,8 +1421,10 @@ const RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').ma
 let ENTER=false,AFTER=null,prayer='fajr',revSurah=2,revFilter='all',catSel='all',tq='',lastAdj=0,wAdj=0,stRole=null,stStep=0,cityQ='',hifzDraft=null,hifzSDraft=null,obHzOnly=false,pendingLoc=null;
 function persist(){try{cur().y=window.scrollY;const js=JSON.stringify({s:STACK,rs:revSurah,rf:revFilter});sessionStorage.setItem(VKEY,js);try{localStorage.setItem('waqf-nav-ls',JSON.stringify({t:Date.now(),d:js}))}catch(e){}}catch(e){}}
 function restore(){try{let raw=sessionStorage.getItem(VKEY);if(!raw){try{const l=JSON.parse(localStorage.getItem('waqf-nav-ls')||'null');if(l&&Date.now()-l.t<180000)raw=l.d}catch(e){}}const o=JSON.parse(raw||'null');if(o&&Array.isArray(o.s)&&o.s.length&&o.s[0].v==='home'){STACK=o.s;revSurah=o.rs||2;revFilter=o.rf||'all';return true}}catch(e){}return false}
+let SWB=false;
 function show(dir,y){
-  const app=$('app');const IOS='cubic-bezier(.32,.72,0,1)',OUT='cubic-bezier(.4,0,.6,1)';
+  const app=$('app');
+  if(SWB){SWB=false;ENTER=false;render();window.scrollTo(0,y||0);parallax();if(!RM){try{app.animate([{opacity:0,transform:'translate3d(30px,0,0)'},{opacity:1,transform:'none'}],{duration:260,easing:'cubic-bezier(.22,1,.36,1)'})}catch(e){}}persist();return}const IOS='cubic-bezier(.32,.72,0,1)',OUT='cubic-bezier(.4,0,.6,1)';
   /* RTL: دفع = تدخل الصفحة من اليسار، رجوع = تدخل من اليمين */
   const sx=dir>0?-1:1;
   if(dir&&!RM&&app.firstChild){const g=app.cloneNode(true);g.removeAttribute('id');g.classList.add('ghost');g.style.top=(-window.scrollY)+'px';document.body.appendChild(g);
@@ -1727,6 +1730,21 @@ let MSW=null;
 document.addEventListener('touchstart',e=>{const t=e.target.closest&&e.target.closest('.mpage');MSW=t&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});
 document.addEventListener('touchend',e=>{if(!MSW||SH)return;const c=e.changedTouches[0],dx=c.clientX-MSW.x,dy=c.clientY-MSW.y;MSW=null;if(Math.abs(dx)>64&&Math.abs(dy)<46)musGo(dx>0?1:-1)},{passive:true});
 window.addEventListener('resize',()=>{if(cur()&&cur().v==='mus'){musFit();musVars()}});
+
+/* ===== السحب من حافة الشاشة للرجوع (يمين الشاشة نحو اليسار) ===== */
+(function(){let g=null;const EDGE=26;
+  const ok=()=>STACK.length>1&&!SH&&cur()&&cur().v!=='mus'&&!document.body.classList.contains('musmode');
+  document.addEventListener('touchstart',e=>{if(e.touches.length!==1||!ok()){g=null;return}const t=e.touches[0];if(t.clientX<innerWidth-EDGE){g=null;return}g={x:t.clientX,y:t.clientY,t:Date.now(),on:false,dx:0,el:$('app'),sh:null}},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!g)return;const t=e.touches[0],dx=g.x-t.clientX,dy=Math.abs(t.clientY-g.y);
+    if(!g.on){if(dx>10&&dx>dy*1.4){g.on=true;g.el.style.transition='none';g.el.style.willChange='transform,opacity';const s=document.createElement('div');s.className='swedge';document.body.appendChild(s);g.sh=s;if(navigator.vibrate)try{navigator.vibrate(0)}catch(_){}}else if(dy>14){g=null;return}else return}
+    g.dx=Math.max(0,dx);const w=innerWidth,p=Math.min(1,g.dx/w);g.el.style.transform='translate3d('+(-g.dx)+'px,0,0)';g.el.style.opacity=String(1-p*.55);if(g.sh){g.sh.style.opacity=String(Math.min(1,p*4));g.sh.style.right='calc(0px - '+(g.dx)+'px)'}
+    if(e.cancelable)e.preventDefault()},{passive:false});
+  const end=ab=>{if(!g)return;const k=g;g=null;if(!k.on)return;const el=k.el,w=innerWidth,v=k.dx/Math.max(1,Date.now()-k.t),commit=!ab&&(k.dx>w*.32||v>.55);
+    const clean=()=>{el.style.transition='';el.style.transform='';el.style.opacity='';el.style.willChange='';if(k.sh)k.sh.remove()};
+    if(commit){const a=el.animate([{transform:'translate3d('+(-k.dx)+'px,0,0)',opacity:el.style.opacity||1},{transform:'translate3d('+(-w)+'px,0,0)',opacity:0}],{duration:200,easing:'cubic-bezier(.32,.72,0,1)',fill:'forwards'});a.onfinish=()=>{SWB=true;clean();try{a.cancel()}catch(_){}navBack()};if(navigator.vibrate)try{navigator.vibrate(8)}catch(_){}}
+    else{const a=el.animate([{transform:'translate3d('+(-k.dx)+'px,0,0)',opacity:el.style.opacity||1},{transform:'none',opacity:1}],{duration:280,easing:'cubic-bezier(.22,1,.36,1)'});a.onfinish=clean;setTimeout(clean,320)}};
+  document.addEventListener('touchend',()=>end(false),{passive:true});document.addEventListener('touchcancel',()=>end(true),{passive:true});
+})();
 /* ================= views ================= */
 const TABV={home:'home',topics:'topics',library:'library',more:'more',plan:'more',ramadan:'more',record:'more',settings:'more'};
 const TABS=[['home','اليوم','mosque'],['mus','المصحف','book'],['topics','المختارات','star'],['library','المكتبة','shelf'],['more','المزيد','list']];
@@ -3669,7 +3687,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=140;
+const APPV=141;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
