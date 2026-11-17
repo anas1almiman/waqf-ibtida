@@ -3604,7 +3604,7 @@ function splash(short){
   el.innerHTML='<div class="sp-ph"></div><div class="sp-ov"></div><div class="sp-bg"></div><div class="rays"></div><div class="glow"></div><div class="vig"></div><div class="dust">'+dust+'</div><div class="medal3d"><div class="r"><div class="l0">'+MEDAL('sp0')+'</div><div class="l1">'+MEDAL('sp1')+'</div></div></div><div class="sp-cart"><svg class="fr" viewBox="0 0 392 282" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cfg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF0BE"/><stop offset=".4" stop-color="#D9AE55"/><stop offset=".7" stop-color="#A97A23"/><stop offset="1" stop-color="#EBCB7C"/></linearGradient></defs><g fill="none" stroke="url(#cfg)" stroke-linejoin="round"><path class="dr" pathLength="1" stroke-width="1.6" d="M30 6H362Q368 22 386 26V256Q368 260 362 276H30Q24 260 6 256V26Q24 22 30 6Z"/><path class="dr" pathLength="1" stroke-width=".8" stroke-opacity=".8" d="M36 14H356Q361 27 378 31V251Q361 255 356 268H36Q31 255 14 251V31Q31 27 36 14Z"/></g><g class="orn" fill="url(#cfg)"><path transform="translate(196 6)" d="M0-9L2.6-2.6 9 0 2.6 2.6 0 9-2.6 2.6-9 0-2.6-2.6Z"/><path transform="translate(196 276)" d="M0-9L2.6-2.6 9 0 2.6 2.6 0 9-2.6 2.6-9 0-2.6-2.6Z"/><path transform="translate(6 141)" d="M0-9L2.6-2.6 9 0 2.6 2.6 0 9-2.6 2.6-9 0-2.6-2.6Z"/><path transform="translate(386 141)" d="M0-9L2.6-2.6 9 0 2.6 2.6 0 9-2.6 2.6-9 0-2.6-2.6Z"/><circle cx="18" cy="18" r="2.2"/><circle cx="374" cy="18" r="2.2"/><circle cx="18" cy="264" r="2.2"/><circle cx="374" cy="264" r="2.2"/></g></svg><div class="gw ay"><div class="gm"></div></div></div><div class="sp-ref">سورة ص</div><div class="gw sp-nm"><div class="gm"></div></div><svg class="sp-dv" viewBox="0 0 190 16"><g fill="none" stroke="#D9B45A" stroke-width="1"><path class="dr" pathLength="1" d="M84 8H6"/><path class="dr" pathLength="1" d="M106 8H184"/></g><path class="orn" fill="#E8C877" d="M95 1.5L101.5 8 95 14.5 88.5 8Z"/><circle class="orn" cx="80" cy="8" r="1.6" fill="#E8C877"/><circle class="orn" cx="110" cy="8" r="1.6" fill="#E8C877"/></svg><div class="gw sp-mt"><div class="gm"></div></div><div class="sp-tap">المس الشاشة للدخول</div>';
   el.classList.toggle('q',!!short);el.setAttribute('aria-label','وقف وابتداء');
   let gone=false;const done=()=>{if(gone)return;gone=true;el.classList.add('gone');setTimeout(()=>{el.innerHTML='';el.style.display='none'},800)};
-  el.style.display='';el.onclick=done;setTimeout(done,short?6000:11000);
+  el.style.display='';el.onclick=done;setTimeout(done,12000);
 }
 function splashSeenToday(){const t=String(dayKey());let k='';try{k=localStorage.getItem('waqf-spd')||''}catch(e){}if(k===t)return true;try{localStorage.setItem('waqf-spd',t)}catch(e){}return false}
 function prefetchData(){if(!navigator.onLine)return;try{ghLoad().catch(()=>{})}catch(e){}try{const rc=RC();if(rc[2]==='sf')tmLoad(rc[4]).catch(()=>{})}catch(e){}}
@@ -3612,14 +3612,14 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=132;
+const APPV=133;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
 updCheck();document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});
 const restored=restore();
 if(restored&&STACK.length>1){try{history.replaceState({d:1},'');for(let d=2;d<=STACK.length;d++)history.pushState({d:d},'')}catch(e){}}else{try{history.replaceState({d:1},'')}catch(e){}}
-if(restored){const sp=$('splash');if(sp){sp.style.display='none';sp.innerHTML=''}}else splash(false);
+splash(false);
 render();
 setTimeout(prefetchData,3500);
 if(restored){const y=cur().y||0;if(y)setTimeout(()=>window.scrollTo(0,y),40)}
