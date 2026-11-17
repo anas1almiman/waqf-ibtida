@@ -35,6 +35,18 @@ button:active{transform:scale(.975)}
 .card[data-act],.rrow[data-act],.adban,.mkban,.hcard,.ptile{transition:transform .32s var(--ease),box-shadow .25s,background-color .2s}
 @media(hover:none){*{-webkit-tap-highlight-color:transparent}}
 html{scroll-behavior:auto}
+#tabbar{view-transition-name:tabbar}
+::view-transition-group(root){animation-duration:.5s}
+::view-transition-old(root),::view-transition-new(root){animation-timing-function:cubic-bezier(.32,.72,0,1);animation-fill-mode:both;mix-blend-mode:normal}
+html[data-vt=f]::view-transition-old(root){animation-name:vtOF;animation-duration:.34s}
+html[data-vt=f]::view-transition-new(root){animation-name:vtNF;animation-duration:.5s}
+html[data-vt=b]::view-transition-old(root){animation-name:vtOB;animation-duration:.34s}
+html[data-vt=b]::view-transition-new(root){animation-name:vtNB;animation-duration:.5s}
+@keyframes vtOF{to{opacity:0;transform:translate3d(32px,0,0)}}
+@keyframes vtNF{from{opacity:0;transform:translate3d(-56px,0,0)}}
+@keyframes vtOB{to{opacity:0;transform:translate3d(-56px,0,0)}}
+@keyframes vtNB{from{opacity:0;transform:translate3d(32px,0,0)}}
+@media(prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
 .sect+.ptiles.sirt{gap:10px}.ptile.sir{padding:10px 14px 10px 12px;border-color:#BFD0DA;background:linear-gradient(135deg,#F2F7FA,var(--card))}.ptile.sir .pi{width:46px;height:46px;border-radius:14px;color:#2F6384;background:radial-gradient(circle at 30% 25%,#F7FBFD,#DCE9F0);border-color:#BFD0DA}.ptile.sir .pi svg{width:27px;height:27px}.ptile.sir .pn b{color:#24506B}.ptile.sir .pt{color:#2F6384}body.dark .ptile.sir{background:linear-gradient(135deg,#142029,#101A17);border-color:#2B4352}body.dark .ptile.sir .pn b,body.dark .ptile.sir .pt{color:#9CC3DC}
 .sirc{margin-bottom:10px}.sirq{display:block;font:700 20px/1.8 'Amiri',serif;color:var(--ink)}
 .mflip{backface-visibility:hidden;will-change:transform;box-shadow:0 0 0 rgba(0,0,0,0);overflow:hidden}
@@ -1442,6 +1454,14 @@ function show(dir,y){
   if(SWB){SWB=false;ENTER=false;render();window.scrollTo(0,y||0);parallax();if(!RM){try{app.animate([{opacity:0,transform:'translate3d(30px,0,0)'},{opacity:1,transform:'none'}],{duration:260,easing:'cubic-bezier(.22,1,.36,1)'})}catch(e){}}persist();return}const IOS='cubic-bezier(.32,.72,0,1)',OUT='cubic-bezier(.4,0,.6,1)';
   /* RTL: دفع = تدخل الصفحة من اليسار، رجوع = تدخل من اليمين */
   const sx=dir>0?-1:1;
+  if(dir&&!RM&&app.firstChild&&document.startViewTransition){
+    const H=document.documentElement;H.dataset.vt=dir>0?'f':'b';
+    try{const vt=document.startViewTransition(()=>{ENTER=false;render();window.scrollTo(0,y||0);parallax();
+        const w=app.querySelector('.wrap')||app,kids=[...w.children].filter(e=>!/^(HEADER|NAV)$/.test(e.tagName)&&!e.classList.contains('bar')&&!e.classList.contains('hhero')).slice(0,8);
+        kids.forEach((e,k)=>{try{e.animate([{opacity:0,transform:'translate3d(0,14px,0)'},{opacity:1,transform:'none'}],{duration:480,delay:70+k*38,fill:'backwards',easing:'cubic-bezier(.32,.72,0,1)'})}catch(_){}})});
+      const done=()=>{delete H.dataset.vt};vt.finished.then(done,done);
+      (window.requestIdleCallback||setTimeout)(()=>persist());return}catch(e){delete H.dataset.vt}
+  }
   if(dir&&!RM&&app.firstChild){const g=app.cloneNode(true);g.removeAttribute('id');g.classList.add('ghost');g.style.top=(-window.scrollY)+'px';document.body.appendChild(g);
     try{g.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translate3d('+(-sx*34)+'px,0,0) scale(.985)',offset:1}],{duration:300,easing:OUT,fill:'forwards'}).onfinish=()=>g.remove()}catch(e){g.remove()}}
   ENTER=false;render();window.scrollTo(0,y||0);parallax();
@@ -3725,7 +3745,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=144;
+const APPV=145;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
