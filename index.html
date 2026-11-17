@@ -2006,12 +2006,12 @@ function vHome(){
     const w=wirdRange();
     x+=sect('الختمة')+'<div class="ptiles'+(ENTER?' stag':'')+'">'+wresCard()+'<button class="ptile next" data-act="nav" data-v="wird"><span class="pi">'+ICON.read+'</span><span class="pn"><b>وِرد اليوم</b><small>'+(w?'من سورة '+D.N[D.P[w[0]][0]-1]+' إلى سورة '+D.N[D.P[w[1]][0]-1]:'أتممت الختمة')+'</small></span></button></div>';
   }else{
-    x+=sect('الصلوات الجهرية')+'<div class="ptiles'+(ENTER?' stag':'')+'">'+ORDER.map(p=>{
+    x+=sect('الصلوات')+'<div class="ptiles'+(ENTER?' stag':'')+'">'+['fajr','dhuhr','asr','maghrib','isha'].map(p=>{
+      if(SIR[p]){return '<button class="ptile sir" data-act="sirp" data-p="'+p+'"><span class="pi">'+PICON[p]+'</span><span class="pn"><b>'+SIR[p].n+'</b><small>صلاة سرّية</small></span>'+(t&&t[p]?'<span class="pt">'+clock(t[p])+'</span>':'')+'</button>'}
       let sub='';const fri=p==='fajr'&&S.friday&&fridayFajr(np);
       if(recentDone(p))sub='<small>صُلّيت · تقبّل الله</small>';else if(fri)sub='<small>سنّة الجمعة: السجدة والإنسان</small>';else if(S.sunna[p])sub='<small>'+MUFN[p]+'</small>';
       if(!sub&&p===np.p){const c=current(p);if(c)sub='<small class="nxs">'+miniSeg(c.a)+'</small>'}
       return '<button class="ptile'+(p===np.p?' next':'')+'" data-act="openp" data-p="'+p+'"><span class="pi">'+PICON[p]+'</span><span class="pn"><b>'+PR[p].n+(p===np.p?'<span class="pill">التالية</span>':'')+'</b>'+sub+'</span>'+(t?'<span class="pt">'+clock(t[p])+'</span>':'')+'</button>'}).join('')+'</div>';
-    x+=sect('الصلاة السرّية')+'<div class="ptiles sirt'+(ENTER?' stag':'')+'">'+['dhuhr','asr'].map(p=>{const c=sirCur(p);return '<button class="ptile sir" data-act="sirp" data-p="'+p+'"><span class="pi">'+PICON[p]+'</span><span class="pn"><b>'+SIR[p].n+'</b><small>'+(c?miniSeg(c.a):'سرّية · مقترح التلاوة')+'</small></span>'+(t&&t[p]?'<span class="pt">'+clock(t[p])+'</span>':'')+'</button>'}).join('')+'</div>';
   }
   if(hj&&(hj.m===9||(hj.m===8&&hj.d>=10)))x+='<button class="card banner go" style="margin-top:14px" data-act="nav" data-v="ramadan"><span><b>'+(hj.m===9?'ختمة رمضان':'يقترب شهر رمضان')+'</b><p>'+(hj.m===9?'الليلة '+AR(tonight()||hj.d)+' من رمضان':'أعدّ خطة الختمة قبل دخول الشهر')+'</p></span></button>';
   x+=homeStrip(np);
@@ -3725,7 +3725,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=143;
+const APPV=144;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
