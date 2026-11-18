@@ -1036,7 +1036,7 @@ html.dk .card.accent{box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 18px 30px 
 .ais{border-top:1px solid var(--line);margin-top:8px;padding-top:9px;display:flex;flex-wrap:wrap;gap:6px}.ais small{width:100%;color:var(--muted);font-size:12.5px}.aisb{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--gold3);border-radius:12px;padding:5px 10px 5px 8px;font-size:13.5px;color:var(--ink2)}.aisb b{background:var(--em);color:#F7E7B3;border-radius:6px;min-width:20px;text-align:center;font:700 12px sans-serif;padding:1px 4px}
 .aikey{display:flex;flex-direction:column;gap:8px}.aikey b{font:700 17px 'Amiri',serif;color:var(--em)}.aikey small{color:var(--muted);font-size:13.5px;line-height:1.8}.aikey .search{margin:0}.aikeyb{border:0;background:none;display:block;margin:0 auto 12px;color:var(--muted);font-size:13px;text-decoration:underline}
 .aiw{position:fixed;left:0;right:0;top:0;height:100%;z-index:12;display:flex;flex-direction:column;padding:0 16px;overflow:hidden}.aiw .bar{flex:none;position:relative}.aisc{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 0 14px}
-.aibar{flex:none;display:flex;gap:8px;align-items:flex-end;margin:0 -16px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--barbg);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.aiw.kb .aibar{padding-bottom:8px}.aibar{flex:none;display:flex;gap:8px;align-items:flex-end;margin:0 -16px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--barbg);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
 
 .aibar textarea{flex:1;resize:none;max-height:120px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;padding:11px 14px;font:16px/1.6 inherit;outline:none}.aisend{flex:none;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#F9E8A9,#D9AE4C);color:#14352a;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(160,120,30,.3)}.aisend svg{width:20px;height:20px}
 </style>
@@ -3374,7 +3374,7 @@ function vAi(r){
   return x;
 }
 const aiBot=()=>{const s=$('aisc');if(s)s.scrollTop=s.scrollHeight};
-function aiVV(){const w=$('aiw');if(!w)return;const v=window.visualViewport;if(!v){return}w.style.height=v.height+'px';w.style.transform='translateY('+v.offsetTop+'px)';if(window.scrollY)window.scrollTo(0,0)}
+function aiVV(){const w=$('aiw');if(!w)return;const v=window.visualViewport;if(!v){return}AIS.h0=Math.max(AIS.h0||0,window.innerHeight,v.height);w.classList.toggle('kb',v.height<AIS.h0-120);w.style.height=v.height+'px';w.style.transform='translateY('+v.offsetTop+'px)';if(window.scrollY)window.scrollTo(0,0)}
 if(window.visualViewport){visualViewport.addEventListener('resize',()=>{aiVV();if(document.activeElement&&document.activeElement.id==='aiin')aiBot()});visualViewport.addEventListener('scroll',aiVV)}
 document.addEventListener('focusin',ev=>{if(ev.target.id==='aiin'){[30,250,600].forEach(t=>setTimeout(()=>{aiVV();aiBot()},t))}});
 document.addEventListener('focusout',ev=>{if(ev.target.id==='aiin')setTimeout(aiVV,150)});
@@ -3966,7 +3966,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=176;
+const APPV=177;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
