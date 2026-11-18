@@ -3324,21 +3324,27 @@ const AIXSYS='حوّل سؤال المستخدم إلى كلمات مفتاحي�
 const aiKey=()=>{try{return(localStorage.getItem('waqf-aikey')||'').trim()}catch(e){return''}};
 async function aiClaude(body){const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'x-api-key':aiKey(),'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});return r}
 const aiB64=u=>fetch(u).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>new Promise((ok,no)=>{const f=new FileReader();f.onload=()=>ok([b.type||'image/webp',String(f.result).split(',')[1]]);f.onerror=no;f.readAsDataURL(b)}));
+const aiGem=()=>/^AIza/.test(aiKey());
+const AIGM=['gemini-2.5-flash','gemini-2.5-flash-lite'];
+async function aiGemCall(stream,body){let last=null;for(const m of AIGM){const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+(stream?':streamGenerateContent?alt=sse&':':generateContent?')+'key='+encodeURIComponent(aiKey()),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});if(r.ok||(r.status!==404&&r.status!==429&&r.status!==503))return r;last=r}return last}
+const aiGH=hist=>hist.map(m=>({role:m.r==='a'?'model':'user',parts:[{text:m.c.slice(0,1500)}]}));
 async function aiExpand(q,hist){
+  if(!AIURL&&aiGem()){const r=await aiGemCall(false,{systemInstruction:{parts:[{text:AIXSYS}]},contents:[...aiGH(hist.slice(-2)),{role:'user',parts:[{text:q}]}],generationConfig:{maxOutputTokens:120}});const d=await r.json();return(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts[0].text)||''}
   if(AIURL){const r=await fetch(AIURL+'/expand',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,h:hist})});return((await r.json()).kw)||''}
   const r=await aiClaude({model:'claude-haiku-5-5',max_tokens:120,system:AIXSYS,messages:[...hist.slice(-2).map(m=>({role:m.r==='a'?'assistant':'user',content:m.c.slice(0,1200)})),{role:'user',content:q}]});
   const d=await r.json();return(d.content&&d.content[0]&&d.content[0].text)||''}
 async function aiAnswer(q,hist,c,im){
   if(AIURL){const res=await fetch(AIURL+'/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,h:hist,c,i:im})});return{ok:res.ok,status:res.status,body:res.body,plain:true}}
-  const parts=[];for(const m of im){try{const [mt,d]=await aiB64(m.u);parts.push({type:'text',text:'صورة المصدر ['+m.n+']:'});parts.push({type:'image',source:{type:'base64',media_type:mt,data:d}})}catch(e){}}
+  const gem=aiGem(),parts=[];for(const m of im){try{const [mt,d]=await aiB64(m.u);if(gem){parts.push({text:'صورة المصدر ['+m.n+']:'});parts.push({inlineData:{mimeType:mt,data:d}})}else{parts.push({type:'text',text:'صورة المصدر ['+m.n+']:'});parts.push({type:'image',source:{type:'base64',media_type:mt,data:d}})}}catch(e){}}
   let txt='';c.forEach(x=>{txt+='\n['+x.n+'] '+x.t+' — '+x.p+':\n'+x.x.slice(0,2600)+'\n'});
+  if(gem){parts.push({text:'المصادر المنقولة نصًّا:\n'+txt+'\n\nالسؤال: '+q});const res=await aiGemCall(true,{systemInstruction:{parts:[{text:AISYS}]},contents:[...aiGH(hist.slice(-6)),{role:'user',parts}],generationConfig:{maxOutputTokens:2500}});return{ok:res.ok,status:res.status,body:res.body,plain:false,gem:true}}
   parts.push({type:'text',text:'المصادر المنقولة نصًّا:\n'+txt+'\n\nالسؤال: '+q});
   const res=await aiClaude({model:'claude-sonnet-5-5',max_tokens:1800,stream:true,system:AISYS,messages:[...hist.slice(-6).map(m=>({role:m.r==='a'?'assistant':'user',content:m.c.slice(0,1500)})),{role:'user',content:parts}]});
   return{ok:res.ok,status:res.status,body:res.body,plain:false}}
 async function* aiStream(res){const rd=res.body.getReader(),dc=new TextDecoder();let buf='';
   for(;;){const {done,value}=await rd.read();if(done)break;const s=dc.decode(value,{stream:true});
     if(res.plain){yield s;continue}
-    buf+=s;let i;while((i=buf.indexOf('\n'))>=0){const l=buf.slice(0,i).trim();buf=buf.slice(i+1);if(l.startsWith('data:')){try{const e=JSON.parse(l.slice(5));if(e.type==='content_block_delta'&&e.delta&&e.delta.text)yield e.delta.text}catch(x){}}}}}
+    buf+=s;let i;while((i=buf.indexOf('\n'))>=0){const l=buf.slice(0,i).trim();buf=buf.slice(i+1);if(l.startsWith('data:')){try{const e=JSON.parse(l.slice(5));if(res.gem){const ps=e.candidates&&e.candidates[0]&&e.candidates[0].content&&e.candidates[0].content.parts;if(ps)for(const q of ps)if(q.text)yield q.text}else if(e.type==='content_block_delta'&&e.delta&&e.delta.text)yield e.delta.text}catch(x){}}}}}
 function aiMd(t,mi){
   let h=esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\[([0-9٠-٩]{1,2})\]/g,(m,n)=>{const k=+n.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));return '<button class="aic" data-act="aisrc" data-m="'+mi+'" data-n="'+k+'">'+AR(k)+'</button>'});
   let o='',ul=false;h.split('\n').forEach(l=>{const m=/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/.exec(l);if(m){if(!ul){o+='<ul>';ul=true}o+='<li>'+m[1]+'</li>'}else{if(ul){o+='</ul>';ul=false}const hd=/^#{1,4}\s+(.*)$/.exec(l);o+=hd?'<p class="aih">'+hd[1]+'</p>':(l.trim()?'<p>'+l+'</p>':'')}});
@@ -3358,7 +3364,7 @@ function vAi(r){
   setTimeout(()=>aiLoad().catch(()=>{}),400);
   let x=topbar('ابحث في المكتبة',{end:AIS.m.length?'<button class="ib" data-act="aiclear" aria-label="محادثة جديدة">'+ICON.x+'</button>':''});
   x+='<div class="aihero"><i>'+SPARK+'</i><b>ابحث في المكتبة</b><small>المصادر ونتائج البحث: الكتب الموجودة في المكتبة فقط</small></div>';
-  if(!AIURL)x+=aiKey()?'<button class="aikeyb" data-act="aikeyx">مفتاحك محفوظ على هذا الجهاز · تغيير</button>':'<div class="card aikey"><b>تفعيل البحث الذكي</b><small>الصق مفتاح Anthropic API. يُحفظ على جوالك فقط، ولا يُرسل إلا إلى Anthropic.</small><input class="search" id="aikey" type="password" dir="ltr" placeholder="sk-ant-…" autocomplete="off"><button class="btn primary" data-act="aikeys">حفظ المفتاح</button></div>';
+  if(!AIURL)x+=aiKey()?'<button class="aikeyb" data-act="aikeyx">مفتاحك محفوظ على هذا الجهاز · تغيير</button>':'<div class="card aikey"><b>تفعيل البحث الذكي</b><small>الصق مفتاح Google Gemini (مجاني من aistudio.google.com) أو مفتاح Anthropic. يُحفظ على جوالك فقط، ولا يُرسل إلا إلى مزوّده.</small><input class="search" id="aikey" type="password" dir="ltr" placeholder="AIza… أو sk-ant-…" autocomplete="off"><button class="btn primary" data-act="aikeys">حفظ المفتاح</button></div>';
   if(!AIS.m.length)x+='<div class="aisug">'+AISUG.map(q=>'<button data-act="aiq" data-q="'+esc(q)+'">'+esc(q)+'</button>').join('')+'</div>';
   x+='<div id="aimsgs">'+AIS.m.map(aiMsgHTML).join('')+'</div><div style="height:96px"></div>';
   x+='<form class="aibar" id="aif" autocomplete="off"><textarea id="aiin" rows="1" placeholder="اسأل عن حكم أو تفسير أو موضع وقف…" aria-label="سؤالك"></textarea><button type="submit" class="aisend" data-act="aisend" aria-label="إرسال">'+ICON.fwd+'</button></form>';
@@ -3372,7 +3378,7 @@ async function aiAsk(q){
   if(cur().v==='ai'){const s=document.querySelector('.aisug');if(s)s.remove();const c=$('aimsgs');if(c)c.insertAdjacentHTML('beforeend',aiMsgHTML(AIS.m[mi-1],mi-1)+aiMsgHTML(msg,mi));window.scrollTo(0,document.documentElement.scrollHeight)}
   const fail=t=>{msg.err=t;msg.c='';aiPaint(mi)};
   try{
-    if(!AIURL&&!aiKey())return fail('أدخل مفتاح Anthropic API في أعلى الصفحة لتفعيل البحث الذكي.');
+    if(!AIURL&&!aiKey())return fail('أدخل مفتاح Gemini أو Anthropic في أعلى الصفحة لتفعيل البحث الذكي.');
     if(!AIX.ready){msg.st='أجهّز فهرس المكتبة (مرة واحدة)…';aiPaint(mi)}
     await aiLoad();msg.st='أبحث في الكتب…';aiPaint(mi);
     let kw='';try{kw=await aiExpand(q,hist)}catch(e){}
@@ -3390,7 +3396,7 @@ async function aiAsk(q){
     const im=[];hits.forEach((h,k)=>{if(im.length<3){const u=aiImg(h.bk,h.p);if(u)im.push({n:k+1,u})}});
     msg.st='أقرأ المصادر وأكتب الجواب…';aiPaint(mi);
     const res=await aiAnswer(q,hist,c,im);
-    if(!res.ok)return fail(res.status===429?'كثرة طلبات، حاول بعد دقيقة.':res.status===401?'المفتاح غير صحيح. تحقّق منه.':'تعذّر الحصول على جواب الآن. حاول لاحقًا.');
+    if(!res.ok)return fail(res.status===429?'كثرة طلبات، حاول بعد دقيقة.':(res.status===401||res.status===400||res.status===403)?'المفتاح غير صحيح أو غير مفعّل. تحقّق منه.':'تعذّر الحصول على جواب الآن. حاول لاحقًا.');
     let raf=0;
     for await(const s of aiStream(res)){msg.c+=s;if(!raf)raf=requestAnimationFrame(()=>{raf=0;aiPaint(mi)})}
     if(!msg.c.trim())return fail('لم يصل جواب. حاول مرة أخرى.');
@@ -3792,7 +3798,7 @@ document.addEventListener('click',ev=>{
   case 'aisend':ev.preventDefault();{const t=$('aiin');if(t){const q=t.value;t.value='';t.style.height='';aiAsk(q)}}break;
   case 'aiq':aiAsk(b.dataset.q);break;
   case 'aisrc':aiSrc(+b.dataset.m,+b.dataset.n);break;
-  case 'aikeys':{const k=(($('aikey')||{}).value||'').trim();if(!/^sk-ant-/.test(k)){toast('المفتاح يبدأ بـ sk-ant-');break}try{localStorage.setItem('waqf-aikey',k)}catch(e){}render();toast('حُفظ المفتاح.');break}
+  case 'aikeys':{const k=(($('aikey')||{}).value||'').trim();if(!/^(sk-ant-|AIza)/.test(k)){toast('المفتاح يبدأ بـ sk-ant- أو AIza');break}try{localStorage.setItem('waqf-aikey',k)}catch(e){}render();toast('حُفظ المفتاح.');break}
   case 'aikeyx':try{localStorage.removeItem('waqf-aikey')}catch(e){}render();break;
   case 'aiclear':if(!AIS.busy){AIS.m=[];render()}break;
   case 'bkflip':bkFlip(+b.dataset.d);break;
@@ -3950,7 +3956,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=166;
+const APPV=167;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
