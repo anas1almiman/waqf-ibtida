@@ -3371,6 +3371,10 @@ function vAi(r){
   x+='<form class="aibar" id="aif" autocomplete="off"><textarea id="aiin" rows="1" placeholder="ابحث في مكتبتك" aria-label="سؤالك"></textarea><button type="submit" class="aisend" data-act="aisend" aria-label="إرسال">'+ICON.fwd+'</button></form>';
   return x;
 }
+function aiKb(){const b=$('aif');if(!b)return;const v=window.visualViewport;if(!v){return}const h=Math.max(0,Math.round(window.innerHeight-v.height-v.offsetTop));b.style.bottom=h+'px';b.style.paddingBottom=h>40?'8px':'';if(h>40&&document.activeElement&&document.activeElement.id==='aiin'&&AIS.m.length){const y=document.documentElement.scrollHeight;window.scrollTo(0,y)}}
+if(window.visualViewport){visualViewport.addEventListener('resize',aiKb);visualViewport.addEventListener('scroll',aiKb)}
+document.addEventListener('focusin',ev=>{if(ev.target.id==='aiin'){setTimeout(aiKb,50);setTimeout(aiKb,300);setTimeout(aiKb,700)}});
+document.addEventListener('focusout',ev=>{if(ev.target.id==='aiin')setTimeout(()=>{const b=$('aif');if(b){b.style.bottom='';b.style.paddingBottom=''}},100)});
 function aiPaint(i){const m=AIS.m[i],e=$('aim'+i);if(!e||cur().v!=='ai')return;const t=document.createElement('div');t.innerHTML=aiMsgHTML(m,i);e.replaceWith(t.firstChild);if(AIS.stick)window.scrollTo(0,document.documentElement.scrollHeight)}
 async function aiAsk(q){
   q=(q||'').trim();if(!q||AIS.busy)return;
@@ -3959,7 +3963,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=172;
+const APPV=173;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
