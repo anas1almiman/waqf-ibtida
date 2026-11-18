@@ -2334,7 +2334,7 @@ function qyBuild1(lv,rk,cont,ds,mu){const tg=lv;const wf=k=>rk<2||k>=rk?1:ds==='
     while(j+1<NP&&D.P[j+1][0]===D.P[j][0]&&isTail(j+1)){j++;n=qyCnt(i,j)}
     bl.push({label:k===rk?'الوتر':'الركعة '+qyOrd(k+1),i:i,j:j});k++;tot+=n;cur=j+1}
   return {bl:bl,tot:tot,lv:lv,rk:rk,ds:ds}}
-function qyRef(b){const u=D.P[b.i],v=D.P[b.j];return 'سورة '+D.N[u[0]-1]+' · '+AR(u[1])+'–'+AR(v[2])}
+function qyRef(b){return miniSeg([b.i,b.j])}
 function vQym(r){if(!r.lv){r.lv=10;r.rk=2}if(!r.ds)r.ds='e';if(!r.plan)r.plan=qyBuild(r.lv,r.rk,false,r.ds);const req=r.rk;if(r.plan.rk!==r.rk)r.rk=r.plan.rk;const pl=r.plan,L=QYD[r.lv];
   let x=topbar('قيام الليل');
   x+='<div class="card qyh"><div class="qyq">«'+QYH+'»</div><div class="meta" style="margin-top:6px">رواه أبو داود</div></div>';
@@ -2343,7 +2343,7 @@ function vQym(r){if(!r.lv){r.lv=10;r.rk=2}if(!r.ds)r.ds='e';if(!r.plan)r.plan=qy
   x+='<div class="sect" style="margin:12px 4px 6px">اقتراحات</div><div class="tsseg qyseg">'+QYP[r.lv].map(a=>'<button class="'+(r.rk===a[1]?'on':'')+'" data-act="qyset" data-v="'+a[1]+'">'+a[0]+' · '+AR(a[1])+' ركعة</button>').join('')+'</div>';
   x+='<div class="sect" style="margin:12px 4px 6px">توزيع الآيات على الركعات</div><div class="tsseg qyseg">'+[['e','متساوية'],['a','تطول تدريجيًا'],['d','تقصر تدريجيًا']].map(a=>'<button class="'+(r.ds===a[0]?'on':'')+'" data-act="qyds" data-v="'+a[0]+'">'+a[1]+'</button>').join('')+'</div>';
   x+=(r.plan.from&&r.plan.from!==r.plan.rk?'<p class="note" style="margin:0 4px 6px">زِدنا الركعات إلى '+AR(r.plan.rk)+' حتى لا تنقص الآيات عن '+AR(r.lv)+'</p>':'')+'<div class="qysum">'+AR(pl.tot)+' آية في '+AR(pl.bl.length-1)+' ركعة + وتر · '+L.w+'</div>';
-  x+=pl.bl.map(b=>'<div class="card qyrow"><b>'+b.label+'</b><span>'+qyRef(b)+'<small style="margin-inline-start:10px;opacity:.85">'+AR(qyCnt(b.i,b.j))+' آية</small></span></div>').join('');
+  x+=pl.bl.map(b=>'<div class="card qyrow"><b>'+b.label+'</b><span>'+qyRef(b)+'<small style="display:block;opacity:.8;margin-top:2px">'+AR(qyCnt(b.i,b.j))+' آية</small></span></div>').join('');
   x+='<button class="btn goldb" data-act="qyread">'+ICON.check+'ابدأ القراءة</button><div class="row2"><button class="btn outline" data-act="qyshuf">اقتراح آخر</button>'+(qyEnd()?'<button class="btn outline" data-act="qycont">أكمل من حيث انتهيت</button>':'')+'</div>';
   return x+'<p class="note">الابتداء والوقف في كل ركعة عند مواضع مناسبة، وتنتهي الركعة عند وقف تام أو كافٍ. من داخل القراءة اضغط الميكروفون لتسميع المقطع.</p>'}
 function vArbain(r){
@@ -3746,7 +3746,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=149;
+const APPV=150;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
