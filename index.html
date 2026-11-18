@@ -1026,6 +1026,16 @@ html.dk .card.accent{box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 18px 30px 
 .tfjump input{width:74px;height:38px;text-align:center;border-radius:12px;border:1px solid var(--gold3);background:var(--card);color:var(--ink);font:700 17px 'Amiri',serif}
 
 .ayq,.ayq.sm,.ikt .tq,.gls .tq{font-family:'KFGQPC Hafs','Amiri Quran','Amiri',serif}
+
+.aibtn{display:flex;margin:6px 0 16px}.aibtn .hcard{flex:1;min-width:0;padding:11px 14px}.aibtn .hi{display:flex;align-items:center;justify-content:center}.aibtn .ht b{font-size:17px}.aibtn em{font-style:normal;font:700 11px 'Amiri',serif;background:#14352a;color:#F7E7B3;border-radius:7px;padding:1px 6px;margin-right:6px;vertical-align:2px}
+.aihero{text-align:center;margin:8px 0 14px}.aihero i{display:inline-flex;width:46px;height:46px;border-radius:15px;align-items:center;justify-content:center;background:linear-gradient(135deg,#F9E8A9,#E3BB5C 60%,#C99A36);color:#14352a;box-shadow:0 8px 20px rgba(160,120,30,.3)}.aihero b{display:block;font:700 21px 'Amiri',serif;color:var(--em);margin-top:8px}.aihero small{display:block;color:var(--muted);font-size:14px;line-height:1.8;margin-top:2px}
+.aisug{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}.aisug button{text-align:right;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:15px;line-height:1.7;color:var(--ink2);box-shadow:var(--shadow)}
+.aiu{background:linear-gradient(135deg,#F9E8A9,#E8C874);color:#2a2410;border-radius:18px 18px 4px 18px;padding:10px 14px;margin:0 0 10px 38px;font-size:16px;line-height:1.8;width:fit-content;max-width:88%}
+.aia{font-size:16.5px;line-height:2;margin-bottom:14px}.aia p{margin:0 0 8px}.aia ul{margin:0 0 8px;padding:0 20px 0 0}.aia li{margin-bottom:4px}.aia .aih{font:700 17px 'Amiri',serif;color:var(--em)}
+.aic,.aisb,.aisend,.aisug button{border:0;outline:none;-webkit-tap-highlight-color:transparent}.aisb{border:1px solid var(--gold3)!important}.aisug button{border:1px solid var(--line)}.aic{display:inline-flex;align-items:center;justify-content:center;min-width:21px;height:21px;border-radius:7px;background:var(--em);color:#F7E7B3;font:700 12px sans-serif;padding:0 5px;margin:0 2px;vertical-align:2px}
+.ais{border-top:1px solid var(--line);margin-top:8px;padding-top:9px;display:flex;flex-wrap:wrap;gap:6px}.ais small{width:100%;color:var(--muted);font-size:12.5px}.aisb{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--gold3);border-radius:12px;padding:5px 10px 5px 8px;font-size:13.5px;color:var(--ink2)}.aisb b{background:var(--em);color:#F7E7B3;border-radius:6px;min-width:20px;text-align:center;font:700 12px sans-serif;padding:1px 4px}
+.aibar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:8px;align-items:flex-end;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--barbg);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.aibar textarea{flex:1;resize:none;max-height:120px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;padding:11px 14px;font:16px/1.6 inherit;outline:none}.aisend{flex:none;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#F9E8A9,#D9AE4C);color:#14352a;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(160,120,30,.3)}.aisend svg{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -2019,7 +2029,7 @@ function tsEnd(){
 }
 
 /*TS_END*/
-const VIEWS={qym:vQym,hbook:vHbook,tasmi:vTasmi,lpdf:vLpdf,mut:vMut,adhkar:vAdhkar,adhkar2:vAdhkar,adhkar3:vAdhkar,adhkar4:vAdhkar,arbain:vArbain,qibla:vQibla,time:vTime,more:vMore,tafsir:vTafsir,mus:vMus,night:vNight,pick:vPick,plan:vPlan,library:vLibrary,book:vBook,home:vHome,prayer:vPrayer,reader:vReader,topics:vTopics,topic:vTopic,record:vRecord,settings:vSettings,about:vAbout,hifz:vHifz,ramadan:vRamadan,review:vReview,wird:vWird};
+const VIEWS={ai:vAi,qym:vQym,hbook:vHbook,tasmi:vTasmi,lpdf:vLpdf,mut:vMut,adhkar:vAdhkar,adhkar2:vAdhkar,adhkar3:vAdhkar,adhkar4:vAdhkar,arbain:vArbain,qibla:vQibla,time:vTime,more:vMore,tafsir:vTafsir,mus:vMus,night:vNight,pick:vPick,plan:vPlan,library:vLibrary,book:vBook,home:vHome,prayer:vPrayer,reader:vReader,topics:vTopics,topic:vTopic,record:vRecord,settings:vSettings,about:vAbout,hifz:vHifz,ramadan:vRamadan,review:vReview,wird:vWird};
 let BGW=-1,BGK=0;function bgwSet(v){if(typeof BGS==='undefined')return;let i;if(v==='home')i=BGP.home;else{const r=cur();if(r.bg==null||r.bg>=BGS.length){let k;do{k=Math.floor(Math.random()*BGS.length)}while(BGS.length>1&&(k===BGW||k===BGP.home));r.bg=k}i=r.bg}if(i===BGW)return;BGW=i;const L=document.querySelectorAll('#bgw i');if(!L.length)return;BGK^=1;L[BGK].style.backgroundImage='url('+BGS[i]+')';L[BGK].classList.add('on');L[BGK^1].classList.remove('on')}
 function render(){
   if(QT)return;applyTheme();if(TSS.on&&cur().v!=='tasmi')tsStop();
@@ -3241,12 +3251,103 @@ LIB.splice(LIB.findIndex(b=>b.id==='gharib'),0,...TFL.flatMap(g=>g[2].map(z=>({i
 const LSEC=[['wq','الوقف والابتداء','المصادر التي استُخرجت منها مواضع الوقف'],['mt','المتشابه','ضبط متشابهات القرآن'],['tf','التفسير','التفاسير وغريب القرآن'],['qr','القراءات','مصحف القراءات العشر'],['hd','الحديث الشريف','متون وشروح'],['aq','العقيدة','متون التوحيد']];
 function vLibrary(){
   let x=topbar('المكتبة',{over:true})+hero('library','','المكتبة','');
+  x+='<div class="aibtn"><button class="hcard hgold" data-act="nav" data-v="ai"><span class="hi">'+SPARK+'</span><span class="ht"><b>ابحث في المكتبة<em>AI</em></b><small>جواب من كتبك بالمصدر</small></span></button></div>';
   LSEC.forEach(sc=>{const L=LIB.filter(b=>(b.sec||'wq')===sc[0]);if(!L.length)return;
     x+='<div class="libsec"><b>'+sc[1]+'</b><small>'+sc[2]+'</small></div>';
     x+='<div class="shelf">'+L.map(b=>'<button class="b3d'+(b.open?'':' locked')+'" data-act="bkopen" data-id="'+b.id+'" style="--c1:'+b.col[0]+';--c2:'+b.col[1]+'" aria-label="'+b.t+'"><span class="pg"></span><span class="sp"></span><span class="cv"><i></i><b>'+b.ct+'</b><small>'+b.ca+'</small>'+(b.open?'':'<em>حقوق الطبع محفوظة</em>')+'</span></button>').join('')+'</div><div class="shelfwood"></div>';
     x+=L.map(b=>'<button class="card bkcard go" data-act="bkopen" data-id="'+b.id+'"><span><b style="font-size:17.5px;color:var(--em)">'+b.t+'</b><small class="meta" style="display:block;line-height:1.7">'+b.a+'</small><small class="meta" style="display:block;line-height:1.7">'+b.ed+'</small><span class="st '+(b.open?'ok':'no')+'">'+(b.open?(b.pages?'متاح للتصفح · '+AR(b.pages)+' صفحة':'متاح للتصفح'):'حقوق الطبع محفوظة للناشر')+'</span></span></button>').join('')});
   return x;
 }
+/* ===== AI search: retrieval ===== */
+const AIMK=/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g;
+function aiNorm(s){return String(s).replace(AIMK,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/[^ء-ي0-9٠-٩ \n]/g,' ').replace(/\s+/g,' ').trim()}
+const AISTOP=new Set('في من على الى عن ما هل هو هي هم ماذا كيف لماذا متى اين الذي التي هذا هذه ذلك تلك كان كانت يكون ان انه انها او ثم قد لا لم لن مع كل بعض غير عند بين حتى اذا اذ ايضا كذا ما هو هي ماهو ماهي احكام حكم اذكر اشرح لخص لي ابي ابغي اريد عليك'.split(' '));
+function aiStem(t){
+  let w=t;
+  w=w.replace(/^(وبال|وال|فال|بال|كال|لل|ال)/,'');
+  if(w.length>4)w=w.replace(/(ات|ان|ون|ين|ها|هم|ه|ي)$/,'');
+  return w.length>1?w:t;
+}
+function aiToks(s){return aiNorm(s).split(' ').filter(t=>t.length>1&&!AISTOP.has(t)).map(aiStem)}
+const AIX={docs:[],df:new Map(),avg:0,ready:false,loading:null};
+function aiAddDoc(bk,p,text){const tk=aiToks(text);if(tk.length<3)return;const tf=new Map();tk.forEach(t=>tf.set(t,(tf.get(t)||0)+1));AIX.docs.push({bk,p,tf,len:tk.length,txt:aiNorm(text)});tf.forEach((_,t)=>AIX.df.set(t,(AIX.df.get(t)||0)+1))}
+function aiFinish(){let s=0;AIX.docs.forEach(d=>s+=d.len);AIX.avg=s/Math.max(1,AIX.docs.length);AIX.ready=true}
+function aiSearch(q,k){
+  const qt=[...new Set(aiToks(q))];if(!qt.length)return[];
+  const N=AIX.docs.length,k1=1.4,b=.75,nq=aiNorm(q);const out=[];
+  for(const d of AIX.docs){let sc=0;
+    for(const t of qt){const f=d.tf.get(t);if(!f)continue;const df=AIX.df.get(t)||1;const idf=Math.log(1+(N-df+.5)/(df+.5));sc+=idf*f*(k1+1)/(f+k1*(1-b+b*d.len/AIX.avg))}
+    if(sc>0){let m=0;qt.forEach(t=>{if(d.tf.has(t))m++});sc*=(.55+.45*m/qt.length);if(nq.length>5&&d.txt.indexOf(nq)>=0)sc*=1.6;out.push([sc,d])}}
+  out.sort((a,b)=>b[0]-a[0]);return out.slice(0,k).map(x=>({bk:x[1].bk,p:x[1].p,s:x[0],txt:x[1].txt}))
+}
+
+/* ===== AI: اسأل المكتبة ===== */
+let AIURL='';
+const AIS={m:[],busy:false};
+const AISUG=['ما الفرق بين الوقف التام والكافي والحسن والقبيح؟','لخّص لي باب الشفاعة في كتاب التوحيد','ما حكم الذبح لغير الله؟','ما مواضع الوقف على لفظ الجلالة وما حكمها؟'];
+const SPARK='<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9z"/><path d="M19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9z" opacity=".75"/></svg>';
+function aiBkOf(id){return id==='arbain'?{id:'arbain',short:'الأربعون النووية',t:'الأربعون النووية'}:LIB.find(b=>b.id===id)}
+function aiImg(id,p){const b=LIB.find(x=>x.id===id);if(!b||!b.dir)return null;return b.ext?b.dir+'p'+String(p).padStart(4,'0')+'.'+b.ext:b.dir+'p'+pad3(p)+'.png'}
+function aiLoad(){
+  if(AIX.ready)return Promise.resolve();
+  return AIX.loading||(AIX.loading=(async()=>{
+    const mf=await (await fetch('idx/manifest.json')).json();
+    for(const b of LIB.filter(x=>x.dir&&x.open&&mf[x.id])){const j=await (await fetch('idx/'+b.id+'.json')).json();j.p.forEach((t,i)=>aiAddDoc(b.id,i+1,t))}
+    if(typeof ARB!=='undefined')ARB.forEach((h,i)=>aiAddDoc('arbain',i+1,h.t+' '+(h.s||'')));
+    aiFinish()})().catch(e=>{AIX.loading=null;throw e}));
+}
+function aiMd(t,mi){
+  let h=esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\[([0-9٠-٩]{1,2})\]/g,(m,n)=>{const k=+n.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));return '<button class="aic" data-act="aisrc" data-m="'+mi+'" data-n="'+k+'">'+AR(k)+'</button>'});
+  let o='',ul=false;h.split('\n').forEach(l=>{const m=/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/.exec(l);if(m){if(!ul){o+='<ul>';ul=true}o+='<li>'+m[1]+'</li>'}else{if(ul){o+='</ul>';ul=false}const hd=/^#{1,4}\s+(.*)$/.exec(l);o+=hd?'<p class="aih">'+hd[1]+'</p>':(l.trim()?'<p>'+l+'</p>':'')}});
+  return o+(ul?'</ul>':'');
+}
+function aiMsgHTML(m,i){
+  if(m.r==='u')return '<div class="aiu">'+esc(m.c)+'</div>';
+  let x='<div class="card aia" id="aim'+i+'">';
+  if(m.err)x+='<p class="note" style="margin:0">'+esc(m.err)+'</p>';
+  else if(!m.c)x+='<div class="tload" style="margin:0"><i class="tspin"></i>'+esc(m.st||'أبحث في الكتب…')+'</div>';
+  else x+=aiMd(m.c,i);
+  if(m.c&&m.src&&m.src.length){const used=[...new Set((m.c.match(/\[([0-9٠-٩]{1,2})\]/g)||[]).map(s=>+s.replace(/[\[\]]/g,'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d))))].filter(n=>m.src[n-1]);
+    if(used.length)x+='<div class="ais"><small>المصادر</small>'+used.map(n=>{const s=m.src[n-1],b=aiBkOf(s.id);return '<button class="aisb" data-act="aisrc" data-m="'+i+'" data-n="'+n+'"><b>'+AR(n)+'</b>'+esc(b?b.short:s.id)+' · '+(s.id==='arbain'?'حديث ':'ص')+AR(s.p)+'</button>'}).join('')+'</div>'}
+  return x+'</div>';
+}
+function vAi(r){
+  let x=topbar('ابحث في المكتبة',{end:AIS.m.length?'<button class="ib" data-act="aiclear" aria-label="محادثة جديدة">'+ICON.x+'</button>':''});
+  x+='<div class="aihero"><i>'+SPARK+'</i><b>اسأل كتب مكتبتك</b><small>يجيب من الكتب الموجودة في المكتبة فقط، ويذكر لك الكتاب والصفحة.</small></div>';
+  if(!AIS.m.length)x+='<div class="aisug">'+AISUG.map(q=>'<button data-act="aiq" data-q="'+esc(q)+'">'+esc(q)+'</button>').join('')+'</div>';
+  x+='<div id="aimsgs">'+AIS.m.map(aiMsgHTML).join('')+'</div><div style="height:96px"></div>';
+  x+='<form class="aibar" id="aif" autocomplete="off"><textarea id="aiin" rows="1" placeholder="اسأل عن حكم أو تفسير أو موضع وقف…" aria-label="سؤالك"></textarea><button type="submit" class="aisend" data-act="aisend" aria-label="إرسال">'+ICON.fwd+'</button></form>';
+  return x;
+}
+function aiPaint(i){const m=AIS.m[i],e=$('aim'+i);if(!e||cur().v!=='ai')return;const t=document.createElement('div');t.innerHTML=aiMsgHTML(m,i);e.replaceWith(t.firstChild);const y=document.documentElement.scrollHeight;if(AIS.stick)window.scrollTo(0,y)}
+async function aiAsk(q){
+  q=(q||'').trim();if(!q||AIS.busy)return;
+  const hist=AIS.m.filter(m=>m.c&&!m.err).slice(-6).map(m=>({r:m.r,c:m.c}));
+  AIS.m.push({r:'u',c:q});const msg={r:'a',c:'',src:[],st:'أبحث في الكتب…'};AIS.m.push(msg);const mi=AIS.m.length-1;AIS.busy=true;AIS.stick=true;
+  if(cur().v==='ai'){const s=document.querySelector('.aisug');if(s)s.remove();const c=$('aimsgs');if(c){c.insertAdjacentHTML('beforeend',aiMsgHTML(AIS.m[mi-1],mi-1)+aiMsgHTML(msg,mi))}window.scrollTo(0,document.documentElement.scrollHeight)}
+  const fail=t=>{msg.err=t;msg.c='';aiPaint(mi)};
+  try{
+    if(!AIURL)return fail('خدمة البحث الذكي لم تُفعَّل بعد.');
+    await aiLoad();
+    let kw='';try{const r=await fetch(AIURL+'/expand',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,h:hist})});kw=((await r.json()).kw)||''}catch(e){}
+    const prev=aiToks(q).length<4?[...AIS.m].reverse().find((m,k)=>m.r==='u'&&k>1):null;
+    const hits=aiSearch(q+' '+kw+' '+(prev?prev.c:''),8);
+    if(!hits.length)return fail('لم أجد في كتب المكتبة ما يخص هذا السؤال. جرّب صياغة أخرى.');
+    msg.src=hits.map(h=>({id:h.bk,p:h.p}));
+    const c=hits.map((h,k)=>{const b=aiBkOf(h.bk);return{n:k+1,t:b?b.t:h.bk,p:h.p,x:h.txt}});
+    const im=[];hits.slice(0,4).forEach((h,k)=>{const u=aiImg(h.bk,h.p);if(u)im.push({n:k+1,u})});
+    msg.st='أقرأ المصادر وأكتب الجواب…';aiPaint(mi);
+    const res=await fetch(AIURL+'/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,h:hist,c,i:im})});
+    if(!res.ok)return fail(res.status===429?'كثرة طلبات، حاول بعد دقيقة.':'تعذّر الحصول على جواب الآن. حاول لاحقًا.');
+    const rd=res.body.getReader(),dc=new TextDecoder();let raf=0;
+    for(;;){const {done,value}=await rd.read();if(done)break;msg.c+=dc.decode(value,{stream:true});if(!raf)raf=requestAnimationFrame(()=>{raf=0;aiPaint(mi)})}
+    if(!msg.c.trim())return fail('لم يصل جواب. حاول مرة أخرى.');
+    aiPaint(mi);
+  }catch(e){fail('تعذّر الاتصال. تحقّق من الإنترنت وحاول مرة أخرى.')}
+  finally{AIS.busy=false}
+}
+function aiSrc(mi,n){const s=(AIS.m[mi]||{}).src&&AIS.m[mi].src[n-1];if(!s)return;if(s.id==='arbain')navPush({v:'arbain',i:s.p-1});else navPush({v:'book',id:s.id,p:s.p})}
+
 const IKPP=5;
 function arbCard(){return '<div class="libsec"><b>الحديث الشريف</b><small>متون وشروح</small></div><button class="card bkcard go" data-act="nav" data-v="arbain"><span><b style="font-size:17.5px;color:var(--em)">الأربعون النووية</b><small class="meta" style="display:block;line-height:1.7">للإمام يحيى بن شرف النووي، وتتمّتها لابن رجب</small><span class="st ok">متاح للقراءة · ٤٢ حديثًا</span></span></button>'}
 function vTafsir(r){
@@ -3630,6 +3731,10 @@ document.addEventListener('click',ev=>{
   case 'tfsur':tfSurSheet();break;
   case 'tfs':{const r=cur();if(r.v!=='tafsir')break;r.s=+v;r.a=1;closeSheet();show(1,0);break}
   case 'bkopen':{const bk=LIB.find(x=>x.id===b.dataset.id);if(!bk)break;if(!bk.open){lockedSheet(bk);break}if(bk.kind){const go=()=>navPush(bk.kind==='lpdf'?{v:'lpdf',id:bk.id}:bk.kind==='arb'?{v:'arbain'}:bk.kind==='hdb'?{v:'hbook',m:bk.id.slice(2)}:bk.kind==='qir'?{v:'mus',pg:S.mus||1,rw:(S.riw&&S.riw!=='hafs'?S.riw:'warsh')}:{v:'tafsir',m:bk.kind,s:1,a:1});const cv=b.classList.contains('b3d')?b:null;if(cv&&!RM){cv.classList.add('opening');setTimeout(go,520)}else go();break}const cov=b.classList.contains('b3d')?b:null;if(cov&&!RM){cov.classList.add('opening');setTimeout(()=>navPush({v:'book',id:bk.id,p:bk.start}),520)}else navPush({v:'book',id:bk.id,p:bk.start});break}
+  case 'aisend':ev.preventDefault();{const t=$('aiin');if(t){const q=t.value;t.value='';t.style.height='';aiAsk(q)}}break;
+  case 'aiq':aiAsk(b.dataset.q);break;
+  case 'aisrc':aiSrc(+b.dataset.m,+b.dataset.n);break;
+  case 'aiclear':if(!AIS.busy){AIS.m=[];render()}break;
   case 'bkflip':bkFlip(+b.dataset.d);break;
   case 'bktoc':tocSheet();break;
   case 'bkgo':closeSheet();bkGo(+b.dataset.p);break;
@@ -3751,8 +3856,9 @@ const R=pkFrom(sN);if(+k===0){r.A=R;if(!r.B||r.B.auto)r.B=pkAfter(R)}else{let R2
   case 'startgo':pvStop();buildSegs();S.onb=true;S.sug={};stRole=null;stStep=0;save();closeSheet();STACK=[{v:'home'}];try{history.replaceState({d:1},'')}catch(e){}show(1,0);break;
   }
 });
+document.addEventListener('keydown',ev=>{if(ev.target.id==='aiin'&&ev.key==='Enter'&&!ev.shiftKey&&!ev.isComposing){ev.preventDefault();const t=ev.target,q=t.value;t.value='';t.style.height='';aiAsk(q)}});
 document.addEventListener('input',ev=>{
-  const el=ev.target;
+  const el=ev.target;if(el.id==='aiin'){el.style.height='auto';el.style.height=Math.min(120,el.scrollHeight)+'px'}
   if(el.id==='tq'){tq=el.value;const l=$('tlist');if(l)l.innerHTML=topicItems()}
   else if(el.id==='tfq'){const l=$('tflist');if(l)l.innerHTML=tfItems(el.value)}
   else if(el.id==='pkq'){const l=$('pklist');if(l)l.innerHTML=pkItems(el.value,+l.dataset.k)}
@@ -3784,7 +3890,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=162;
+const APPV=163;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}

@@ -1,0 +1,10 @@
+name = "waqf-ai"
+main = "ai.js"
+compatibility_date = "2025-01-01"
+
+# حدّ الطلبات لكل عنوان (اختياري، يحمي مفتاحك من الإساءة)
+[[unsafe.bindings]]
+name = "RL"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 12, period = 60 }
