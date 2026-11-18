@@ -3189,7 +3189,7 @@ function planSheet(){const f=()=>{const R=S.ram;let h=shead('ضبط الخطة')
   }
   return h+'<button class="btn primary" data-act="closesheet">تمّ</button>'};openSheet(f(),'plan',f)}
 /* ---- location ---- */
-function locSheet(){openSheet(shead('الموقع والمواقيت')+'<div class="card" style="text-align:center"><div style="width:40px;height:40px;margin:0 auto;color:var(--gold)">'+ICON.pin+'</div><p style="font-size:17px">'+(S.loc?'الموقع الحالي: <b>'+esc(S.loc.name)+'</b>':'لم يُحدَّد الموقع بعد')+'</p>'+(S.loc?'<p class="meta">'+(()=>{const t=todayTimes(new Date());return 'الفجر '+clock(t.fajr)+' · المغرب '+clock(t.maghrib)+' · العشاء '+clock(t.isha)})()+'</p>':'')+'<p class="meta">على تقويم أم القرى</p></div><button class="btn primary" data-act="locate">'+ICON.pin+'تحديد موقعي</button><button class="btn outline" data-act="cities">اختيار المدينة</button>','loc')}
+function locSheet(){openSheet(shead('الموقع والمواقيت')+'<div class="card" style="text-align:center"><div style="width:40px;height:40px;margin:0 auto;color:var(--gold)">'+ICON.pin+'</div><p style="font-size:17px">'+(S.loc?'الموقع الحالي: <b>'+esc(S.loc.name)+'</b>':'لم يُحدَّد الموقع بعد')+'</p>'+(S.loc?'<p class="meta">'+(()=>{const t=todayTimes(new Date());return 'الفجر '+clock(t.fajr)+' · الظهر '+clock(t.dhuhr)+' · العصر '+clock(t.asr)+' · المغرب '+clock(t.maghrib)+' · العشاء '+clock(t.isha)})()+'</p>':'')+'<p class="meta">على تقويم أم القرى</p></div><button class="btn primary" data-act="locate">'+ICON.pin+'تحديد موقعي</button><button class="btn outline" data-act="cities">اختيار المدينة</button>','loc')}
 function locate(){
   if(!navigator.geolocation){openCities('تعذّر تحديد الموقع تلقائيًا، فاختر مدينتك.');return}
   toast('جارٍ تحديد الموقع…');
@@ -3198,7 +3198,7 @@ function locate(){
 function openLocConfirm(lat,lng,n){
   const near=n.d<=40;pendingLoc={lat:lat,lng:lng,name:near?n.c[0]:'قرب '+n.c[0]};
   const t=PT.times(new Date(),lat,lng,isRamadanDate(new Date()));
-  openSheet(shead('تأكيد الموقع')+'<div class="card accent" style="text-align:center"><div style="width:42px;height:42px;margin:0 auto;color:var(--gold)">'+ICON.pin+'</div><p style="font-size:18px">'+(near?'تبيّن أنك في مدينة <b>'+n.c[0]+'</b>، أصحيح؟':'أقرب مدينة إلى موقعك <b>'+n.c[0]+'</b>، على بُعد نحو '+AR(Math.round(n.d))+' كم. أتعتمد موقعك الحالي؟')+'</p><p class="meta">الفجر '+clock(t.fajr)+' · المغرب '+clock(t.maghrib)+' · العشاء '+clock(t.isha)+'</p></div><button class="btn primary" data-act="locok">نعم، صحيح</button><button class="btn outline" data-act="cities">لا، أختار مدينتي</button>','locok');
+  openSheet(shead('تأكيد الموقع')+'<div class="card accent" style="text-align:center"><div style="width:42px;height:42px;margin:0 auto;color:var(--gold)">'+ICON.pin+'</div><p style="font-size:18px">'+(near?'تبيّن أنك في مدينة <b>'+n.c[0]+'</b>، أصحيح؟':'أقرب مدينة إلى موقعك <b>'+n.c[0]+'</b>، على بُعد نحو '+AR(Math.round(n.d))+' كم. أتعتمد موقعك الحالي؟')+'</p><p class="meta">الفجر '+clock(t.fajr)+' · الظهر '+clock(t.dhuhr)+' · العصر '+clock(t.asr)+' · المغرب '+clock(t.maghrib)+' · العشاء '+clock(t.isha)+'</p></div><button class="btn primary" data-act="locok">نعم، صحيح</button><button class="btn outline" data-act="cities">لا، أختار مدينتي</button>','locok');
 }
 function openCities(msg){openSheet(shead('اختيار المدينة')+(msg?'<p class="note">'+msg+'</p>':'')+'<input class="search" id="cq" type="search" placeholder="ابحث عن مدينتك" value="'+esc(cityQ)+'"><div class="citylist" id="clist">'+cityItems()+'</div>','cities')}
 function cityItems(){const q=cityQ.trim();return CITIES.map((c,i)=>[c,i]).filter(([c])=>!q||c[0].indexOf(q)>=0).map(([c,i])=>'<button data-act="city" data-v="'+i+'"><span>'+c[0]+'</span><small>'+(S.loc&&S.loc.name===c[0]?'المختارة':'')+'</small></button>').join('')||'<p class="note">لا نتيجة.</p>'}
@@ -3784,7 +3784,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=158;
+const APPV=159;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
