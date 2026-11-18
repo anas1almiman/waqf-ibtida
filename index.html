@@ -2269,7 +2269,7 @@ function qibStart(){
   const go=()=>{QB.fn=hd;QB.on=true;window.addEventListener('deviceorientationabsolute',hd,true);window.addEventListener('deviceorientation',hd,true);const b=document.getElementById('qbtn');if(b)b.style.display='none';setTimeout(()=>{if(QB.h==null){const m=document.getElementById('qtxt');if(m)m.textContent='لم يصل إشارة البوصلة من جهازك. تأكد من السماح للموقع بحركة الجهاز، وأنك في الخارج بعيدًا عن المعادن.'}},2500)};
   try{if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')go();else toast('لم يُسمح بالوصول إلى البوصلة.')}).catch(()=>toast('تعذّر تشغيل البوصلة.'))}else go()}catch(e){toast('تعذّر تشغيل البوصلة.')}}
 function vQibla(){
-  let x=topbar('اتجاه القبلة',{over:true})+hero('home','نحو الكعبة المشرّفة','اتجاه القبلة',S.loc?esc(S.loc.name):'حدّد موقعك أولًا');
+  let x=topbar('اتجاه القبلة',{over:true})+hero('home','فَوَلِّ وَجْهَكَ شَطْرَ الْمَسْجِدِ الْحَرَامِ','اتجاه القبلة',S.loc?esc(S.loc.name):'حدّد موقعك أولًا');
   if(!S.loc)return x+'<div class="card empty"><b>حدّد مدينتك</b><p>يُحسب اتجاه القبلة من موقعك.</p><button class="btn goldb" data-act="locsheet">'+ICON.pin+'تحديد الموقع</button></div>';
   const br=qiblaBearing(S.loc.lat,S.loc.lng),dist=qiblaDist(S.loc.lat,S.loc.lng);
   const ticks=Array.from({length:72},(_,i)=>{const a=i*5,l=a%90===0?14:a%30===0?10:6;return '<line x1="150" y1="14" x2="150" y2="'+(14+l)+'" transform="rotate('+a+' 150 150)" stroke="'+(a%90===0?'#C79B3B':'rgba(120,98,50,.55)')+'" stroke-width="'+(a%90===0?2.4:1.2)+'"/>'}).join('');
@@ -3976,7 +3976,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=179;
+const APPV=180;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
