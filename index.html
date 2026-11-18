@@ -3039,9 +3039,8 @@ const IKP=new Map();
 const TFL=[
  ['التفسير بالمأثور','ما نُقل عن النبي ﷺ والصحابة والتابعين',[['tabari','ar-tafsir-al-tabari','تفسير الطبري','جامع البيان · أبو جعفر الطبري (ت ٣١٠هـ)',['#3A2A0B','#6B4E17']],['ik','ar-tafsir-ibn-kathir','تفسير ابن كثير','تفسير القرآن العظيم · الحافظ ابن كثير (ت ٧٧٤هـ)',['#12343B','#1F5A66']],['baghawi','ar-tafsir-al-baghawi','تفسير البغوي','معالم التنزيل · الحسين بن مسعود البغوي (ت ٥١٦هـ)',['#2B3A12','#4E6A1F']]]],
  ['التفاسير الفقهية','عناية بأحكام الآيات واستنباطها',[['qurtubi','ar-tafseer-al-qurtubi','تفسير القرطبي','الجامع لأحكام القرآن · أبو عبد الله القرطبي (ت ٦٧١هـ)',['#4A1E12','#7A3520']]]],
- ['اللغوية والبلاغية','عناية بالإعراب والبيان ووجوه البلاغة',[['kashshaf','al-kashshaf-al-zamakhshari','الكشاف','الزمخشري (ت ٥٣٨هـ)',['#1E2F4A','#34507A']],['bahr','al-bahr-al-muhit','البحر المحيط','أبو حيان الأندلسي (ت ٧٤٥هـ)',['#0B3A2D','#17624B']]]],
- ['التفاسير المعاصرة','',[['adwa','adwa-al-bayan','أضواء البيان','محمد الأمين الشنقيطي (ت ١٣٩٣هـ)',['#3B1230','#6A1F55']],['tahrir','ar-tafseer-tahrir-al-tanwir','التحرير والتنوير','محمد الطاهر ابن عاشور (ت ١٣٩٣هـ)',['#2B1F4A','#4A3A7A']],['muyassar','ar-tafsir-muyassar','التفسير الميسر','مجمع الملك فهد لطباعة المصحف الشريف',['#7A5C14','#B8912E']]]],
- ['التفاسير الجامعة','تجمع الأثر والنظر معًا',[['razi','tafsir-al-razi','التفسير الكبير','مفاتيح الغيب · فخر الدين الرازي (ت ٦٠٦هـ)',['#33261A','#6A4C30']]]]
+ ['اللغوية والبلاغية','عناية بالإعراب والبيان ووجوه البلاغة',[['bahr','al-bahr-al-muhit','البحر المحيط','أبو حيان الأندلسي (ت ٧٤٥هـ)',['#0B3A2D','#17624B']]]],
+ ['التفاسير المعاصرة','',[['adwa','adwa-al-bayan','أضواء البيان','محمد الأمين الشنقيطي (ت ١٣٩٣هـ)',['#3B1230','#6A1F55']],['tahrir','ar-tafseer-tahrir-al-tanwir','التحرير والتنوير','محمد الطاهر ابن عاشور (ت ١٣٩٣هـ)',['#2B1F4A','#4A3A7A']],['muyassar','ar-tafsir-muyassar','التفسير الميسر','مجمع الملك فهد لطباعة المصحف الشريف',['#7A5C14','#B8912E']],['saadi','ar-tafseer-al-saddi','تفسير السعدي','تيسير الكريم الرحمن · عبد الرحمن السعدي (ت ١٣٧٦هـ)',['#0F4A3C','#1F7A62']],['wasit','ar-tafsir-al-wasit','التفسير الوسيط','محمد سيد طنطاوي (ت ١٤٣١هـ)',['#1F3A5F','#3A64A0']],['shawkani','fath-al-qadir-al-shawkani','فتح القدير','محمد بن علي الشوكاني (ت ١٢٥٠هـ)',['#4A2B12','#7E4E26']]]]
 ];
 const TFM={};TFL.forEach(g=>g[2].forEach(z=>{TFM[z[0]]={slug:z[1],name:z[2],au:z[3],col:z[4]}}));
 const IK=new Map();let TFP=false;
@@ -3747,7 +3746,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=146;
+const APPV=147;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
