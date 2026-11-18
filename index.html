@@ -3368,7 +3368,7 @@ function vAi(r){
   if(!AIURL)x+=aiKey()?'<button class="aikeyb" data-act="aikeyx">مفتاحك محفوظ على هذا الجهاز · تغيير</button>':'<div class="card aikey"><b>تفعيل البحث الذكي</b><small>الصق مفتاح Google Gemini (مجاني من aistudio.google.com) أو مفتاح Anthropic. يُحفظ على جوالك فقط، ولا يُرسل إلا إلى مزوّده.</small><input class="search" id="aikey" type="password" dir="ltr" placeholder="الصق المفتاح هنا" autocomplete="off"><button class="btn primary" data-act="aikeys">حفظ المفتاح</button></div>';
   if(!AIS.m.length)x+='<div class="aisug">'+AISUG.map(q=>'<button data-act="aiq" data-q="'+esc(q)+'">'+esc(q)+'</button>').join('')+'</div>';
   x+='<div id="aimsgs">'+AIS.m.map(aiMsgHTML).join('')+'</div><div style="height:96px"></div>';
-  x+='<form class="aibar" id="aif" autocomplete="off"><textarea id="aiin" rows="1" placeholder="اسأل في مكتبتك" aria-label="سؤالك"></textarea><button type="submit" class="aisend" data-act="aisend" aria-label="إرسال">'+ICON.fwd+'</button></form>';
+  x+='<form class="aibar" id="aif" autocomplete="off"><textarea id="aiin" rows="1" placeholder="ابحث في مكتبتك" aria-label="سؤالك"></textarea><button type="submit" class="aisend" data-act="aisend" aria-label="إرسال">'+ICON.fwd+'</button></form>';
   return x;
 }
 function aiPaint(i){const m=AIS.m[i],e=$('aim'+i);if(!e||cur().v!=='ai')return;const t=document.createElement('div');t.innerHTML=aiMsgHTML(m,i);e.replaceWith(t.firstChild);if(AIS.stick)window.scrollTo(0,document.documentElement.scrollHeight)}
