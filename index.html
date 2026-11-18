@@ -3369,7 +3369,7 @@ function vAi(r){
   x+='<div class="aisc" id="aisc"><div class="aihero"><i>'+SPARK+'</i><small>المصادر ونتائج البحث: الكتب الموجودة في المكتبة فقط</small></div>';
   if(!AIURL)x+=aiKey()?'<button class="aikeyb" data-act="aikeyx">مفتاحك محفوظ على هذا الجهاز · تغيير</button>':'<div class="card aikey"><b>تفعيل البحث الذكي</b><small>الصق مفتاح Google Gemini (مجاني من aistudio.google.com) أو مفتاح Anthropic. يُحفظ على جوالك فقط، ولا يُرسل إلا إلى مزوّده.</small><input class="search" id="aikey" type="password" dir="ltr" placeholder="الصق المفتاح هنا" autocomplete="off"><button class="btn primary" data-act="aikeys">حفظ المفتاح</button></div>';
   if(!AIS.m.length)x+='<div class="aisug">'+AISUG.map(q=>'<button data-act="aiq" data-q="'+esc(q)+'">'+esc(q)+'</button>').join('')+'</div>';
-  x+='<div id="aimsgs">'+AIS.m.map(aiMsgHTML).join('')+'</div></div>';
+  x+='<div id="aimsgs">'+AIS.m.map(aiMsgHTML).join('')+'</div><p class="note" style="font-size:11px;opacity:.6">النسخة '+AR(APPV)+'</p></div>';
   x+='<form class="aibar" id="aif" autocomplete="off"><textarea id="aiin" rows="1" placeholder="ابحث في مكتبتك" aria-label="سؤالك"></textarea><button type="submit" class="aisend" data-act="aisend" aria-label="إرسال">'+ICON.fwd+'</button></form></div>';
   return x;
 }
@@ -3966,7 +3966,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=175;
+const APPV=176;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
