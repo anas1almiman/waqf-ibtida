@@ -866,8 +866,9 @@ body.musmode #app .mlines{-webkit-user-select:none;user-select:none;-webkit-touc
 .lpnote{text-align:center;font-size:12.5px;color:var(--muted);margin:10px 0 24px}.lnk{border:0;background:none;color:var(--warn);font:inherit;text-decoration:underline}
 button.mbk{font-family:inherit;background:none;cursor:pointer}
 body.musmode .fab{bottom:calc(156px + var(--sab))}
-.mbar{flex:none;display:flex;gap:8px;align-items:center;margin:6px 0 4px;min-width:0}
+.mbar{flex:none;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:6px 0 4px;min-width:0}
 .mrw{flex:none;display:inline-flex;align-items:center;gap:8px;padding:5px 14px 3px;border-radius:999px;border:1px solid var(--gold2);background:var(--chip);color:var(--ink);font:15px 'Amiri',serif}
+.mbar .mrw{padding:5px 11px 3px;gap:6px}
 .mrw small{color:var(--muted);font-size:13px}.mrw b{color:var(--gold);font-weight:700}.mrw i{font-style:normal;color:var(--gold);font-size:13px}
 .mhl{flex:1;min-width:0;font-size:13.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}.mhl b{color:var(--gold)}
 .mpage{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;margin:2px -8px 8px;padding:8px 10px 6px;border-radius:16px;background:linear-gradient(180deg,#FFFDF6,#FBF5E6);border:1px solid var(--gold2);outline:3px double var(--gold3);outline-offset:-6px;box-shadow:var(--shadow);touch-action:pan-y;transition:opacity .2s}
@@ -875,7 +876,7 @@ body.musmode .fab{bottom:calc(156px + var(--sab))}
 body.dark .mpage.sh{background:#FAF3E2}
 .mpage.sh{padding:0;background:#FAF3E2;align-items:center;justify-content:center;overflow:hidden;border-color:#d9d9d9;outline:0}
 .mpage.sh .mtop,.mpage.sh .mfoot{display:none}
-.mpage.sh .shi{display:block;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
+.mpage.sh .shi{display:block;flex:none;width:108%;max-width:none;height:auto;max-height:100%;object-fit:contain;transform:translateX(-1.5%);user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
 body.dark .mpage{background:linear-gradient(180deg,#15211D,#101A17)}
 .mtop,.mfoot{flex:none;display:flex;justify-content:space-between;font:13px 'Amiri',serif;color:var(--gold);padding:1px 8px;min-height:20px}
 .mfoot{justify-content:center}
@@ -1681,7 +1682,7 @@ function vMus(r){
   if(r.hl&&r.hl.length&&!(r.rw&&r.rw!=='hafs')){const c='<button class="mchip mplc" data-act="musplay">'+(AU.on?ICON.pause:ICON.play)+(AU.on?'إيقاف الاستماع':'استمع للمقطع كاملًا')+'</button>';chips=chips?chips.replace(/^<div class="mchips">/,'<div class="mchips">'+c):'<div class="mchips">'+c+'</div>'}
   if(r.hl&&!(r.rw&&r.rw!=='hafs')&&MUT){const n=mutScope({sc:'seg',blocks:r.hl.map(h=>({s:h[0],a:h[1],b:h[2]}))}).length;if(n){const c='<button class="mchip mtk" data-act="mutmus">'+ICON.mut+'المتشابه · '+AR(n)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
   if(S.mark&&!(r.rw&&r.rw!=='hafs')){const mp0=pgOf(S.mark.s,S.mark.a);if(mp0!==r.pg){const c='<button class="mchip mkb" data-act="markgo">'+ICBM+'تابع من حيث وقفتَ · '+D.N[S.mark.s-1]+' '+AR(S.mark.a)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
-  const bar='<div class="mbar"><button class="mrw" data-act="musrw"><small>'+(isSh(r)?'المصحف':'الرواية')+'</small><b>'+(meta?meta[1]:isSh(r)?'مصحف الشمرلي':'حفص عن عاصم')+'</b><i>▾</i></button>'+info+'</div>'+chips;
+  const bar='<div class="mbar"><button class="mrw" data-act="musedsh"><small>المصحف</small><b>'+(isSh(r)?'الشمرلي':'المدينة')+'</b><i>▾</i></button><button class="mrw" data-act="musrw"><small>الرواية</small><b>'+(meta?meta[1]:'حفص عن عاصم')+'</b><i>▾</i></button>'+info+'</div>'+chips;
   const shell=(inner,cls,pg,top)=>'<div class="mtg">'+x+bar+'</div><div class="musv"><div class="mpage '+cls+'" data-act="mtap" data-pg="'+pg+'"><div class="mtop"><span>'+(top||'')+'</span><span>'+(pg?'الجزء '+AR(juzOf(pg)):'')+'</span></div>'+inner+'<div class="mfoot">'+(pg?AR(pg):'')+'</div></div><div class="mdk">'+mact+
     '<div class="mnav"><button data-act="musgo" data-d="-1"'+(pg<=1?' disabled':'')+'>السابقة</button><button class="mpn" data-act="musidx">'+(pg?'صفحة '+AR(pg):'')+'</button><button data-act="musgo" data-d="1"'+(pg>=(isSh(r)?SHN:604)?' disabled':'')+'>التالية</button></div></div>'+
     '<div id="rwbar" class="rwbar"><button class="ib" data-act="rwx" aria-label="إيقاف">'+ICON.x+'</button><div class="rwi"><b id="rwl"></b><small id="rwt"></small></div><button class="ib" data-act="rwseek" data-d="-10" aria-label="رجوع عشر ثوانٍ">−١٠</button><button class="ib rwp" data-act="rwtog" aria-label="تشغيل أو إيقاف مؤقت" id="rwp">'+ICON.pause+'</button><button class="ib" data-act="rwseek" data-d="10" aria-label="تقديم عشر ثوانٍ">+١٠</button></div>';
@@ -1740,11 +1741,13 @@ function musGo(d){const r=cur();if(r.v!=='mus')return;const n=Math.max(1,Math.mi
   if(!hasT&&!INART&&!Q2ERR&&!q2Ready(n)){const pe=document.querySelector('#app .mpage');if(pe)pe.classList.add('busy');let done=false;const go=()=>{if(done)return;done=true;if(cur()===r)musApply(r,n,d)};q2Load(n).then(go,()=>{Q2ERR=true;go()});setTimeout(go,4000);return}
   musApply(r,n,d)}
 function musAnchor(r){if(isSh(r))return shAnc(r.pg);if(r.rw&&RWT[r.rw]&&RWD[r.rw])return RWD[r.rw].F[r.pg]||[1,1];mlsInit();const m=MLS[r.pg-1];return [m[0],m[1]]}
+function musEdSheet(){const r=cur();const shOn=isSh(r),inRw=!!(r.rw&&r.rw!=='hafs');let h=shead('اختيار المصحف');
+  const row=(id,n,sub,on)=>'<button class="rwrow'+(on?' on':'')+'" data-act="mused" data-v="'+id+'"><span><b>'+n+'</b><small>'+sub+'</small></span>'+(on?ICON.check:'')+'</button>';
+  h+='<div class="rwlist">'+row('','مصحف المدينة النبوية','خط مجمع الملك فهد · تظليل الآيات والتفسير بالضغط المطوّل',!shOn&&!inRw)+row('sh','مصحف الشمرلي','صفحات مصوَّرة · بلا تظليل للآيات',shOn)+'</div>';
+  h+='<p class="note">الروايات الأخرى تُختار من زر «الرواية».</p>';openSheet(h,'mused')}
 function musRwSheet(){const r=cur();const curId=r.rw&&r.rw!=='hafs'?r.rw:'';let h=shead('اختيار الرواية');
   const row=(id,n,sub)=>'<button class="rwrow'+(id===curId?' on':'')+'" data-act="musrwset" data-v="'+id+'"><span><b>'+n+'</b><small>'+sub+'</small></span>'+(id===curId?ICON.check:'')+'</button>';
-  const edr=(id,n,sub,on)=>'<button class="rwrow'+(on?' on':'')+'" data-act="mused" data-v="'+id+'"><span><b>'+n+'</b><small>'+sub+'</small></span>'+(on?ICON.check:'')+'</button>';
-  const shOn=isSh(r);h+='<div class="sect" style="margin:2px 4px 8px">نسخة المصحف</div><div class="rwlist">'+edr('','مصحف المدينة النبوية','حفص عن عاصم · خط مجمع الملك فهد',!curId&&!shOn)+edr('sh','مصحف الشمرلي','حفص عن عاصم · صفحات مصوَّرة، بلا تظليل للآيات',shOn)+'</div><div class="sect" style="margin:14px 4px 8px">الروايات</div>';
-  h+='<div class="rwlist">'+RIW.map(w=>row(w[0],w[1],(RWTS[w[0]]?'نصٌّ وصوت، آيةً آية':RWT[w[0]]?'نصًّا وصوتًا':'صوتًا فقط')+' · '+w[2])).join('')+'</div>';
+  h+='<div class="rwlist">'+row('','حفص عن عاصم','مصحف المدينة النبوية')+RIW.map(w=>row(w[0],w[1],(RWTS[w[0]]?'نصٌّ وصوت، آيةً آية':RWT[w[0]]?'نصًّا وصوتًا':'صوتًا فقط')+' · '+w[2])).join('')+'</div>';
   h+='<p class="note">نصوص الروايات وخطوطها من مجمع الملك فهد لطباعة المصحف الشريف. روايات هشام وخلّاد وأبي الحارث وقراءتا أبي جعفر وخلف العاشر لم نجد لها تسجيلًا كاملًا بعد.</p>';openSheet(h,'musrw')}
 let QSN=null,QSK=null;const qSk=t=>t.replace(/[اويى]/g,'');
 const qNorm=t=>String(t).replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ۞۩]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/\s+/g,' ').trim();
@@ -3578,9 +3581,10 @@ document.addEventListener('click',ev=>{
   case 'musidx':musIdx();break;
   case 'musq':musIdx();setTimeout(()=>{const i=$('msq');if(i)i.focus()},350);break;
   case 'musrw':musRwSheet();break;
+  case 'musedsh':musEdSheet();break;
   case 'musretry':{const r=cur();r.err=0;render();break}
   case 'mused':{const r=cur();if(r.v!=='mus')break;const an=musAnchor(r);closeSheet();S.ed=v==='sh'?'sh':'';r.rw='';r.err=0;r.anc=null;r.pg=pgOf(an[0],an[1]);saveLocal();rwStop();render();window.scrollTo(0,0);persist();break}
-  case 'musrwset':{const r=cur();if(r.v!=='mus')break;const an=musAnchor(r);const was=(r.rw&&RWT[r.rw]&&RWD[r.rw])||isSh(r);if(v&&S.ed==='sh'){S.ed='';saveLocal()}closeSheet();r.rw=v||'';r.err=0;if(v){S.riw=v;saveLocal()}
+  case 'musrwset':{const r=cur();if(r.v!=='mus')break;const an=musAnchor(r);if(!v&&isSh(r)){closeSheet();break}const was=(r.rw&&RWT[r.rw]&&RWD[r.rw])||isSh(r);if(v&&S.ed==='sh'){S.ed='';saveLocal()}closeSheet();r.rw=v||'';r.err=0;if(v){S.riw=v;saveLocal()}
     if(v&&RWT[v])r.anc=an;else{r.anc=null;if(was)r.pg=D.PG[an[0]-1][Math.min(an[1],D.PG[an[0]-1].length)-1]}
     if(!v||v!==RW.id)rwStop();render();window.scrollTo(0,0);break}
   case 'filq':{const r=cur();closeSheet();if(r.v!=='mus')break;const F={s:105,a:1,b:5,label:'سورة الفيل'},Q={s:106,a:1,b:4,label:'سورة قريش'};const bl=v==='fil'?[F]:v==='qur'?[Q]:[F,Q];r.hl=hlOf(bl);r.ht=v==='fil'?'سورة الفيل':v==='qur'?'سورة قريش':'سورة الفيل مع قريش';r.spec=null;r.pg=D.PG[v==='qur'?105:104][0];r.anc=null;render();window.scrollTo(0,0);persist();break}
@@ -3771,7 +3775,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=151;
+const APPV=152;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
