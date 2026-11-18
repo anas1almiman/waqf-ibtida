@@ -3326,8 +3326,8 @@ const aiKey=()=>{try{return(localStorage.getItem('waqf-aikey')||'').trim()}catch
 async function aiClaude(body){const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'x-api-key':aiKey(),'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});return r}
 const aiB64=u=>fetch(u).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>new Promise((ok,no)=>{const f=new FileReader();f.onload=()=>ok([b.type||'image/webp',String(f.result).split(',')[1]]);f.onerror=no;f.readAsDataURL(b)}));
 const aiGem=()=>/^(AIza|AQ\.)/.test(aiKey());
-const AIGM=['gemini-2.5-flash','gemini-2.5-flash-lite'];
-async function aiGemCall(stream,body){let last=null;for(const m of AIGM){const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+(stream?':streamGenerateContent?alt=sse':':generateContent'),{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':aiKey()},body:JSON.stringify(body)});if(r.ok||(r.status!==404&&r.status!==429&&r.status!==503))return r;last=r}return last}
+const AIGM=['gemini-flash-latest','gemini-2.5-flash','gemini-flash-lite-latest','gemini-2.5-flash-lite','gemini-3-flash-preview'];
+async function aiGemCall(stream,body){let last=null;for(const m of AIGM){const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+(stream?':streamGenerateContent?alt=sse':':generateContent'),{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':aiKey()},body:JSON.stringify(body)});if(r.ok||(r.status!==404&&r.status!==429&&r.status!==503&&r.status!==400))return r;if(r.status===400){const t=await r.clone().text();if(!/model|not supported|not found/i.test(t))return r}last=r}return last}
 const aiGH=hist=>hist.map(m=>({role:m.r==='a'?'model':'user',parts:[{text:m.c.slice(0,1500)}]}));
 async function aiExpand(q,hist){
   if(!AIURL&&aiGem()){const r=await aiGemCall(false,{systemInstruction:{parts:[{text:AIXSYS}]},contents:[...aiGH(hist.slice(-2)),{role:'user',parts:[{text:q}]}],generationConfig:{maxOutputTokens:120}});const d=await r.json();return(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts[0].text)||''}
@@ -3338,7 +3338,7 @@ async function aiAnswer(q,hist,c,im){
   if(AIURL){const res=await fetch(AIURL+'/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,h:hist,c,i:im})});return{ok:res.ok,status:res.status,body:res.body,plain:true}}
   const gem=aiGem(),parts=[];for(const m of im){try{const [mt,d]=await aiB64(m.u);if(gem){parts.push({text:'صورة المصدر ['+m.n+']:'});parts.push({inlineData:{mimeType:mt,data:d}})}else{parts.push({type:'text',text:'صورة المصدر ['+m.n+']:'});parts.push({type:'image',source:{type:'base64',media_type:mt,data:d}})}}catch(e){}}
   let txt='';c.forEach(x=>{txt+='\n['+x.n+'] '+x.t+' — '+x.p+':\n'+x.x.slice(0,2600)+'\n'});
-  if(gem){parts.push({text:'المصادر المنقولة نصًّا:\n'+txt+'\n\nالسؤال: '+q});const res=await aiGemCall(true,{systemInstruction:{parts:[{text:AISYS}]},contents:[...aiGH(hist.slice(-6)),{role:'user',parts}],generationConfig:{maxOutputTokens:2500}});return{ok:res.ok,status:res.status,body:res.body,plain:false,gem:true}}
+  if(gem){parts.push({text:'المصادر المنقولة نصًّا:\n'+txt+'\n\nالسؤال: '+q});const res=await aiGemCall(true,{systemInstruction:{parts:[{text:AISYS}]},contents:[...aiGH(hist.slice(-6)),{role:'user',parts}],generationConfig:{maxOutputTokens:2500}});let et='';if(!res.ok){try{const j=await res.json();et=(j.error&&j.error.message)||''}catch(e){}}return{ok:res.ok,status:res.status,body:res.body,plain:false,gem:true,et:et}}
   parts.push({type:'text',text:'المصادر المنقولة نصًّا:\n'+txt+'\n\nالسؤال: '+q});
   const res=await aiClaude({model:'claude-sonnet-5-5',max_tokens:1800,stream:true,system:AISYS,messages:[...hist.slice(-6).map(m=>({role:m.r==='a'?'assistant':'user',content:m.c.slice(0,1500)})),{role:'user',content:parts}]});
   return{ok:res.ok,status:res.status,body:res.body,plain:false}}
@@ -3397,7 +3397,7 @@ async function aiAsk(q){
     const im=[];hits.forEach((h,k)=>{if(im.length<3){const u=aiImg(h.bk,h.p);if(u)im.push({n:k+1,u})}});
     msg.st='أقرأ المصادر وأكتب الجواب…';aiPaint(mi);
     const res=await aiAnswer(q,hist,c,im);
-    if(!res.ok)return fail(res.status===429?'كثرة طلبات، حاول بعد دقيقة.':(res.status===401||res.status===400||res.status===403)?'المفتاح غير صحيح أو غير مفعّل. تحقّق منه.':'تعذّر الحصول على جواب الآن. حاول لاحقًا.');
+    if(!res.ok)return fail(res.status===429?'كثرة طلبات، حاول بعد دقيقة.':(res.status===401||res.status===403)?'المفتاح غير صحيح أو غير مفعّل. تحقّق منه.':'تعذّر الحصول على جواب الآن ('+res.status+'). '+String(res.et||'').slice(0,160));
     let raf=0;
     for await(const s of aiStream(res)){msg.c+=s;if(!raf)raf=requestAnimationFrame(()=>{raf=0;aiPaint(mi)})}
     if(!msg.c.trim())return fail('لم يصل جواب. حاول مرة أخرى.');
@@ -3959,7 +3959,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=170;
+const APPV=171;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
