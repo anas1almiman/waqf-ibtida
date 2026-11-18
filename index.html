@@ -2039,7 +2039,7 @@ function homeStrip(np){const W=isWird();const has=!!homeSpec();let rd=0;if(!W)RE
   const card=(act,ic,t,sub,dis,cls)=>'<button class="hcard'+(cls||'')+'" data-act="'+act+'"'+(dis?' disabled':'')+'><span class="hi">'+ic+'</span><span class="ht"><b>'+t+'</b><small>'+sub+'</small></span></button>';
   let hint='';if(!S.stripHint){S.stripHint=1;setTimeout(saveLocal,0);hint='<div class="shint">← اسحب لترى المزيد</div>'}
   let x='<div class="hsw">'+hint+'<div class="hstrip'+(ENTER?' stag':'')+'">';
-  x+='<button class="hcard" data-act="nav" data-v="qym"><span class="hi">'+CRESCENT_I+'</span><span class="ht"><b>قيام الليل</b><small>من قام بعشر آيات لم يُكتب من الغافلين</small></span></button>';
+  x+='<button class="hcard" data-act="nav" data-v="qym"><span class="hi">'+CRESCENT_I+'</span><span class="ht"><b>قيام الليل</b><small>رتّب تلاوتك</small></span></button>';
   x+='<button class="hcard hgold" data-act="nav" data-v="time"><span class="hi">'+ICON.clock+'</span><span class="ht"><b>اقرأ حسب وقتك</b><small>عندك ١٥ دقيقة؟ ٢٠؟</small></span></button>';
   x+=card('hlisten',ICON.play,W?'استمع لوردك':'استمع لقراءتك',RC()[1],!has);
   x+=card('hmean',ICON.taf,W?'معاني وردك':'معاني قراءتك','بيان المفردات',!has);
@@ -3784,7 +3784,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=159;
+const APPV=160;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
