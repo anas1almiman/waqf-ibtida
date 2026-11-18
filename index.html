@@ -1753,7 +1753,7 @@ function musAnchor(r){if(isSh(r))return shAnc(r.pg);if(r.rw&&RWT[r.rw]&&RWD[r.rw
 function musEdSheet(){const r=cur();const shOn=isSh(r),inRw=!!(r.rw&&r.rw!=='hafs');let h=shead('اختيار المصحف');
   const row=(id,n,sub,on)=>'<button class="rwrow'+(on?' on':'')+'" data-act="mused" data-v="'+id+'"><span><b>'+n+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</span>'+(on?ICON.check:'')+'</button>';
   h+='<div class="rwlist">'+row('','مصحف مجمع الملك فهد','',!shOn&&!inRw)+row('sh','مصحف الشمرلي','',shOn)+'</div>';
-  h+='<p class="note">الروايات الأخرى تُختار من زر «الرواية».</p>';openSheet(h,'mused')}
+  openSheet(h,'mused')}
 function musRwSheet(){const r=cur();const curId=r.rw&&r.rw!=='hafs'?r.rw:'';let h=shead('اختيار الرواية');
   const row=(id,n,sub)=>'<button class="rwrow'+(id===curId?' on':'')+'" data-act="musrwset" data-v="'+id+'"><span><b>'+n+'</b><small>'+sub+'</small></span>'+(id===curId?ICON.check:'')+'</button>';
   h+='<div class="rwlist">'+row('','حفص عن عاصم','مصحف مجمع الملك فهد')+RIW.map(w=>row(w[0],w[1],(RWTS[w[0]]?'نصٌّ وصوت، آيةً آية':RWT[w[0]]?'نصًّا وصوتًا':'صوتًا فقط')+' · '+w[2])).join('')+'</div>';
@@ -3784,7 +3784,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=155;
+const APPV=156;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
