@@ -872,6 +872,10 @@ body.musmode .fab{bottom:calc(156px + var(--sab))}
 .mhl{flex:1;min-width:0;font-size:13.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}.mhl b{color:var(--gold)}
 .mpage{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;margin:2px -8px 8px;padding:8px 10px 6px;border-radius:16px;background:linear-gradient(180deg,#FFFDF6,#FBF5E6);border:1px solid var(--gold2);outline:3px double var(--gold3);outline-offset:-6px;box-shadow:var(--shadow);touch-action:pan-y;transition:opacity .2s}
 .mpage.busy{opacity:.55}
+body.dark .mpage.sh{background:#FAF3E2}
+.mpage.sh{padding:0;background:#FAF3E2;align-items:center;justify-content:center;overflow:hidden;border-color:#d9d9d9;outline:0}
+.mpage.sh .mtop,.mpage.sh .mfoot{display:none}
+.mpage.sh .shi{display:block;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
 body.dark .mpage{background:linear-gradient(180deg,#15211D,#101A17)}
 .mtop,.mfoot{flex:none;display:flex;justify-content:space-between;font:13px 'Amiri',serif;color:var(--gold);padding:1px 8px;min-height:20px}
 .mfoot{justify-content:center}
@@ -1595,8 +1599,20 @@ document.addEventListener('contextmenu',ev=>{if(cur().v==='mus'&&ev.target.close
 function bmCls(s,a){return S.mark&&S.mark.s===s&&S.mark.a===a?' bm':''}
 function hlCls(hl,s,a){if(!hl)return '';const h=hlAt(hl,s,a);return h?' hl h'+(h[3]%2):' dm'}
 function hlEnd(hl,s,a){if(!hl)return false;if(!hl.ends){const E={};hl.forEach(h=>{E[h[3]||0]=h[0]*1000+h[2]});hl.ends=new Set(Object.keys(E).map(k=>E[k]))}return hl.ends.has(s*1000+a)}
+/* مصحف الشمرلي: صور الصفحات (٥٢٢ صفحة) + أول آية في كل صفحة */
+const SHS=[1001, 1001, 2001, 2005, 2016, 2024, 2030, 2039, 2050, 2060, 2065, 2075, 2083, 2090, 2098, 2105, 2113, 2122, 2130, 2139, 2145, 2154, 2164, 2173, 2179, 2187, 2193, 2199, 2210, 2217, 2221, 2229, 2233, 2238, 2247, 2251, 2257, 2262, 2267, 2275, 2282, 2285, 3007, 3014, 3023, 3031, 3041, 3050, 3061, 3072, 3080, 3089, 3099, 3109, 3117, 3126, 3139, 3149, 3154, 3163, 3172, 3181, 3189, 3198, 4004, 4011, 4016, 4023, 4027, 4035, 4043, 4051, 4060, 4069, 4077, 4084, 4091, 4095, 4102, 4111, 4120, 4129, 4137, 4145, 4154, 4163, 4172, 5002, 5005, 5011, 5016, 5023, 5032, 5041, 5046, 5052, 5060, 5067, 5075, 5083, 5092, 5099, 5106, 5113, 6001, 6009, 6020, 6031, 6040, 6051, 6059, 6070, 6078, 6089, 6094, 6103, 6113, 6122, 6130, 6139, 6145, 6152, 6159, 7003, 7018, 7028, 7037, 7043, 7052, 7060, 7071, 7081, 7089, 7101, 7117, 7131, 7140, 7146, 7155, 7160, 7167, 7176, 7186, 7195, 8001, 8011, 8021, 8032, 8041, 8048, 8059, 8067, 8075, 9007, 9017, 9024, 9032, 9038, 9046, 9055, 9064, 9071, 9079, 9087, 9095, 9103, 9111, 9118, 9125, 10003, 10012, 10020, 10026, 10035, 10045, 10058, 10068, 10076, 10088, 10098, 10108, 11007, 11017, 11026, 11036, 11045, 11056, 11065, 11077, 11087, 11096, 11109, 11120, 12006, 12018, 12026, 12036, 12043, 12052, 12064, 12073, 12082, 12093, 12103, 13001, 13007, 13016, 13023, 13031, 13039, 14004, 14010, 14021, 14028, 14039, 14051, 15014, 15032, 15054, 15077, 16001, 16012, 16025, 16034, 16044, 16058, 16068, 16076, 16085, 16093, 16104, 16115, 16126, 17007, 17017, 17028, 17040, 17052, 17061, 17071, 17083, 17096, 17106, 18006, 18017, 18024, 18032, 18044, 18053, 18062, 18077, 18088, 18102, 19004, 19020, 19035, 19049, 19063, 19076, 19098, 20017, 20040, 20058, 20072, 20086, 20097, 20114, 20128, 21002, 21017, 21031, 21044, 21059, 21075, 21087, 21102, 22002, 22011, 22020, 22030, 22040, 22051, 22062, 22073, 23005, 23022, 23034, 23051, 23071, 23088, 23106, 24002, 24012, 24022, 24031, 24035, 24043, 24053, 24059, 24063, 25006, 25018, 25032, 25045, 25059, 25073, 26012, 26034, 26056, 26083, 26112, 26139, 26165, 26190, 26217, 27007, 27018, 27032, 27042, 27055, 27065, 27082, 28001, 28010, 28019, 28029, 28038, 28047, 28058, 28070, 28079, 29001, 29011, 29022, 29032, 29042, 29052, 29064, 30008, 30020, 30029, 30040, 30050, 31001, 31014, 31022, 31033, 32008, 32020, 33001, 33009, 33019, 33027, 33035, 33043, 33051, 33057, 33069, 34003, 34013, 34022, 34033, 34043, 35001, 35008, 35014, 35028, 35039, 36001, 36015, 36034, 36049, 36067, 37001, 37022, 37051, 37081, 37110, 37141, 37172, 38009, 38024, 38038, 38059, 38079, 39005, 39013, 39023, 39037, 39046, 39058, 39071, 40004, 40013, 40025, 40034, 40045, 40057, 40067, 40081, 41006, 41016, 41028, 41039, 41047, 42003, 42013, 42020, 42029, 42042, 42051, 43012, 43025, 43039, 43055, 43071, 44001, 44020, 44045, 45005, 45017, 45027, 46001, 46011, 46018, 46027, 47001, 47010, 47018, 47031, 48002, 48011, 48018, 48027, 49002, 49011, 49017, 50014, 50034, 51007, 51033, 51054, 52017, 52037, 53006, 53030, 53056, 54014, 54037, 55005, 55033, 55061, 56009, 56047, 56075, 57003, 57012, 57019, 57026, 58003, 58009, 58019, 59002, 59010, 59019, 60001, 60009, 61001, 61010, 62003, 63001, 63009, 64007, 64017, 65004, 65012, 66006, 67001, 67012, 67026, 68016, 68041, 69006, 69031, 70004, 70037, 71007, 71028, 72013, 73001, 73019, 74013, 74043, 75012, 76001, 76019, 77001, 77036, 78014, 79001, 79035, 80018, 81009, 82008, 83015, 84004, 85004, 86004, 87016, 89001, 89024, 91001, 92010, 94001, 96003, 98001, 99006, 101005, 104001, 106001, 109001, 112001],SHN=522;
+function shPgOf(s,a){const k=s*1000+a;let lo=0,hi=SHN-1;while(lo<hi){const m=(lo+hi+1)>>1;if(SHS[m]<=k)lo=m;else hi=m-1}return lo+1}
+function shAnc(p){const v=SHS[Math.max(1,Math.min(SHN,p))-1];return [Math.floor(v/1000),v%1000]}
+function isSh(r){return S.ed==='sh'&&!(r&&r.rw&&r.rw!=='hafs')}
+function pgOf(s,a){const n=D.Q[s-1].length;a=Math.max(1,Math.min(a,n));return S.ed==='sh'?shPgOf(s,a):D.PG[s-1][a-1]}
+function mus2sh(pg){mlsInit();const m=MLS[Math.max(1,Math.min(604,pg))-1];return shPgOf(m[0],m[1])}
+function shAyat(p){const k0=SHS[p-1],k1=p<SHN?SHS[p]:115000,o=[];let s=Math.floor(k0/1000),a=k0%1000;for(let g=0;g<400;g++){const k=s*1000+a;if(k>=k1&&o.length)break;o.push([s,a]);a++;if(a>D.Q[s-1].length){s++;a=1}if(s>114)break}return o}
+const SHD=new Set(),SHP={};
+function shSrc(p){return 'sh/'+pad3(p)+'.webp?v=1'}
+function shReady(p){return SHD.has(p)}
+function shLoad(p){if(SHD.has(p))return Promise.resolve();if(!SHP[p])SHP[p]=new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const f=()=>{SHD.add(p);ok()};if(i.decode)i.decode().then(f,f);else f()};i.onerror=()=>{SHP[p]=null;no(new Error('img'))};i.src=shSrc(p)});return SHP[p]}
 function musOpen(o){o=o||{};const r={v:'mus',pg:0,rw:o.rw||'',hl:o.hl||null,ht:o.ht||''};let s=o.s,a=o.a||1;if(!s&&o.hl&&o.hl.length){s=o.hl[0][0];a=o.hl[0][1]}
-  if(s){r.pg=D.PG[s-1][Math.min(a,D.PG[s-1].length)-1];if(r.rw&&RWT[r.rw])r.anc=[s,a]}else r.pg=o.pg||S.mus||1;navPush(r)}
+  if(s){r.pg=(S.ed==='sh'&&!r.rw)?shPgOf(s,Math.min(a,D.Q[s-1].length)):D.PG[s-1][Math.min(a,D.PG[s-1].length)-1];if(r.rw&&RWT[r.rw])r.anc=[s,a]}else if(S.ed==='sh'&&!r.rw)r.pg=o.pg?mus2sh(o.pg):(S.mush||2);else r.pg=o.pg||S.mus||1;navPush(r)}
 function musHafs(pg,hl){mlsInit();let s=MLS[pg-1][0],a=MLS[pg-1][1],w=MLS[pg-1][2];let x='';
   D.ML[pg-1].forEach(l=>{
     if(typeof l!=='number'){x+=l==='B'?'<div class="ml mb">'+D.Q[0][0]+'</div>':'<div class="ml mh"><span>سورة '+D.N[+l.slice(1)-1]+'</span></div>';return}
@@ -1660,14 +1676,14 @@ function vMus(r){
   const rw=r.rw&&r.rw!=='hafs'?r.rw:'';const meta=rw?RIW.find(x=>x[0]===rw):null;const hasT=!!(rw&&RWT[rw]);
   let x=topbar(r.spec?esc(r.spec.title||'القراءة'):'المصحف',{end:(rw?'':'<button class="ib mplay'+(AU.on?' on':'')+'" id="mplay" data-act="musplay" aria-label="استماع">'+(AU.on?ICON.pause:ICON.play)+'</button>')+(r.spec&&r.spec.blocks?'<button class="ib" data-act="tasmi" aria-label="سمّع المقطع">'+ICON.mic+'</button>':'')+(r.spec?'<button class="ib" data-act="mtext" aria-label="عرض نصّي مع الاستماع">'+ICON.aa+'</button>':'')+'<button class="ib" data-act="musidx" aria-label="الانتقال إلى سورة أو جزء">'+ICON.juz+'</button><button class="ib" data-act="musq" aria-label="بحث في المصحف">'+ICON.srch+'</button>'});
   const SP=r.spec;const mact=!SP?'':SP.mode==='prayer'?'<button class="btn goldb mact" data-act="prayed">'+ICON.check+'تمّت قراءة المقترح</button>':SP.mode==='fri'?'<button class="btn goldb mact" data-act="prayedfri">'+ICON.check+'تمّت قراءة المقترح</button>':SP.mode==='wird'?'<button class="btn goldb mact" data-act="wdone">'+ICON.check+'أتممت الورد</button>':SP.mode==='topic'?'<button class="btn goldb mact" data-act="tprayed">'+ICON.check+'تمّت قراءة المقترح</button>':SP.mode==='night'?'<button class="btn goldb mact" data-act="ndone" data-k="'+SP.k+'" data-m="'+SP.m+'">'+ICON.check+'تمّت القراءة</button>':SP.mode==='qiyam'?'<button class="btn goldb mact" data-act="qdone">'+ICON.check+'تمّت القراءة</button>':'';
-  let info='';if(r.hl&&!hasT)info='<span class="mhl"><b>'+esc(r.ht||'المقطع')+'</b>'+(r.hl.some(h=>h[3]>0)?'':' · مظلَّل')+'</span>';else if(rw&&!hasT)info='<span class="mhl">النص حفص · الصوت بالرواية</span>';
-  let chips='';if(r.hl&&!hasT&&r.hl.some(h=>h[3]>0)){const ORD=['الأولى','الثانية','الثالثة','الرابعة','الخامسة','السادسة','السابعة','الثامنة'];const seen={};r.hl.forEach(h=>{if(!seen[h[3]])seen[h[3]]=h});const ks=Object.keys(seen);const pgNow=r.pg;chips='<div class="mchips">'+ks.map(k=>{const h=seen[k],p1=D.PG[h[0]-1][h[1]-1],p2=D.PG[h[0]-1][h[2]-1];const on=pgNow>=p1&&pgNow<=Math.max(p1,p2);return '<button class="mchip k'+(k%2)+(on?' on':'')+'" data-act="musblk" data-i="'+k+'"><i></i>'+(r.hl.many&&ks.length>1&&(h[4]||'')?esc(h[4]):((SP&&SP.listen?'المقطع ':'الركعة ')+(ORD[k]||AR(+k+1))))+'</button>'}).join('')+'</div>'}
+  let info='';if(isSh(r)&&!hasT){info='<span class="mhl">'+(r.hl?'<b>'+esc(r.ht||'المقطع')+'</b> · بلا تظليل في هذا المصحف':'صفحات مصوَّرة من مصحف الشمرلي')+'</span>'}else if(r.hl&&!hasT)info='<span class="mhl"><b>'+esc(r.ht||'المقطع')+'</b>'+(r.hl.some(h=>h[3]>0)?'':' · مظلَّل')+'</span>';else if(rw&&!hasT)info='<span class="mhl">النص حفص · الصوت بالرواية</span>';
+  let chips='';if(r.hl&&!hasT&&r.hl.some(h=>h[3]>0)){const ORD=['الأولى','الثانية','الثالثة','الرابعة','الخامسة','السادسة','السابعة','الثامنة'];const seen={};r.hl.forEach(h=>{if(!seen[h[3]])seen[h[3]]=h});const ks=Object.keys(seen);const pgNow=r.pg;chips='<div class="mchips">'+ks.map(k=>{const h=seen[k],p1=pgOf(h[0],h[1]),p2=pgOf(h[0],h[2]);const on=pgNow>=p1&&pgNow<=Math.max(p1,p2);return '<button class="mchip k'+(k%2)+(on?' on':'')+'" data-act="musblk" data-i="'+k+'"><i></i>'+(r.hl.many&&ks.length>1&&(h[4]||'')?esc(h[4]):((SP&&SP.listen?'المقطع ':'الركعة ')+(ORD[k]||AR(+k+1))))+'</button>'}).join('')+'</div>'}
   if(r.hl&&r.hl.length&&!(r.rw&&r.rw!=='hafs')){const c='<button class="mchip mplc" data-act="musplay">'+(AU.on?ICON.pause:ICON.play)+(AU.on?'إيقاف الاستماع':'استمع للمقطع كاملًا')+'</button>';chips=chips?chips.replace(/^<div class="mchips">/,'<div class="mchips">'+c):'<div class="mchips">'+c+'</div>'}
   if(r.hl&&!(r.rw&&r.rw!=='hafs')&&MUT){const n=mutScope({sc:'seg',blocks:r.hl.map(h=>({s:h[0],a:h[1],b:h[2]}))}).length;if(n){const c='<button class="mchip mtk" data-act="mutmus">'+ICON.mut+'المتشابه · '+AR(n)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
-  if(S.mark&&!(r.rw&&r.rw!=='hafs')){const mp0=D.PG[S.mark.s-1][S.mark.a-1];if(mp0!==r.pg){const c='<button class="mchip mkb" data-act="markgo">'+ICBM+'تابع من حيث وقفتَ · '+D.N[S.mark.s-1]+' '+AR(S.mark.a)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
-  const bar='<div class="mbar"><button class="mrw" data-act="musrw"><small>الرواية</small><b>'+(meta?meta[1]:'حفص عن عاصم')+'</b><i>▾</i></button>'+info+'</div>'+chips;
+  if(S.mark&&!(r.rw&&r.rw!=='hafs')){const mp0=pgOf(S.mark.s,S.mark.a);if(mp0!==r.pg){const c='<button class="mchip mkb" data-act="markgo">'+ICBM+'تابع من حيث وقفتَ · '+D.N[S.mark.s-1]+' '+AR(S.mark.a)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
+  const bar='<div class="mbar"><button class="mrw" data-act="musrw"><small>'+(isSh(r)?'المصحف':'الرواية')+'</small><b>'+(meta?meta[1]:isSh(r)?'مصحف الشمرلي':'حفص عن عاصم')+'</b><i>▾</i></button>'+info+'</div>'+chips;
   const shell=(inner,cls,pg,top)=>'<div class="mtg">'+x+bar+'</div><div class="musv"><div class="mpage '+cls+'" data-act="mtap" data-pg="'+pg+'"><div class="mtop"><span>'+(top||'')+'</span><span>'+(pg?'الجزء '+AR(juzOf(pg)):'')+'</span></div>'+inner+'<div class="mfoot">'+(pg?AR(pg):'')+'</div></div><div class="mdk">'+mact+
-    '<div class="mnav"><button data-act="musgo" data-d="-1"'+(pg<=1?' disabled':'')+'>السابقة</button><button class="mpn" data-act="musidx">'+(pg?'صفحة '+AR(pg):'')+'</button><button data-act="musgo" data-d="1"'+(pg>=604?' disabled':'')+'>التالية</button></div></div>'+
+    '<div class="mnav"><button data-act="musgo" data-d="-1"'+(pg<=1?' disabled':'')+'>السابقة</button><button class="mpn" data-act="musidx">'+(pg?'صفحة '+AR(pg):'')+'</button><button data-act="musgo" data-d="1"'+(pg>=(isSh(r)?SHN:604)?' disabled':'')+'>التالية</button></div></div>'+
     '<div id="rwbar" class="rwbar"><button class="ib" data-act="rwx" aria-label="إيقاف">'+ICON.x+'</button><div class="rwi"><b id="rwl"></b><small id="rwt"></small></div><button class="ib" data-act="rwseek" data-d="-10" aria-label="رجوع عشر ثوانٍ">−١٠</button><button class="ib rwp" data-act="rwtog" aria-label="تشغيل أو إيقاف مؤقت" id="rwp">'+ICON.pause+'</button><button class="ib" data-act="rwseek" data-d="10" aria-label="تقديم عشر ثوانٍ">+١٠</button></div>';
   const wait=(msg)=>shell('<div class="mlines mwait"><div class="tload"><i class="tspin"></i>'+msg+'</div></div>','ld',r.pg||0,'');
   if(hasT&&!RWD[rw]){
@@ -1676,10 +1692,14 @@ function vMus(r){
     rwLoad(rw).then(()=>{if(cur()===r)render()},()=>{r.err=1;if(cur()===r)render()});
     return wait('جارٍ تحميل مصحف '+meta[1]+'…')}
   if(hasT&&r.anc){const T=RWD[rw].S[r.anc[0]-1].p;r.pg=T[Math.min(r.anc[1],T.length)-1];r.anc=null}
-  const pg=Math.max(1,Math.min(604,r.pg||1));r.pg=pg;if(!hasT&&S.mus!==pg){S.mus=pg;setTimeout(saveLocal,0)}
+  const shm=isSh(r)&&!hasT;const pg=Math.max(1,Math.min(shm?SHN:604,r.pg||1));r.pg=pg;if(shm){if(S.mush!==pg){S.mush=pg;setTimeout(saveLocal,0)}}else if(!hasT&&S.mus!==pg){S.mus=pg;setTimeout(saveLocal,0)}
   const ss=musSurahs(pg,rw);const top=ss.map(s=>'سورة '+D.N[s-1]).slice(0,2).join(' · ');
   let body,cls;
-  if(hasT){body='<div class="mlines">'+musRiw(rw,pg)+'</div>';cls='rw uq'+(pg<=2?' p12':'')}
+  if(shm){
+    if(r.err)return shell('<div class="mlines mwait"><p class="note">تعذّر تحميل صفحة المصحف. تحقّق من الاتصال ثم أعد المحاولة.</p><button class="btn outline" data-act="musretry">إعادة المحاولة</button></div>','ld',0,'');
+    if(!shReady(pg)){shLoad(pg).then(()=>{if(cur()===r&&r.pg===pg)render()},()=>{r.err=1;if(cur()===r)render()});return wait('جارٍ فتح الصفحة…')}
+    body='<img class="shi" src="'+shSrc(pg)+'" alt="صفحة '+AR(pg)+' من مصحف الشمرلي" draggable="false">';cls='sh';[pg+1,pg-1].forEach(n=>{if(n>=1&&n<=SHN&&!shReady(n))shLoad(n).catch(()=>{})})}
+  else if(hasT){body='<div class="mlines">'+musRiw(rw,pg)+'</div>';cls='rw uq'+(pg<=2?' p12':'')}
   else{
     const exact=!INART&&!Q2ERR;
     if(exact&&!q2Ready(pg)){q2Load(pg).then(()=>{if(cur()===r&&r.pg===pg)render()},()=>{Q2ERR=true;if(cur()===r)render()});return wait('جارٍ فتح الصفحة…')}
@@ -1688,7 +1708,7 @@ function vMus(r){
   }
   return shell(body,cls,pg,top);
 }
-function musFit(){const pe=document.querySelector('#app .mpage');if(!pe||pe.classList.contains('ld'))return;const box=pe.querySelector('.mlines');const L=[].slice.call(box.querySelectorAll('.ml:not(.mh):not(.mb):not(.me)'));if(!L.length)return;
+function musFit(){const pe=document.querySelector('#app .mpage');if(!pe||pe.classList.contains('ld')||pe.classList.contains('sh'))return;const box=pe.querySelector('.mlines');const L=[].slice.call(box.querySelectorAll('.ml:not(.mh):not(.mb):not(.me)'));if(!L.length)return;
   const rows=box.children.length||15;
   pe.classList.add('meas');box.style.setProperty('--mf','20px');let mx=0;const ws=L.map(e=>{const w=e.getBoundingClientRect().width;if(w>mx)mx=w;return w});pe.classList.remove('meas');
   const cs=getComputedStyle(box);const cw=box.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),ch=box.clientHeight;if(!mx||!cw)return;
@@ -1714,14 +1734,17 @@ function musApply(r,n,d){musFlipClean();const old=document.querySelector('#app .
   }catch(e){musFlipClean();if(pe)pe.style.visibility=''}}
   else if(pe&&!RM){try{pe.animate([{opacity:.25,transform:'translateX('+(d>0?-22:22)+'px)'},{opacity:1,transform:'none'}],{duration:280,easing:'cubic-bezier(.22,1,.36,1)'})}catch(e){}}
   persist()}
-function musGo(d){const r=cur();if(r.v!=='mus')return;const n=Math.max(1,Math.min(604,(r.pg||1)+d));if(n===r.pg)return;
+function musGo(d){const r=cur();if(r.v!=='mus')return;const n=Math.max(1,Math.min(isSh(r)?SHN:604,(r.pg||1)+d));if(n===r.pg)return;
   const hasT=r.rw&&RWT[r.rw];
+  if(isSh(r)){if(!shReady(n)){const pe=document.querySelector('#app .mpage');if(pe)pe.classList.add('busy');let done=false;const go=()=>{if(done)return;done=true;if(cur()===r)musApply(r,n,d)};shLoad(n).then(go,go);setTimeout(go,4000);return}musApply(r,n,d);return}
   if(!hasT&&!INART&&!Q2ERR&&!q2Ready(n)){const pe=document.querySelector('#app .mpage');if(pe)pe.classList.add('busy');let done=false;const go=()=>{if(done)return;done=true;if(cur()===r)musApply(r,n,d)};q2Load(n).then(go,()=>{Q2ERR=true;go()});setTimeout(go,4000);return}
   musApply(r,n,d)}
-function musAnchor(r){if(r.rw&&RWT[r.rw]&&RWD[r.rw])return RWD[r.rw].F[r.pg]||[1,1];mlsInit();const m=MLS[r.pg-1];return [m[0],m[1]]}
+function musAnchor(r){if(isSh(r))return shAnc(r.pg);if(r.rw&&RWT[r.rw]&&RWD[r.rw])return RWD[r.rw].F[r.pg]||[1,1];mlsInit();const m=MLS[r.pg-1];return [m[0],m[1]]}
 function musRwSheet(){const r=cur();const curId=r.rw&&r.rw!=='hafs'?r.rw:'';let h=shead('اختيار الرواية');
   const row=(id,n,sub)=>'<button class="rwrow'+(id===curId?' on':'')+'" data-act="musrwset" data-v="'+id+'"><span><b>'+n+'</b><small>'+sub+'</small></span>'+(id===curId?ICON.check:'')+'</button>';
-  h+='<div class="rwlist">'+row('','حفص عن عاصم','مصحف المدينة النبوية')+RIW.map(w=>row(w[0],w[1],(RWTS[w[0]]?'نصٌّ وصوت، آيةً آية':RWT[w[0]]?'نصًّا وصوتًا':'صوتًا فقط')+' · '+w[2])).join('')+'</div>';
+  const edr=(id,n,sub,on)=>'<button class="rwrow'+(on?' on':'')+'" data-act="mused" data-v="'+id+'"><span><b>'+n+'</b><small>'+sub+'</small></span>'+(on?ICON.check:'')+'</button>';
+  const shOn=isSh(r);h+='<div class="sect" style="margin:2px 4px 8px">نسخة المصحف</div><div class="rwlist">'+edr('','مصحف المدينة النبوية','حفص عن عاصم · خط مجمع الملك فهد',!curId&&!shOn)+edr('sh','مصحف الشمرلي','حفص عن عاصم · صفحات مصوَّرة، بلا تظليل للآيات',shOn)+'</div><div class="sect" style="margin:14px 4px 8px">الروايات</div>';
+  h+='<div class="rwlist">'+RIW.map(w=>row(w[0],w[1],(RWTS[w[0]]?'نصٌّ وصوت، آيةً آية':RWT[w[0]]?'نصًّا وصوتًا':'صوتًا فقط')+' · '+w[2])).join('')+'</div>';
   h+='<p class="note">نصوص الروايات وخطوطها من مجمع الملك فهد لطباعة المصحف الشريف. روايات هشام وخلّاد وأبي الحارث وقراءتا أبي جعفر وخلف العاشر لم نجد لها تسجيلًا كاملًا بعد.</p>';openSheet(h,'musrw')}
 let QSN=null,QSK=null;const qSk=t=>t.replace(/[اويى]/g,'');
 const qNorm=t=>String(t).replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ۞۩]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/\s+/g,' ').trim();
@@ -1729,18 +1752,18 @@ function qSearch(q){const o=document.getElementById('msres'),L=document.getEleme
   const arN=q.replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c));let h='';
   const m=/^(\d{1,3})\s*[:\/\-\s]\s*(\d{1,3})$/.exec(arN);
   if(m){const s=+m[1],a=+m[2];if(s>=1&&s<=114&&a>=1&&a<=D.Q[s-1].length){o.innerHTML=qRow(s,a,'');return}}
-  if(/^\d{1,3}$/.test(arN)){const n=+arN;if(n>=1&&n<=604)h+='<button class="card go" data-act="musjump" data-pg="'+n+'"><span><b>صفحة '+AR(n)+'</b></span></button>';if(n>=1&&n<=114)h+='<button class="card go" data-act="musjump" data-s="'+n+'"><span><b>سورة '+D.N[n-1]+'</b><span class="meta" style="display:block">'+AR(D.Q[n-1].length)+' آية</span></span></button>'}
+  if(/^\d{1,3}$/.test(arN)){const n=+arN;if(n>=1&&n<=(S.ed==='sh'?SHN:604))h+='<button class="card go" data-act="musjump" data-pg="'+n+'"'+(S.ed==='sh'?' data-ed="sh"':'')+'><span><b>صفحة '+AR(n)+'</b></span></button>';if(n>=1&&n<=114)h+='<button class="card go" data-act="musjump" data-s="'+n+'"><span><b>سورة '+D.N[n-1]+'</b><span class="meta" style="display:block">'+AR(D.Q[n-1].length)+' آية</span></span></button>'}
   const qn=qNorm(q.replace(/^سورة\s+/,''));
-  if(qn.length>=2){D.N.forEach((nm,i)=>{if(qNorm(nm).indexOf(qn)>=0)h+='<button class="card go" data-act="musjump" data-s="'+(i+1)+'"><span><b>سورة '+nm+'</b><span class="meta" style="display:block">'+AR(D.Q[i].length)+' آية · صفحة '+AR(D.PG[i][0])+'</span></span></button>'})}
+  if(qn.length>=2){D.N.forEach((nm,i)=>{if(qNorm(nm).indexOf(qn)>=0)h+='<button class="card go" data-act="musjump" data-s="'+(i+1)+'"><span><b>سورة '+nm+'</b><span class="meta" style="display:block">'+AR(D.Q[i].length)+' آية · صفحة '+AR(pgOf(i+1,1))+'</span></span></button>'})}
   if(qn.length>=2){if(!QSN){QSN=[];D.Q.forEach((S2,i)=>S2.forEach((t,j)=>QSN.push(qNorm(t))))}
     if(!QSK)QSK=QSN.map(qSk);const tk=qn.split(' ').filter(Boolean),tk2=tk.map(w=>qSk(w.replace(/^(ال|وال|بال|لل|فال)/,''))).filter(w=>w.length>=2);let c=0,c2=0,rows='',rows2='',i0=0;const lim=60;
     D.Q.forEach((S2,i)=>{S2.forEach((t,j)=>{const n=QSN[i0],k2=QSK[i0];i0++;if(tk.every(w=>n.indexOf(w)>=0)){c++;if(c<=lim)rows+=qRow(i+1,j+1,tk)}else if(tk2.length&&tk2.every(w=>k2.indexOf(w)>=0)){c2++;if(c2<=lim)rows2+=qRow(i+1,j+1,tk)}})});if(!c){c=c2;rows=rows2}
     h+=(c?'<div class="sect" style="margin:10px 4px 6px">'+AR(c)+' آية'+(c>lim?' (أول '+AR(lim)+')':'')+'</div>'+rows:(h?'':'<p class="note">لا توجد نتائج. جرّب كلمة أقصر.</p>'))}
   o.innerHTML=h||'<p class="note">اكتب كلمتين على الأقل.</p>'}
-function qRow(s,a,tk){let t=txt(s,a);return '<button class="card go qres" data-act="musjump" data-pg="'+D.PG[s-1][Math.min(a,D.PG[s-1].length)-1]+'"><span><span class="qt">'+esc(t)+'</span><span class="meta" style="display:block;margin-top:4px">سورة '+D.N[s-1]+' · الآية '+AR(a)+' · صفحة '+AR(D.PG[s-1][Math.min(a,D.PG[s-1].length)-1])+'</span></span></button>'}
+function qRow(s,a,tk){let t=txt(s,a);return '<button class="card go qres" data-act="musjump" data-pg="'+pgOf(s,a)+'"'+(S.ed==='sh'?' data-ed="sh"':'')+'><span><span class="qt">'+esc(t)+'</span><span class="meta" style="display:block;margin-top:4px">سورة '+D.N[s-1]+' · الآية '+AR(a)+' · صفحة '+AR(pgOf(s,a))+'</span></span></button>'}
 function musIdx(){let h=shead('الانتقال في المصحف')+'<input class="search" id="msq" type="search" placeholder="ابحث: كلمة، آية، سورة، صفحة، أو ٢:٢٥٥" autocomplete="off"><div id="msres"></div><div id="mslists">';
   h+='<div class="sect" style="margin:2px 4px 8px">الأجزاء</div><div class="riws">'+Array.from({length:30},(_,i)=>'<button data-act="musjump" data-pg="'+(i?i*20+2:1)+'">'+AR(i+1)+'</button>').join('')+'</div>';
-  h+='<div class="sect" style="margin:8px 4px 8px">السور</div><div class="msl">'+D.N.map((n,i)=>'<button data-act="musjump" data-s="'+(i+1)+'"><b>'+AR(i+1)+'</b><span>'+n+'</span><small>ص '+AR(D.PG[i][0])+'</small></button>').join('')+'</div></div>';openSheet(h,'musidx')}
+  h+='<div class="sect" style="margin:8px 4px 8px">السور</div><div class="msl">'+D.N.map((n,i)=>'<button data-act="musjump" data-s="'+(i+1)+'"><b>'+AR(i+1)+'</b><span>'+n+'</span><small>ص '+AR(pgOf(i+1,1))+'</small></button>').join('')+'</div></div>';openSheet(h,'musidx')}
 /* riwaya listening: the recording is one file per surah, so playback starts near the ayah */
 const RW={el:null,id:'',s:0,a:0,on:false,url:'',tm:null,stopAt:0,marked:false};
 const RWTS={qalun:1,warsh:1,duri:1,susi:1,bazzi:1,shuba:1};const RWTM={},RWTP={};
@@ -3492,6 +3515,7 @@ document.addEventListener('click',ev=>{
   case 'musplay':{if(AU.on){auStop();AU.q=null;break}
     const all=[...document.querySelectorAll('#app .ay[data-s]')];const hl=all.some(e=>e.classList.contains('hl'));const seen=new Set(),L=[];
     all.forEach(e=>{if(e.classList.contains('hid'))return;if(hl&&!e.classList.contains('hl'))return;const s2=+e.dataset.s,a2=+e.dataset.a,k=s2*1000+a2;if(seen.has(k))return;seen.add(k);L.push([s2,a2])});
+    if(isSh(cur())){L.length=0;shAyat(cur().pg).forEach(x=>L.push(x))}
     if(!L.length)break;L.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);let bl=[];L.forEach(([s2,a2])=>{const c=bl[bl.length-1];if(c&&c.s===s2&&a2===c.b+1)c.b=a2;else bl.push({label:'',s:s2,a:a2,b:a2})});
     const r=cur();if(r.hl&&r.hl.length&&!(r.rw&&r.rw!=='hafs')){bl=r.hl.map(h=>({label:'',s:h[0],a:h[1],b:h[2]}))}azStop();AU.spec={listen:true,title:(r.spec&&r.spec.title)||('صفحة '+AR(r.pg||'')),blocks:bl};AU.keep=true;AU.fb=0;AU.qt=1;AU.lastBi=null;AU.reps=null;AU.adk=null;auToggle();break}
   case 'kahfplay':{if(AU.on&&AU.spec&&AU.spec.kahf){auStop();AU.spec=null;AU.keep=false;break}
@@ -3555,11 +3579,12 @@ document.addEventListener('click',ev=>{
   case 'musq':musIdx();setTimeout(()=>{const i=$('msq');if(i)i.focus()},350);break;
   case 'musrw':musRwSheet();break;
   case 'musretry':{const r=cur();r.err=0;render();break}
-  case 'musrwset':{const r=cur();if(r.v!=='mus')break;const an=musAnchor(r);const was=r.rw&&RWT[r.rw]&&RWD[r.rw];closeSheet();r.rw=v||'';r.err=0;if(v){S.riw=v;saveLocal()}
+  case 'mused':{const r=cur();if(r.v!=='mus')break;const an=musAnchor(r);closeSheet();S.ed=v==='sh'?'sh':'';r.rw='';r.err=0;r.anc=null;r.pg=pgOf(an[0],an[1]);saveLocal();rwStop();render();window.scrollTo(0,0);persist();break}
+  case 'musrwset':{const r=cur();if(r.v!=='mus')break;const an=musAnchor(r);const was=(r.rw&&RWT[r.rw]&&RWD[r.rw])||isSh(r);if(v&&S.ed==='sh'){S.ed='';saveLocal()}closeSheet();r.rw=v||'';r.err=0;if(v){S.riw=v;saveLocal()}
     if(v&&RWT[v])r.anc=an;else{r.anc=null;if(was)r.pg=D.PG[an[0]-1][Math.min(an[1],D.PG[an[0]-1].length)-1]}
     if(!v||v!==RW.id)rwStop();render();window.scrollTo(0,0);break}
   case 'filq':{const r=cur();closeSheet();if(r.v!=='mus')break;const F={s:105,a:1,b:5,label:'سورة الفيل'},Q={s:106,a:1,b:4,label:'سورة قريش'};const bl=v==='fil'?[F]:v==='qur'?[Q]:[F,Q];r.hl=hlOf(bl);r.ht=v==='fil'?'سورة الفيل':v==='qur'?'سورة قريش':'سورة الفيل مع قريش';r.spec=null;r.pg=D.PG[v==='qur'?105:104][0];r.anc=null;render();window.scrollTo(0,0);persist();break}
-  case 'musjump':{const r=cur();if(r.v!=='mus')break;if((+b.dataset.s===105||+b.dataset.s===106)&&!r.rw){openSheet(shead('الفيل وقريش')+'<p class="meta" style="margin:0 0 10px;line-height:1.9">عدّ بعض العلماء الفيل وقريش سورة واحدة، منهم أُبيّ بن كعب، ولا فصل بينهما في مصحفه، وقالوا إن «لإيلاف» متعلقة بما قبلها: أهلك الله أصحاب الفيل لتبقى قريش آمنة في رحلتيها (البغوي والقرطبي). وهما سورتان منفصلتان في المصحف العثماني، وهذا اقتراح للتدبر وليس حكمًا.</p><button class="card go" data-act="filq" data-v="both"><span><b>سورة الفيل مع سورة قريش</b></span></button><button class="card go" data-act="filq" data-v="fil"><span><b>سورة الفيل فقط</b></span></button><button class="card go" data-act="filq" data-v="qur"><span><b>سورة قريش فقط</b></span></button>');break}closeSheet();const s2=+b.dataset.s;if(s2){if(r.rw&&RWT[r.rw]&&RWD[r.rw])r.pg=RWD[r.rw].S[s2-1].p[0];else r.pg=D.PG[s2-1][0]}else r.pg=+b.dataset.pg||1;r.anc=null;render();window.scrollTo(0,0);persist();break}
+  case 'musjump':{const r=cur();if(r.v!=='mus')break;if((+b.dataset.s===105||+b.dataset.s===106)&&!r.rw&&!isSh(r)){openSheet(shead('الفيل وقريش')+'<p class="meta" style="margin:0 0 10px;line-height:1.9">عدّ بعض العلماء الفيل وقريش سورة واحدة، منهم أُبيّ بن كعب، ولا فصل بينهما في مصحفه، وقالوا إن «لإيلاف» متعلقة بما قبلها: أهلك الله أصحاب الفيل لتبقى قريش آمنة في رحلتيها (البغوي والقرطبي). وهما سورتان منفصلتان في المصحف العثماني، وهذا اقتراح للتدبر وليس حكمًا.</p><button class="card go" data-act="filq" data-v="both"><span><b>سورة الفيل مع سورة قريش</b></span></button><button class="card go" data-act="filq" data-v="fil"><span><b>سورة الفيل فقط</b></span></button><button class="card go" data-act="filq" data-v="qur"><span><b>سورة قريش فقط</b></span></button>');break}closeSheet();const s2=+b.dataset.s;if(s2){if(r.rw&&RWT[r.rw]&&RWD[r.rw])r.pg=RWD[r.rw].S[s2-1].p[0];else r.pg=isSh(r)?shPgOf(s2,1):D.PG[s2-1][0]}else r.pg=b.dataset.ed==='sh'?(+b.dataset.pg||1):(isSh(r)?mus2sh(+b.dataset.pg||1):(+b.dataset.pg||1));r.anc=null;render();window.scrollTo(0,0);persist();break}
   case 'rwplay':{const r=cur();closeSheet();rwPlay(r.rw,+b.dataset.s,+b.dataset.a,b.dataset.one==='1');break}
   case 'rwtog':{if(!RW.el)break;if(RW.el.paused){const p=RW.el.play();if(p&&p.catch)p.catch(()=>{})}else RW.el.pause();break}
   case 'rwseek':{if(!RW.el)break;try{RW.el.currentTime=Math.max(0,RW.el.currentTime+(+b.dataset.d))}catch(e){}break}
@@ -3746,7 +3771,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=150;
+const APPV=151;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
