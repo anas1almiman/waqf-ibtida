@@ -2039,8 +2039,8 @@ function homeStrip(np){const W=isWird();const has=!!homeSpec();let rd=0;if(!W)RE
   const card=(act,ic,t,sub,dis,cls)=>'<button class="hcard'+(cls||'')+'" data-act="'+act+'"'+(dis?' disabled':'')+'><span class="hi">'+ic+'</span><span class="ht"><b>'+t+'</b><small>'+sub+'</small></span></button>';
   let hint='';if(!S.stripHint){S.stripHint=1;setTimeout(saveLocal,0);hint='<div class="shint">← اسحب لترى المزيد</div>'}
   let x='<div class="hsw">'+hint+'<div class="hstrip'+(ENTER?' stag':'')+'">';
-  x+='<button class="hcard" data-act="nav" data-v="qym"><span class="hi">'+CRESCENT_I+'</span><span class="ht"><b>قيام الليل</b><small>استغل وقتك</small></span></button>';
-  x+='<button class="hcard hgold" data-act="nav" data-v="time"><span class="hi">'+ICON.clock+'</span><span class="ht"><b>اقرأ حسب وقتك</b><small>عندك ١٥ دقيقة؟ ٢٠؟</small></span></button>';
+  x+='<button class="hcard" data-act="nav" data-v="qym"><span class="hi">'+CRESCENT_I+'</span><span class="ht"><b>قيام الليل</b><small>رتّب تلاوتك</small></span></button>';
+  x+='<button class="hcard hgold" data-act="nav" data-v="time"><span class="hi">'+ICON.clock+'</span><span class="ht"><b>اقرأ حسب وقتك</b><small>استغل وقتك</small></span></button>';
   x+=card('hlisten',ICON.play,W?'استمع لوردك':'استمع لقراءتك',RC()[1],!has);
   x+=card('hmean',ICON.taf,W?'معاني وردك':'معاني قراءتك','بيان المفردات',!has);
   if(!W)x+=card('hzsug',ICON.heart,'من محفوظك',hasHz()?hifzLabel():'حدّد محفوظك');
@@ -2153,7 +2153,7 @@ function tmTopics(){const B=tmBudget(),o=[];TOPICS.forEach(t=>{let n=0;try{TR(t)
 function tmCard(kick,r){const p=D.P[r.i],q=D.P[r.j],s=p[0];return '<div class="card accent tmc"><div class="cardtop"><span class="rk">'+kick+'</span><span class="meta">'+AR(r.n)+(r.n<=10?' أسطر':' سطرًا')+' · نحو '+tmTime(r.n)+'</span></div><div class="cart">سورة '+D.N[s-1]+(q[0]!==s?' <small>إلى سورة '+D.N[q[0]-1]+'</small>':(isWhole(r.i,r.j)?' كاملة':'، '+ayRange(r.i,r.j)))+'</div><div class="se"><span>يبدأ</span><div class="q">'+firstW(r.i)+' …</div><span>وينتهي</span><div class="q">… '+lastW(r.j)+'</div></div><button class="btn goldb" data-act="tmread" data-i="'+r.i+'" data-j="'+r.j+'">'+ICON.read+'اقرأه الآن</button></div>'}
 function vTime(){
   const B=tmBudget();
-  let x=topbar('بحسب وقتك',{over:true})+hero('wird','اقرأ ما يسعه وقتك','بحسب وقتك','مقاطع تامّة المعنى بقدر الدقائق التي عندك');
+  let x=topbar('بحسب وقتك',{over:true})+hero('wird','','بحسب وقتك','');
   x+='<div class="card"><div class="meta" style="margin-bottom:8px">كم عندك من الوقت؟</div><div class="tmchips">'+TMMIN.map(m=>'<button class="opt'+(tmMin()===m?' on':'')+'" data-act="tmset" data-k="min" data-v="'+m+'">'+AR(m)+' د</button>').join('')+'</div>'
    +'<div class="tmcus"><label for="tmcus">أو اكتب مدتك بنفسك</label><div class="tmstep"><button class="ib" data-act="tmstep" data-d="-5" aria-label="أنقص خمس دقائق">−</button><input id="tmcus" type="number" inputmode="numeric" min="1" max="600" step="1" value="'+tmMin()+'" aria-label="عدد الدقائق"><span>دقيقة</span><button class="ib" data-act="tmstep" data-d="5" aria-label="زد خمس دقائق">+</button></div></div>'
    +'<div class="meta" style="margin:14px 0 8px">سرعة قراءتك</div><div class="tmchips">'+TMPACE.map(([v,l])=>'<button class="opt'+(tmPace()===v?' on':'')+'" data-act="tmset" data-k="pace" data-v="'+v+'">'+l+'<small>'+AR(v)+' د للوجه</small></button>').join('')+'</div>'
@@ -3784,7 +3784,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=161;
+const APPV=162;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
