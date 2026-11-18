@@ -3287,9 +3287,14 @@ const SPARK='<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"
 const AITFN=[['طبري','tabari'],['كثير','ik'],['بغوي','baghawi'],['قرطبي','qurtubi'],['حيان','bahr'],['بحر','bahr'],['اضواء','adwa'],['شنقيط','adwa'],['تحرير','tahrir'],['عاشور','tahrir'],['ميسر','muyassar'],['سعدي','saadi'],['وسيط','wasit']];
 function aiBkOf(id){if(id==='arbain')return{id:id,short:'الأربعون النووية',t:'الأربعون النووية'};if(id==='quran')return{id:id,short:'القرآن الكريم',t:'القرآن الكريم'};return LIB.find(b=>b.id===id)}
 const aiNum=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
-function aiLabel(id,p){if(id==='arbain'||id.startsWith('h_'))return 'حديث '+aiNum(p);if(id==='quran'||id.startsWith('tf_')||id==='gharib')return 'سورة '+D.N[Math.floor(p/1000)-1]+' · '+AR(p%1000);return 'ص'+AR(p)}
+function aiLabel(id,p){if(id==='arbain'||id.startsWith('h_'))return 'حديث '+aiNum(p);if(id==='quran'||id.startsWith('tf_')||id==='gharib')return 'سورة '+D.N[Math.floor(p/1000)-1]+' · '+AR(p%1000);return id==='ighatha'?'ص'+AR(p-2):'ص'+AR(p)}
 function aiImg(id,p){const b=LIB.find(x=>x.id===id);if(!b||!b.dir)return null;return b.ext?b.dir+'p'+String(p).padStart(4,'0')+'.'+b.ext:b.dir+'p'+pad3(p)+'.png'}
 const aiYield=()=>new Promise(r=>setTimeout(r,0));
+async function aiIgUnlock(pw){const r=await fetch('idx/ighatha.idx');if(!r.ok)throw new Error('net');const b=new Uint8Array(await r.arrayBuffer());if(String.fromCharCode(b[0],b[1],b[2])!=='WQ1')throw new Error('fmt');
+  const salt=b.slice(3,19),iv=b.slice(19,31),ct=b.slice(31);const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:600000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+  let pt;try{pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct)}catch(e){throw new Error('pw')}
+  await lpPut('ighatha_idx',new Blob([pt],{type:'application/json'}));AIS.ig=1;AIX.ready=false;AIX.loading=null;AIX.docs=[];AIX.post=new Map()}
 function aiLoad(){
   if(AIX.ready)return Promise.resolve();
   return AIX.loading||(AIX.loading=(async()=>{
@@ -3297,6 +3302,7 @@ function aiLoad(){
     for(const id of Object.keys(mf)){const b=LIB.find(x=>x.id===id&&x.open);if(!b)continue;
       const j=await (await fetch('idx/'+id+'.json')).json();let k=0;
       for(let i=0;i<j.p.length;i++){aiAddDoc(id,j.n?j.n[i]:i+1,j.p[i]);if(++k%1500===0)await aiYield()}}
+    try{const ib=await lpGet('ighatha_idx');if(ib){const j=JSON.parse(await ib.text());j.p.forEach((t,i)=>aiAddDoc('ighatha',j.n[i],t));AIS.ig=1}else AIS.ig=0}catch(e){AIS.ig=0}
     if(typeof ARB!=='undefined')ARB.forEach((h,i)=>aiAddDoc('arbain',i+1,h.t+' '+(h.s||'')));
     let k=0;D.Q.forEach((ay,si)=>ay.forEach((t,ai)=>{aiAddDoc('quran',(si+1)*1000+ai+1,typeof t==='string'?t:String(t&&t.t||''));}));
     aiFinish()})().catch(e=>{AIX.loading=null;throw e}));
@@ -3361,10 +3367,11 @@ function aiMsgHTML(m,i){
   return x+'</div>';
 }
 function vAi(r){
-  setTimeout(()=>aiLoad().catch(()=>{}),400);
+  setTimeout(()=>aiLoad().then(()=>{if(AIS.ig===0&&!AIS.igr&&cur().v==='ai'&&!AIS.busy){AIS.igr=1;render()}}).catch(()=>{}),400);
   let x=topbar('ابحث في المكتبة',{end:AIS.m.length?'<button class="ib" data-act="aiclear" aria-label="محادثة جديدة">'+ICON.x+'</button>':''});
   x+='<div class="aihero"><i>'+SPARK+'</i><b>ابحث في المكتبة</b><small>المصادر ونتائج البحث: الكتب الموجودة في المكتبة فقط</small></div>';
   if(!AIURL)x+=aiKey()?'<button class="aikeyb" data-act="aikeyx">مفتاحك محفوظ على هذا الجهاز · تغيير</button>':'<div class="card aikey"><b>تفعيل البحث الذكي</b><small>الصق مفتاح Google Gemini (مجاني من aistudio.google.com) أو مفتاح Anthropic. يُحفظ على جوالك فقط، ولا يُرسل إلا إلى مزوّده.</small><input class="search" id="aikey" type="password" dir="ltr" placeholder="AIza… أو sk-ant-…" autocomplete="off"><button class="btn primary" data-act="aikeys">حفظ المفتاح</button></div>';
+  if(AIS.ig===0)x+='<div class="card aikey"><b>أدرج «إغاثة اللهفان» في البحث</b><small>أدخل كلمة سر الكتاب مرة واحدة، فيُفتح فهرسه على جوالك فقط.</small><input class="search" id="aiigw" type="password" placeholder="كلمة السر" autocomplete="off"><button class="btn outline" data-act="aiig">إدراج الكتاب</button></div>';
   if(!AIS.m.length)x+='<div class="aisug">'+AISUG.map(q=>'<button data-act="aiq" data-q="'+esc(q)+'">'+esc(q)+'</button>').join('')+'</div>';
   x+='<div id="aimsgs">'+AIS.m.map(aiMsgHTML).join('')+'</div><div style="height:96px"></div>';
   x+='<form class="aibar" id="aif" autocomplete="off"><textarea id="aiin" rows="1" placeholder="اسأل عن حكم أو تفسير أو موضع وقف…" aria-label="سؤالك"></textarea><button type="submit" class="aisend" data-act="aisend" aria-label="إرسال">'+ICON.fwd+'</button></form>';
@@ -3410,6 +3417,7 @@ function aiSrc(mi,n){const s=(AIS.m[mi]||{}).src&&AIS.m[mi].src[n-1];if(!s)retur
   else if(id.startsWith('tf_'))navPush({v:'tafsir',m:id.slice(3),s:Math.floor(s.p/1000),a:s.p%1000});
   else if(id==='quran')navPush({v:'tafsir',m:'ik',s:Math.floor(s.p/1000),a:s.p%1000});
   else if(id==='gharib')navPush({v:'tafsir',m:'gh',s:Math.floor(s.p/1000),a:s.p%1000});
+  else if(id==='ighatha')navPush({v:'lpdf',id:'ighatha',p:s.p});
   else navPush({v:'book',id:id,p:s.p})}
 
 const IKPP=5;
@@ -3648,7 +3656,7 @@ document.addEventListener('click',ev=>{
   switch(a){
   case 'back':navBack();break;
   case 'tfretry':{[...IK.keys()].forEach(k=>{if(IK.get(k)===null)IK.delete(k)});if(SH==='taf')refreshSheet();break}
-  case 'lpunlock':{const r=cur(),id=b.dataset.id,pw=($('lpw')||{}).value||'';if(!pw){r.err='اكتب كلمة السر.';render();break}b.disabled=true;b.textContent='جارٍ الفتح…';lpUnlock(id,pw).then(()=>{r.st=1;r.err='';render();toast('أُضيف الكتاب إلى مكتبتك على هذا الجهاز')},e=>{r.err=e.message==='pw'?'كلمة السر غير صحيحة.':'تعذّر تحميل الكتاب. تأكد من الإنترنت وأعد المحاولة.';render()});break}
+  case 'lpunlock':{const r=cur(),id=b.dataset.id,pw=($('lpw')||{}).value||'';if(!pw){r.err='اكتب كلمة السر.';render();break}b.disabled=true;b.textContent='جارٍ الفتح…';lpUnlock(id,pw).then(()=>{if(id==='ighatha')aiIgUnlock(pw).catch(()=>{});r.st=1;r.err='';render();toast('أُضيف الكتاب إلى مكتبتك على هذا الجهاز')},e=>{r.err=e.message==='pw'?'كلمة السر غير صحيحة.':'تعذّر تحميل الكتاب. تأكد من الإنترنت وأعد المحاولة.';render()});break}
   case 'upd':updNow();break;
   case 'tsmic':if(TSS.on)tsStop();else tsStart();break;
   case 'tsopt':{if(v==='hide')TSS.hide=!TSS.hide;else if(v==='stop')TSS.stop=!TSS.stop;else TSS.sens=TSS.sens==='normal'?'strict':TSS.sens==='strict'?'low':'normal';render();break}
@@ -3799,6 +3807,7 @@ document.addEventListener('click',ev=>{
   case 'aiq':aiAsk(b.dataset.q);break;
   case 'aisrc':aiSrc(+b.dataset.m,+b.dataset.n);break;
   case 'aikeys':{const k=(($('aikey')||{}).value||'').trim();if(!/^(sk-ant-|AIza)/.test(k)){toast('المفتاح يبدأ بـ sk-ant- أو AIza');break}try{localStorage.setItem('waqf-aikey',k)}catch(e){}render();toast('حُفظ المفتاح.');break}
+  case 'aiig':{const pw=(($('aiigw')||{}).value||'');if(!pw){toast('اكتب كلمة السر.');break}b.disabled=true;aiIgUnlock(pw).then(()=>{render();toast('أُدرج الكتاب في البحث.')},e=>{b.disabled=false;toast(e.message==='pw'?'كلمة السر غير صحيحة.':'تعذّر تحميل الفهرس.')});break}
   case 'aikeyx':try{localStorage.removeItem('waqf-aikey')}catch(e){}render();break;
   case 'aiclear':if(!AIS.busy){AIS.m=[];render()}break;
   case 'bkflip':bkFlip(+b.dataset.d);break;
@@ -3956,7 +3965,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=167;
+const APPV=168;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
