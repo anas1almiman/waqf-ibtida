@@ -1780,7 +1780,7 @@ function musRwSheet(){const r=cur();const curId=r.rw&&r.rw!=='hafs'?r.rw:'';let 
   const row=(id,n,sub)=>'<button class="rwrow'+(id===curId?' on':'')+'" data-act="musrwset" data-v="'+id+'"><span><b>'+n+'</b><small>'+sub+'</small></span>'+(id===curId?ICON.check:'')+'</button>';
   h+='<div class="rwlist">'+row('','حفص عن عاصم','مصحف مجمع الملك فهد')+RIW.map(w=>row(w[0],w[1],(RWTS[w[0]]?'نصٌّ وصوت، آيةً آية':RWT[w[0]]?'نصًّا وصوتًا':'صوتًا فقط')+' · '+w[2])).join('')+'</div>';
   h+='<p class="note">نصوص الروايات وخطوطها من مجمع الملك فهد لطباعة المصحف الشريف. روايات هشام وخلّاد وأبي الحارث وقراءتا أبي جعفر وخلف العاشر لم نجد لها تسجيلًا كاملًا بعد.</p>';openSheet(h,'musrw')}
-let QSN=null,QSK=null;const qSk=t=>t.replace(/[اويى]/g,'');
+let QSN=null,QSK=null,QSP=null;const qSk=t=>t.replace(/[اويى]/g,'');
 const qNorm=t=>String(t).replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ۞۩]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/\s+/g,' ').trim();
 function qSearch(q){const o=document.getElementById('msres'),L=document.getElementById('mslists');if(!o)return;q=(q||'').trim();if(L)L.style.display=q?'none':'';if(!q){o.innerHTML='';return}
   const arN=q.replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c));let h='';
@@ -1790,7 +1790,10 @@ function qSearch(q){const o=document.getElementById('msres'),L=document.getEleme
   const qn=qNorm(q.replace(/^سورة\s+/,''));
   if(qn.length>=2){D.N.forEach((nm,i)=>{if(qNorm(nm).indexOf(qn)>=0)h+='<button class="card go" data-act="musjump" data-s="'+(i+1)+'"><span><b>سورة '+nm+'</b><span class="meta" style="display:block">'+AR(D.Q[i].length)+' آية · صفحة '+AR(pgOf(i+1,1))+'</span></span></button>'})}
   if(qn.length>=2){if(!QSN){QSN=[];D.Q.forEach((S2,i)=>S2.forEach((t,j)=>QSN.push(qNorm(t))))}
-    if(!QSK)QSK=QSN.map(qSk);const tk=qn.split(' ').filter(Boolean),tk2=tk.map(w=>qSk(w.replace(/^(ال|وال|بال|لل|فال)/,''))).filter(w=>w.length>=2);let c=0,c2=0,rows='',rows2='',i0=0;const lim=60;
+    if(!QSK)QSK=QSN.map(qSk);if(!QSP)QSP=QSN.map(t=>t.replace(/ /g,'|'));
+    const mk=w=>new RegExp('(^|\\|)'+w.split('').map(c=>c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('\\|?')+'(\\||$)'),ph=qn.replace(/ /g,''),phk=qSk(ph);if(ph.length>=3){const r1=mk(ph),r2=phk.length>=3?mk(phk):null;let pc=0,pr='',pc2=0,pr2='',i1=0;D.Q.forEach((S2,i)=>{S2.forEach((t,j)=>{const k=i1++;if(r1.test(QSP[k])){pc++;if(pc<=60)pr+=qRow(i+1,j+1,[])}else if(r2&&r2.test(qSk(QSP[k]))){pc2++;if(pc2<=60)pr2+=qRow(i+1,j+1,[])}})});if(!pc){pc=pc2;pr=pr2}
+      if(pc){o.innerHTML=h+'<div class="sect" style="margin:10px 4px 6px">'+AR(pc)+' آية'+(pc>60?' (أول '+AR(60)+')':'')+'</div>'+pr;return}}
+    const tk=qn.split(' ').filter(Boolean),tk2=tk.map(w=>qSk(w.replace(/^(ال|وال|بال|لل|فال)/,''))).filter(w=>w.length>=2);let c=0,c2=0,rows='',rows2='',i0=0;const lim=60;
     D.Q.forEach((S2,i)=>{S2.forEach((t,j)=>{const n=QSN[i0],k2=QSK[i0];i0++;if(tk.every(w=>n.indexOf(w)>=0)){c++;if(c<=lim)rows+=qRow(i+1,j+1,tk)}else if(tk2.length&&tk2.every(w=>k2.indexOf(w)>=0)){c2++;if(c2<=lim)rows2+=qRow(i+1,j+1,tk)}})});if(!c){c=c2;rows=rows2}
     h+=(c?'<div class="sect" style="margin:10px 4px 6px">'+AR(c)+' آية'+(c>lim?' (أول '+AR(lim)+')':'')+'</div>'+rows:(h?'':'<p class="note">لا توجد نتائج. جرّب كلمة أقصر.</p>'))}
   o.innerHTML=h||'<p class="note">اكتب كلمتين على الأقل.</p>'}
@@ -3976,7 +3979,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=180;
+const APPV=181;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
