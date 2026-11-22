@@ -657,6 +657,7 @@ html.bookmode,html.bookmode body{background:#16100a!important}
 .tscale b{color:var(--gold);font-weight:700}.tscale button{font-family:inherit;transition:background .2s,color .2s}.tscale button.on{background:var(--gg);color:#2A1E06;border-color:transparent;box-shadow:0 6px 14px -8px rgba(120,84,18,.6)}.tscale button.on b{color:#2A1E06}
 .tamt{text-align:center;font-size:13.5px;color:var(--gold);margin-top:6px}
 .tamt.over{color:#B4472F}
+.tamt.long{color:#9A6B12}
 
 .totop{position:fixed;right:16px;bottom:calc(104px + var(--sab));z-index:45;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(201,162,79,.65);background:rgba(14,42,33,.92);color:#F3DFA8;box-shadow:0 6px 20px rgba(0,0,0,.28),inset 0 0 0 1px rgba(243,223,168,.12);opacity:0;transform:translateY(14px) scale(.9);pointer-events:none;transition:opacity .3s ease,transform .35s cubic-bezier(.22,1,.36,1);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 body.hasdock .totop{bottom:calc(168px + var(--sab))}
@@ -1481,7 +1482,7 @@ function suggest(p,avoid){
   return null;
 }
 function endOK(j){return !noEnd(j)||restDone(j)}
-function valid(p,sg){if(!(Array.isArray(sg)&&sg.length===2&&sg[0]<=sg[1]&&sg[1]<NP&&avail(sg)&&allowed(p,sg)))return false;if(tailNext(sg))return false;if(sg[1]>sg[0]&&isTail(sg[1])&&D.P[sg[1]-1][0]===D.P[sg[1]][0])sg=[sg[0],sg[1]-1];const s=D.P[sg[0]][0];if(s>=QISAR)return fits(p,sg[0],sg[1]);return D.P[sg[1]][0]===s&&endOK(sg[1])&&inCap(p,segLines(sg[0],sg[1]))}
+function valid(p,sg){if(!(Array.isArray(sg)&&sg.length===2&&sg[0]<=sg[1]&&sg[1]<NP&&avail(sg)&&allowed(p,sg)))return false;if(tailNext(sg))return false;const s=D.P[sg[0]][0];const ok=g=>D.P[g[1]][0]===s&&endOK(g[1])&&inCap(p,segLines(g[0],g[1]));const trim=sg[1]>sg[0]&&isTail(sg[1])&&D.P[sg[1]-1][0]===D.P[sg[1]][0]&&endOK(sg[1]-1);if(s>=QISAR)return fits(p,sg[0],trim?sg[1]-1:sg[1]);return ok(sg)||(trim&&ok([sg[0],sg[1]-1]))}
 function current(p){const c=S.sug[p];if(c&&c.custom&&Array.isArray(c.a)&&Array.isArray(c.b)&&c.a[1]<NP&&c.b[1]<NP)return c;if(c&&valid(p,c.a)&&valid(p,c.b)&&c.b[0]>c.a[1]&&stAbs(c.a[0])&&(stAbs(c.b[0])||c.b[0]===c.a[1]+1))return c;const n=suggest(p);S.sug[p]=n;save();return n}
 const FRI={a:surahRange(32),b:surahRange(76)};
 function fridayFajr(np){return !!(np&&np.p==='fajr'&&np.day&&np.day.getDay()===5)}
@@ -1577,7 +1578,7 @@ function rakCard(label,sg,w){
   if(segInHz(i,j))tags.push(['من محفوظك','']);
   if(hasSajda(i,j))tags.push(['فيه سجدة تلاوة','gold']);
   return '<div class="card accent"><div class="cardtop"><span class="rk">'+label+'</span><span class="meta">الصفحة '+AR(D.P[i][4])+'</span></div><div class="cart">سورة '+D.N[s-1]+(isWhole(i,j)?'':' <small>'+ayRange(i,j)+'</small>')+'</div>'+(tags.length?'<div class="tags">'+tags.map(t=>'<span class="tag '+t[1]+'">'+t[0]+'</span>').join('')+'</div>':'')+startEnd(i,j)+
-  (w&&s<QISAR?(()=>{const n=segLines(i,j);const np2=nPrayer(n);let pj=j-1;while(pj>=i&&!endOK(pj))pj--;let nj=j+1;while(nj<NP&&D.P[nj][0]===s&&!endOK(nj))nj++;const more=nj<NP&&D.P[nj][0]===s&&segLines(i,nj)<=tCapF();return '<div class="tadj"><button class="chipb" data-act="shorter" data-w="'+w+'"'+(pj>=i?'':' disabled')+'>− أقل</button><span class="meta">'+AR(n)+(n<=2?(n===1?' سطر':' سطران'):n<=10?' أسطر':' سطرًا')+'</span><button class="chipb" data-act="longer" data-w="'+w+'"'+(more?'':' disabled')+'>+ أكثر</button></div>'+(()=>{const E=rakEnds(i);const k=E.indexOf(j);return E.length>2&&k>=0?'<input type="range" class="rsl" dir="rtl" aria-label="مقدار الركعة" data-w="'+w+'" data-i="'+i+'" min="0" max="'+(E.length-1)+'" step="1" value="'+k+'">':''})()+'<div class="tamt'+(np2?'':' over')+'">'+(np2?'مقدارها يناسب صلاة '+PR[np2].n:'أطول من مقدار صلاة الفجر')+'</div>'})():'')+
+  (w&&s<QISAR?(()=>{const n=segLines(i,j);const np2=nPrayer(n);let pj=j-1;while(pj>=i&&!endOK(pj))pj--;let nj=j+1;while(nj<NP&&D.P[nj][0]===s&&!endOK(nj))nj++;const more=nj<NP&&D.P[nj][0]===s&&segLines(i,nj)<=tCapF();return '<div class="tadj"><button class="chipb" data-act="shorter" data-w="'+w+'"'+(pj>=i?'':' disabled')+'>− أقل</button><span class="meta">'+AR(n)+(n<=2?(n===1?' سطر':' سطران'):n<=10?' أسطر':' سطرًا')+'</span><button class="chipb" data-act="longer" data-w="'+w+'"'+(more?'':' disabled')+'>+ أكثر</button></div>'+(()=>{const E=rakEnds(i);const k=E.indexOf(j);return E.length>2&&k>=0?'<input type="range" class="rsl" dir="rtl" aria-label="مقدار الركعة" data-w="'+w+'" data-i="'+i+'" min="0" max="'+(E.length-1)+'" step="1" value="'+k+'">':''})()+(()=>{const T=tamtOf(n);return '<div class="tamt'+(T[1]?' '+T[1]:'')+'">'+T[0]+'</div>'})()})():'')+
   '<div class="rkf">'+dalilBtn(j,i)+tafBtn(i,j)+(w&&hasHz()?'<button class="chipb plain" data-act="nm" data-w="'+w+'">ليس من محفوظي</button>':'')+'</div></div>';
 }
 function miniSeg(sg){const [i,j]=sg;const s=D.P[i][0];return 'سورة '+D.N[s-1]+(isWhole(i,j)?' كاملة':'، '+ayRange(i,j))}
@@ -1861,7 +1862,7 @@ function qscanSheet(pg){let h=shead('القراءات العشر · الصفحة
   if(INART)h+='<p class="note">صفحات هامش القراءات تُحمَّل من موقع التطبيق، ولا تسمح بها هذه المعاينة.</p>';
   else h+='<div class="qstage" data-act="qirz"><img src="qiraat/'+pad3(pg+5)+'.webp" alt="الصفحة '+AR(pg)+' من مصحف القراءات العشر" loading="eager"></div><p class="bknote">المس الصفحة للتكبير، واسحب لرؤية الفروق والشواهد.</p>';
   openSheet(h,'qscan')}
-document.addEventListener('input',e=>{const b=e.target;if(!b.classList||!b.classList.contains('rsl'))return;const i=+b.dataset.i,E=rakEnds(i),n=segLines(i,E[+b.value]);const c=b.closest('.card');const m=c&&c.querySelector('.tadj .meta'),a=c&&c.querySelector('.tamt');if(m)m.textContent=linesN(n);const p2=nPrayer(n);if(a){a.textContent=p2?'مقدارها يناسب صلاة '+PR[p2].n:'أطول من مقدار صلاة الفجر';a.classList.toggle('over',!p2)}});
+document.addEventListener('input',e=>{const b=e.target;if(!b.classList||!b.classList.contains('rsl'))return;const i=+b.dataset.i,E=rakEnds(i),n=segLines(i,E[+b.value]);const c=b.closest('.card');const m=c&&c.querySelector('.tadj .meta'),a=c&&c.querySelector('.tamt');if(m)m.textContent=linesN(n);const p2=nPrayer(n);if(a){const T=tamtOf(n);a.textContent=T[0];a.classList.toggle('over',T[1]==='over');a.classList.toggle('long',T[1]==='long')}});
 document.addEventListener('change',e=>{const b=e.target;if(!b.classList||!b.classList.contains('rsl'))return;const c=S.sug[prayer];if(!c)return;const w=b.dataset.w,tgt=+b.value;let guard=60;QT=true;try{while(guard--){const E=rakEnds(c[w][0]);const k=E.indexOf(c[w][1]);if(k<0||k===tgt)break;const before=c[w][1];adjust(w,tgt>k?1:-1);if(c[w][1]===before)break}}finally{QT=false}save();const y=window.scrollY;render();window.scrollTo(0,y);toast(fitMsg(segLines(c[w][0],c[w][1])))});
 let MSW=null;
 document.addEventListener('touchstart',e=>{const t=e.target.closest&&e.target.closest('.mpage');MSW=t&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});
@@ -2701,6 +2702,7 @@ function fabSync(){const f=$('fab');const mp=isMusP();const on=S.onb&&(cur().v==
 /* ---- topics ---- */
 function topicStatus(t){return 'ok'}
 const TSEL={};function tCapF(){return RANGES[rgK()].fajr[3]}
+function tamtOf(n){const p2=nPrayer(n);const lg=p2==='fajr'&&n>RANGES[rgK()].fajr[1];return [p2?(lg?'مقدار أطول من المعتاد في الفجر':'مقدارها يناسب صلاة '+PR[p2].n):'أطول من مقدار صلاة الفجر',!p2?'over':lg?'long':'']}
 function nPrayer(n){const rg=RANGES[rgK()];return n<=rg.maghrib[2]?'maghrib':n<=rg.isha[2]?'isha':n<=rg.fajr[3]?'fajr':null}
 function tPrayer(T0){const rg=RANGES[rgK()];const n=Math.max.apply(null,T0.r.map(r=>lines(r[0],r[1],r[2])));return n<=rg.maghrib[2]?'maghrib':n<=rg.isha[2]?'isha':'fajr'}
 const PN1={fajr:'فجر',maghrib:'مغرب',isha:'عشاء'};
@@ -3632,7 +3634,7 @@ function aproxSync(){const b=$('aprox');if(b)b.hidden=!(AU.on&&AU.mode==='sf'&&A
 /* ================= actions ================= */
 function musSpec(spec){const hl=hlOf(spec.blocks);const r={v:'mus',pg:1,rw:'',hl:hl,ht:spec.title||'المقطع',spec:spec};if(hl.length)r.pg=D.PG[hl[0][0]-1][hl[0][1]-1];return r}
 function openReader(spec){revMode=false;revealN=0;if(spec.text||S.rview==='text'||!spec.blocks||!spec.blocks.length)navPush({v:'reader',spec:spec});else navPush(musSpec(spec))}
-function fitMsg(n){const p=nPrayer(n);return p?'أصبح مقدارها يناسب صلاة '+PR[p].n+'.':'أطول من مقدار صلاة الفجر.'}
+function fitMsg(n){const p=nPrayer(n);if(p==='fajr'&&n>RANGES[rgK()].fajr[1])return 'أطول من المعتاد في الفجر، والحدّ الأعلى '+AR(tCapF())+' سطرًا.';return p?'أصبح مقدارها يناسب صلاة '+PR[p].n+'.':'أطول من مقدار صلاة الفجر.'}
 function nextB(A){let i=A[1]+1;if(i>=NP)return null;const s=D.P[i][0];let j=i;while(j<NP-1&&D.P[j+1][0]===s&&!endOK(j))j++;const lo=RG(prayer)[0];while(j<NP-1&&D.P[j+1][0]===s&&segLines(i,j)<lo){let k=j+1;while(k<NP-1&&D.P[k+1][0]===s&&!endOK(k))k++;if(segLines(i,k)>RG(prayer)[3])break;j=k}return [i,j]}
 function adjust(w,delta){
   const c=S.sug[prayer];if(!c)return;const sg=c[w];const i=sg[0];let j=sg[1]+delta;
@@ -4012,7 +4014,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=184;
+const APPV=186;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
