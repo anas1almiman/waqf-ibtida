@@ -1464,7 +1464,8 @@ function allowed(p,sg){
 }
 const stAbs=i=>!D.P[i][8];
 function pool(p){const ok=sg=>avail(sg)&&allowed(p,sg);let a=SEGS[p].filter(ok);if(a.length<6)a=a.concat(SOFT[p].filter(ok));return a.concat(LATE[p].filter(sg=>ok(sg)&&restDone(sg[1])))}
-function pickB(A,L){
+function pickB(A,L,p){
+  if(p&&S.bmode==='next'){const n=A[1]+1;if(n<NP&&D.P[n][0]===D.P[A[1]][0]&&stAbs(n)&&!L.some(B=>B[0]===n)){const c=(SOFT[p]||[]).filter(B=>B[0]===n&&B[0]>A[1]&&avail(B)&&allowed(p,B)&&segLines(B[0],B[1])<=18);if(c.length)return rand(c)}}
   let later=L.filter(B=>B[0]>A[1]&&(stAbs(B[0])||B[0]===A[1]+1));if(!later.length)return null;
   if(S.bmode==='other'){later=later.filter(B=>D.P[B[0]][0]>D.P[A[1]][0]);return later.length?rand(later):null}
   if(S.bmode==='next'){const nx=later.filter(B=>B[0]===A[1]+1&&D.P[B[0]][0]===D.P[A[1]][0]);if(nx.length)return rand(nx);const f=Math.min.apply(null,later.map(B=>B[0]));return rand(later.filter(B=>B[0]===f))}
@@ -1476,7 +1477,7 @@ const ext=sg=>tailNext(sg)?[sg[0],sg[1]+1]:sg;
 function suggest(p,avoid){
   const L=pool(p);if(!L.length)return null;
   const order=S.ordered?L.slice().sort((x,y)=>x[0]-y[0]||x[1]-y[1]):shuffle(L.slice());
-  for(const A0 of order){if(!stAbs(A0[0]))continue;if(avoid&&order.length>1&&same(A0,avoid))continue;const A=ext(A0);let B=pickB(A,L);if(B&&B[0]===B[1]&&isTail(B[0])&&p!=='maghrib')B=null;if(B)return {a:A,b:ext(B)}}
+  for(const A0 of order){if(!stAbs(A0[0]))continue;if(avoid&&order.length>1&&same(A0,avoid))continue;const A=ext(A0);let B=pickB(A,L,p);if(B&&B[0]===B[1]&&isTail(B[0])&&p!=='maghrib')B=null;if(B)return {a:A,b:ext(B)}}
   return null;
 }
 function endOK(j){return !noEnd(j)||restDone(j)}
@@ -4011,7 +4012,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=183;
+const APPV=184;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
