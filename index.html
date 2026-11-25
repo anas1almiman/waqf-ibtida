@@ -3652,19 +3652,21 @@ function adjust(w,delta){
     if(c.b[0]<=j||follows){const B=nextB(A2);if(!B){toast('لم يبقَ بعده مقطع للركعة الثانية.');return}c.a=A2;c.b=B;save();render();refreshSheet();toast(fitMsg(n)+' وتبعتها الركعة الثانية.');return}}
   c[w]=[i,j];save();render();refreshSheet();toast(fitMsg(n));
 }
+function dropSugOver(rs,except){if(!S.noRepeat)return;const hit=sg=>sg&&rs.some(r=>sg[0]<=r[1]&&r[0]<=sg[1]);for(const q in S.sug){const c=S.sug[q];if(q!==except&&c&&(hit(c.a)||hit(c.b)))S.sug[q]=null}}
 function markNM(sgs){sgs.forEach(sg=>{for(let x=sg[0];x<=sg[1];x++)NM.add(x)})}
 function notMem(w){const c=S.sug[prayer];if(!c)return;markNM([c[w]]);let n=null;if(w==='b'){const B=pickB(c.a,pool(prayer));if(B)n={a:c.a,b:B}}S.sug[prayer]=n||suggest(prayer);save();closeSheet();render();toast('لن يُقترح عليك هذا المقطع.')}
 function leaveReaderTo(after){if(cur().v==='reader'||(cur().v==='mus'&&cur().spec)){const st=history.state;if(st&&st.d===STACK.length){AFTER=after||(()=>{});history.back();return}STACK.pop();auStop();after&&after();show(-1,0)}else{after&&after();show(1,0)}}
 function prayed(){
   const c=S.sug[prayer];if(!c)return;
   [c.a,c.b].forEach(sg=>{for(let x=sg[0];x<=sg[1];x++)READ.add(x)});
+  dropSugOver([c.a,c.b],prayer);
   S.hist.unshift({t:Date.now(),p:prayer,a:c.a,b:c.b});if(S.hist.length>400)S.hist.length=400;
   S.last={t:Date.now(),p:prayer,a:c.a.slice(),b:c.b.slice()};lastAdj=0;S.sug[prayer]=null;save();
   leaveReaderTo();
   toast('تقبّل الله منك.',undo);
 }
 function prayedFri(){
-  [FRI.a,FRI.b].forEach(sg=>{for(let x=sg[0];x<=sg[1];x++)READ.add(x)});
+  [FRI.a,FRI.b].forEach(sg=>{for(let x=sg[0];x<=sg[1];x++)READ.add(x)});dropSugOver([FRI.a,FRI.b]);
   S.hist.unshift({t:Date.now(),p:'fajr',sun:'fri'});S.last={t:Date.now(),p:'fajr',fri:true};save();
   leaveReaderTo();toast('تقبّل الله منك.',undo);
 }
@@ -3909,7 +3911,7 @@ const R=pkFrom(sN);if(+k===0){r.A=R;if(!r.B||r.B.auto)r.B=pkAfter(R)}else{let R2
   case 'tadj':{const t=TOPICS.find(x=>x.id===cur().id);if(!t)break;const key=t.id+':'+(TSEL[t.id]||0);const k=+b.dataset.k;const R=TR(t).r[k],r0=TS(t).r[k];if(+b.dataset.d>0){const nb=stopAfter(R[0],R[2]);if(nb<=R[2]||lines(R[0],R[1],nb)>tCapF()){toast('بلغتَ أقصى مقدار لصلاة الفجر ('+AR(tCapF())+' سطرًا للركعة)، فلا يُزاد عليه.');break}}const e=TEXT[key]||(TEXT[key]={});const before=tPrayer(TR(t));if(+b.dataset.d>0){const R1=TR(t).r[1];if(k===0&&R1&&R1[0]===R[0]&&R1[1]>R[1]&&stopAfter(R[0],R[2])>=R1[1]){toast('لا تتجاوز الركعة الأولى موضع ابتداء الثانية.');break}e[k]=stopAfter(R[0],R[2])}else{const pv=prevStop(R[0],R[1],R[2]);if(pv<0)break;e[k]=pv}const y=window.scrollY;render();window.scrollTo(0,y);const after=tPrayer(TR(t));if(after!==before)toast('أصبح مقدارها يناسب صلاة '+PR[after].n);break}
   case 'tst':S.topics[cur().id]=v;save();render();toast(v==='ok'?'اعتُمدت المجموعة.':v==='rej'?'رُفضت المجموعة.':'سُجّلت للتعديل.');break;
   case 'tread':case 'tpray':{const t=TOPICS.find(x=>x.id===cur().id);if(t)openReader({mode:a==='tpray'?'topic':'view',tid:t.id,title:t.sets?t.title+' — '+TS(t).t:t.title,blocks:TR(t).r.map((r,i)=>({label:i?'الركعة الثانية':'الركعة الأولى',s:r[0],a:r[1],b:r[2]}))});break}
-  case 'tprayed':{const t=TOPICS.find(x=>x.id===cur().spec.tid);if(!t)break;const cov=topicCovered(t);cov.forEach(x=>READ.add(x));S.hist.unshift({t:Date.now(),p:tPrayer(TR(t)),topic:t.id,cov:cov});save();leaveReaderTo();toast('تقبّل الله منك، وسُجّلت في السجل.',undo);break}
+  case 'tprayed':{const t=TOPICS.find(x=>x.id===cur().spec.tid);if(!t)break;const cov=topicCovered(t);cov.forEach(x=>READ.add(x));dropSugOver(cov.map(x=>[x,x]));S.hist.unshift({t:Date.now(),p:tPrayer(TR(t)),topic:t.id,cov:cov});save();leaveReaderTo();toast('تقبّل الله منك، وسُجّلت في السجل.',undo);break}
   case 'undo':undo();break;
   case 'tg':{if(k.indexOf('.')>0){const [o,f]=k.split('.');S[o][f]=!S[o][f]}else S[k]=!S[k];if(k==='hifzOnly'&&S.hifzOnly&&!hasHz()){hifzDraft=null;save();navPush({v:'hifz'});toast('حدّد محفوظك أولًا.');break}if(k!=='big'&&k!=='friday'&&k!=='taf'&&k!=='qir')S.sug={};save();refreshSheet();render();break}
   case 'restart':stRole=null;stStep=0;S.onb=false;save();show(1,0);break;
@@ -4014,7 +4016,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=186;
+const APPV=187;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
