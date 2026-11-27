@@ -1105,6 +1105,11 @@ body.dark .mpage.sh.sx{background:#fff}
 .mlines.sho .ay.cur,.mlines.sho .ay.lpd{background:rgba(200,162,83,.42)}
 .mlines.sho .ay.dm{opacity:1;mix-blend-mode:normal;background:rgba(255,255,255,.58)}
 .mlines.sho .ay.bm{text-decoration:none;box-shadow:inset 0 -3px 0 #C79B3B}
+
+.mpage.sh.sx .shb{position:absolute;inset:0}
+.mpage.sh.sx .shb .sb{position:absolute;left:0;right:0;display:block;background-image:url(sh2/frame.webp?v=3);background-repeat:no-repeat;overflow:hidden}
+.mpage.sh.sx .shb .sb b{position:absolute;left:0;right:0;display:block;background-repeat:no-repeat}
+.mpage.sh.sx .shw.fr{background:none}
 </style>
 </head>
 <body>
@@ -1700,9 +1705,9 @@ function shAyat(p){const k0=SHS[p-1],k1=p<SHN?SHS[p]:115000,o=[];let s=Math.floo
 const SHD=new Set(),SHP={};
 function shSrc(p){return 'sh2/'+pad3(p)+'.webp?v=3'}
 let SHR=null,SHRP=null;
-function shrLoad(){if(!SHRP)SHRP=Promise.all([fetch('sh2/r.json?v=3').then(r=>{if(!r.ok)throw new Error('http');return r.json()}),new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const f=()=>ok();if(i.decode)i.decode().then(f,f);else f()};i.onerror=()=>no(new Error('fr'));i.src='sh2/frame.webp?v=3'})]).then(a=>{SHR=a[0]},e=>{SHRP=null;throw e});return SHRP}
+function shrLoad(){if(!SHRP)SHRP=Promise.all([fetch('sh2/r.json?v=4').then(r=>{if(!r.ok)throw new Error('http');return r.json()}),new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const f=()=>ok();if(i.decode)i.decode().then(f,f);else f()};i.onerror=()=>no(new Error('fr'));i.src='sh2/frame.webp?v=3'})]).then(a=>{SHR=a[0]},e=>{SHRP=null;throw e});return SHRP}
 function shSA(p,k){const v=SHS[p-1];let s=Math.floor(v/1000),a=v%1000;for(let i=0;i<k;i++){a++;if(a>D.Q[s-1].length){s++;a=1}}return [s,a]}
-function shOv(p,hl){const R=SHR&&SHR.r[p];if(!R)return '';let h='';R.forEach(q=>{const sa=shSA(p,q[0]);if(sa[0]>114)return;h+='<span class="ay'+hlCls(hl,sa[0],sa[1])+bmCls(sa[0],sa[1])+'" data-act="ayt" data-s="'+sa[0]+'" data-a="'+sa[1]+'" style="left:'+q[1]/10+'%;top:'+q[2]/10+'%;width:'+(q[3]-q[1])/10+'%;height:'+(q[4]-q[2])/10+'%"></span>'});return h}
+function shOv(p,hl){const R=SHR&&SHR.r[p];if(!R)return '';let h='';R.forEach(q=>{const sa=shSA(p,q[0]);if(sa[0]>114)return;h+='<span class="ay'+hlCls(hl,sa[0],sa[1])+bmCls(sa[0],sa[1])+'" data-act="ayt" data-s="'+sa[0]+'" data-a="'+sa[1]+'" data-sl="'+Math.max(0,Math.min(14,Math.round((q[2]*2.5-238)/137.333)))+'" style="left:'+q[1]/10+'%;top:'+q[2]/10+'%;width:'+(q[3]-q[1])/10+'%;height:'+(q[4]-q[2])/10+'%"></span>'});return h}
 function shReady(p){return SHD.has(p)}
 function shLoad(p){if(SHD.has(p))return Promise.resolve();if(!SHP[p])SHP[p]=shrLoad().then(()=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const f=()=>{SHD.add(p);ok()};if(i.decode)i.decode().then(f,f);else f()};i.onerror=()=>{SHP[p]=null;no(new Error('img'))};i.src=shSrc(p)}),e=>{SHP[p]=null;throw e});return SHP[p]}
 function musOpen(o){o=o||{};const r={v:'mus',pg:0,rw:o.rw||'',hl:o.hl||null,ht:o.ht||''};let s=o.s,a=o.a||1;if(!s&&o.hl&&o.hl.length){s=o.hl[0][0];a=o.hl[0][1]}
@@ -1792,7 +1797,7 @@ function vMus(r){
   if(shm){
     if(r.err)return shell('<div class="mlines mwait"><p class="note">تعذّر تحميل صفحة المصحف. تحقّق من الاتصال ثم أعد المحاولة.</p><button class="btn outline" data-act="musretry">إعادة المحاولة</button></div>','ld',0,'');
     if(!shReady(pg)){shLoad(pg).then(()=>{if(cur()===r&&r.pg===pg)render()},()=>{r.err=1;if(cur()===r)render()});return wait('جارٍ فتح الصفحة…')}
-    {const z=(SHR.z[pg]||[1528,2500]);body='<div class="shw'+(pg>2?' fr':'')+'" style="--ar:'+z[0]/z[1]+'"><img class="shi" src="'+shSrc(pg)+'" alt="صفحة '+AR(pg)+' من مصحف الشمرلي" draggable="false"><div class="mlines sho">'+shOv(pg,r.hl)+'</div></div>';cls='sh sx'}[pg+1,pg-1].forEach(n=>{if(n>=1&&n<=SHN&&!shReady(n))shLoad(n).catch(()=>{})})}
+    {const z=(SHR.z[pg]||[1528,2500]);body='<div class="shw'+(pg>2?' fr':'')+'" data-pg="'+pg+'" style="--ar:'+z[0]/z[1]+'">'+(pg>2?'<div class="shb"></div>':'<img class="shi" src="'+shSrc(pg)+'" alt="صفحة '+AR(pg)+' من مصحف الشمرلي" draggable="false">')+'<div class="mlines sho">'+shOv(pg,r.hl)+'</div></div>';cls='sh sx'}[pg+1,pg-1].forEach(n=>{if(n>=1&&n<=SHN&&!shReady(n))shLoad(n).catch(()=>{})})}
   else if(hasT){body='<div class="mlines">'+musRiw(rw,pg)+'</div>';cls='rw uq'+(pg<=2?' p12':'')}
   else{
     const exact=!INART&&!Q2ERR;
@@ -1803,7 +1808,20 @@ function vMus(r){
   return shell(body,cls,pg,top);
 }
 const JUZW=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون','الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون'];
-function musFit(){const pe=document.querySelector('#app .mpage');if(!pe||pe.classList.contains('ld')||pe.classList.contains('sh'))return;const box=pe.querySelector('.mlines');const L=[].slice.call(box.querySelectorAll('.ml:not(.mh):not(.mb):not(.me)'));if(!L.length)return;
+function shFit(){const pe=document.querySelector('#app .mpage.sx'),w=pe&&pe.querySelector('.shw');if(!w||!w.dataset.pg||+w.dataset.pg<=2||!SHR)return;
+  const pg=+w.dataset.pg,CW=pe.clientWidth,CH=pe.clientHeight;if(!CW||!CH)return;const FW=1528,FH=2500,A=238,B=2298,SH=2060/15,s=Math.min(CW/FW,CH/FH);
+  const bl={};((SHR.bn||{})[pg]||[]).forEach(b=>{bl[b[0]]=b[1]});const U=[];for(let i=0;i<15;){const n=bl[i]||1;U.push({i:i,n:n,ban:!!bl[i]});i+=n}
+  const e=Math.max(0,Math.min(CH/s-FH,600)),g=e/U.length,Wp=Math.round(FW*s),Tp=Math.round((FH+e)*s);
+  w.style.width=Wp+'px';w.style.height=Tp+'px';const src=shSrc(pg),R=x=>Math.round(x);
+  const bands=[{r0:0,rs:A,off:0,top:0,h:A*s,ih:A*s}];let y=A*s;
+  U.forEach(u=>{const rs=u.n*SH;bands.push({r0:A+u.i*SH,rs:rs,off:g*s/2,top:y,h:(rs+g)*s,ih:rs*s});y+=(rs+g)*s});
+  bands.push({r0:B,rs:FH-B,off:0,top:y,h:(FH-B)*s,ih:(FH-B)*s});
+  const ys=bands.map(b=>R(b.top));ys.push(Tp);let h='';
+  bands.forEach((b,i)=>{const t=ys[i],bh=ys[i+1]-t+(i<bands.length-1?1:0),k=(b.h/s)/b.rs;
+    h+='<i class="sb" style="top:'+t+'px;height:'+bh+'px;background-size:'+Wp+'px '+(FH*s*k).toFixed(2)+'px;background-position:0 '+(-b.r0*s*k).toFixed(2)+'px"><b style="top:'+b.off.toFixed(2)+'px;height:'+b.ih.toFixed(2)+'px;background-image:url('+src+');background-size:'+Wp+'px '+(FH*s).toFixed(2)+'px;background-position:0 '+(-b.r0*s).toFixed(2)+'px"></b></i>'});
+  w.querySelector('.shb').innerHTML=h;
+  [].forEach.call(w.querySelectorAll('.sho .ay'),el=>{const sl=+el.dataset.sl;let ui=0;U.forEach((u,k)=>{if(sl>=u.i&&sl<u.i+u.n)ui=k});el.style.top=(ys[ui+1]/Tp*100).toFixed(3)+'%';el.style.height=((ys[ui+2]-ys[ui+1])/Tp*100).toFixed(3)+'%'})}
+function musFit(){const pe=document.querySelector('#app .mpage');if(pe&&pe.classList.contains('sx')){shFit();return}if(!pe||pe.classList.contains('ld')||pe.classList.contains('sh'))return;const box=pe.querySelector('.mlines');const L=[].slice.call(box.querySelectorAll('.ml:not(.mh):not(.mb):not(.me)'));if(!L.length)return;
   const rows=box.children.length||15;
   pe.classList.add('meas');box.style.setProperty('--mf','20px');let mx=0;const ks=(pe.getBoundingClientRect().width/pe.offsetWidth)||1;const ws=L.map(e=>{const w=e.getBoundingClientRect().width/ks;if(w>mx)mx=w;return w});pe.classList.remove('meas');
   const cs=getComputedStyle(box);const cw=box.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),ch=box.clientHeight;if(!mx||!cw)return;
@@ -4058,7 +4076,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=193;
+const APPV=194;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
