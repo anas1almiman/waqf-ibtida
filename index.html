@@ -1096,7 +1096,7 @@ body.dark .mpage.hf.qx .ae:not(.wq):not(.be){color:#A9C595}
 body.dark .mpage.sh.sx{background:#fff}
 .mpage.sh.sx .mtop,.mpage.sh.sx .mfoot,.mpage.sh.sx::before,.mpage.sh.sx::after{display:none}
 .mpage.sh.sx .shw{position:relative;flex:none;width:min(100cqw,calc(100cqh*var(--ar)));aspect-ratio:var(--ar)}
-.mpage.sh.sx .shw.fr{background:url(sh2/frame.webp?v=3) center/100% 100% no-repeat}
+.mpage.sh.sx .shw.fr{background:url(sh2/frame.webp?v=4) center/100% 100% no-repeat}
 .mpage.sh.sx .shi{display:block;width:100%;height:100%;max-width:none;max-height:none;transform:none;object-fit:fill}
 .mlines.sho{position:absolute;inset:0;display:block;padding:0;margin:0;width:auto;height:auto;font-size:0}
 .mlines.sho .ay{position:absolute;display:block;border-radius:3px;mix-blend-mode:multiply;-webkit-tap-highlight-color:transparent}
@@ -1107,7 +1107,7 @@ body.dark .mpage.sh.sx{background:#fff}
 .mlines.sho .ay.bm{text-decoration:none;box-shadow:inset 0 -3px 0 #C79B3B}
 
 .mpage.sh.sx .shb{position:absolute;inset:0}
-.mpage.sh.sx .shb .sb{position:absolute;left:0;right:0;display:block;background-image:url(sh2/frame.webp?v=3);background-repeat:no-repeat;overflow:hidden}
+.mpage.sh.sx .shb .sb{position:absolute;left:0;right:0;display:block;background-image:url(sh2/frame.webp?v=4);background-repeat:no-repeat;overflow:hidden}
 .mpage.sh.sx .shb .sb b{position:absolute;left:0;right:0;display:block;background-repeat:no-repeat}
 .mpage.sh.sx .shw.fr{background:none}
 </style>
@@ -1705,7 +1705,7 @@ function shAyat(p){const k0=SHS[p-1],k1=p<SHN?SHS[p]:115000,o=[];let s=Math.floo
 const SHD=new Set(),SHP={};
 function shSrc(p){return 'sh2/'+pad3(p)+'.webp?v=3'}
 let SHR=null,SHRP=null;
-function shrLoad(){if(!SHRP)SHRP=Promise.all([fetch('sh2/r.json?v=4').then(r=>{if(!r.ok)throw new Error('http');return r.json()}),new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const f=()=>ok();if(i.decode)i.decode().then(f,f);else f()};i.onerror=()=>no(new Error('fr'));i.src='sh2/frame.webp?v=3'})]).then(a=>{SHR=a[0]},e=>{SHRP=null;throw e});return SHRP}
+function shrLoad(){if(!SHRP)SHRP=Promise.all([fetch('sh2/r.json?v=5').then(r=>{if(!r.ok)throw new Error('http');return r.json()}),new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const f=()=>ok();if(i.decode)i.decode().then(f,f);else f()};i.onerror=()=>no(new Error('fr'));i.src='sh2/frame.webp?v=4'})]).then(a=>{SHR=a[0]},e=>{SHRP=null;throw e});return SHRP}
 function shSA(p,k){const v=SHS[p-1];let s=Math.floor(v/1000),a=v%1000;for(let i=0;i<k;i++){a++;if(a>D.Q[s-1].length){s++;a=1}}return [s,a]}
 function shOv(p,hl){const R=SHR&&SHR.r[p];if(!R)return '';let h='';R.forEach(q=>{const sa=shSA(p,q[0]);if(sa[0]>114)return;h+='<span class="ay'+hlCls(hl,sa[0],sa[1])+bmCls(sa[0],sa[1])+'" data-act="ayt" data-s="'+sa[0]+'" data-a="'+sa[1]+'" data-sl="'+Math.max(0,Math.min(14,Math.round((q[2]*2.5-238)/137.333)))+'" style="left:'+q[1]/10+'%;top:'+q[2]/10+'%;width:'+(q[3]-q[1])/10+'%;height:'+(q[4]-q[2])/10+'%"></span>'});return h}
 function shReady(p){return SHD.has(p)}
@@ -1811,10 +1811,10 @@ const JUZW=['الأول','الثاني','الثالث','الرابع','الخا�
 function shFit(){const pe=document.querySelector('#app .mpage.sx'),w=pe&&pe.querySelector('.shw');if(!w||!w.dataset.pg||+w.dataset.pg<=2||!SHR)return;
   const pg=+w.dataset.pg,CW=pe.clientWidth,CH=pe.clientHeight;if(!CW||!CH)return;const FW=1528,FH=2500,A=238,B=2298,SH=2060/15,s=Math.min(CW/FW,CH/FH);
   const bl={};((SHR.bn||{})[pg]||[]).forEach(b=>{bl[b[0]]=b[1]});const U=[];for(let i=0;i<15;){const n=bl[i]||1;U.push({i:i,n:n,ban:!!bl[i]});i+=n}
-  const e=Math.max(0,Math.min(CH/s-FH,600)),g=e/U.length,Wp=Math.round(FW*s),Tp=Math.round((FH+e)*s);
+  const V=(SHR.v||{})[pg],Bd=[A];for(let k=1;k<15;k++)Bd.push(V&&V.length===14?V[k-1]:A+k*SH);Bd.push(B);const e=Math.max(0,Math.min(CH/s-FH,600)),g=e/U.length,Wp=Math.round(FW*s),Tp=Math.round((FH+e)*s);
   w.style.width=Wp+'px';w.style.height=Tp+'px';const src=shSrc(pg),R=x=>Math.round(x);
   const bands=[{r0:0,rs:A,off:0,top:0,h:A*s,ih:A*s}];let y=A*s;
-  U.forEach(u=>{const rs=u.n*SH;bands.push({r0:A+u.i*SH,rs:rs,off:g*s/2,top:y,h:(rs+g)*s,ih:rs*s});y+=(rs+g)*s});
+  U.forEach(u=>{const r0=Bd[u.i],rs=Bd[u.i+u.n]-r0;bands.push({r0:r0,rs:rs,off:g*s/2,top:y,h:(rs+g)*s,ih:rs*s});y+=(rs+g)*s});
   bands.push({r0:B,rs:FH-B,off:0,top:y,h:(FH-B)*s,ih:(FH-B)*s});
   const ys=bands.map(b=>R(b.top));ys.push(Tp);let h='';
   bands.forEach((b,i)=>{const t=ys[i],bh=ys[i+1]-t+(i<bands.length-1?1:0),k=(b.h/s)/b.rs;
@@ -4076,7 +4076,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=194;
+const APPV=195;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
