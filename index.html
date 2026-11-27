@@ -1071,6 +1071,23 @@ html[data-tbk="1"]::view-transition-new(tabbar){animation:none}
 .shelf>.b3d{flex:0 0 calc((min(100vw,520px) - 86px)/3.25);scroll-snap-align:start}
 .shint{top:auto;bottom:calc(100% + 6px);left:16px}
 @media(prefers-reduced-motion:reduce){#tabbar button.pop svg{animation:none}}
+
+/* ===== v188 mushaf page: flat, high-contrast, King Fahd style ===== */
+.mpage.hf{background:#F1EEDF;border:0;outline:0;border-radius:0;box-shadow:none;padding:6px 0 4px}
+body.dark .mpage.hf{background:#181816}
+.mpage.hf .mlines{color:#0A0A09;padding:0 5px}
+body.dark .mpage.hf .mlines{color:#F3F1E8}
+.mpage.hf .mtop{padding:2px 14px 0;min-height:26px;align-items:center;font:700 17px 'KFGQPC Hafs','Amiri Quran','Amiri',serif;color:#0A0A09}
+body.dark .mpage.hf .mtop{color:#F3F1E8}
+.mpage.hf .mfoot{padding:2px 0 0;min-height:34px;align-items:center;font:700 24px 'Amiri',serif;color:#0A0A09}
+body.dark .mpage.hf .mfoot{color:#F3F1E8}
+.mpage.hf.qx .ml:not(.mh):not(.mb){-webkit-text-stroke:.22px currentColor}
+.mpage.hf.qx .ml.mh span{font-family:"KFGQPC Hafs","Amiri Quran","Amiri",serif;font-weight:700;font-size:calc(var(--mf)*1.1);line-height:1.5;color:#0A0A09;border:0;border-block:4px double rgba(78,106,61,.75);outline:0;border-radius:0;background:linear-gradient(90deg,transparent,rgba(78,106,61,.12) 20%,rgba(78,106,61,.12) 80%,transparent);margin:2px 6px}
+body.dark .mpage.hf.qx .ml.mh span{color:#F3F1E8;border-block-color:rgba(169,197,149,.7);background:linear-gradient(90deg,transparent,rgba(169,197,149,.12) 20%,rgba(169,197,149,.12) 80%,transparent)}
+.mpage.hf.qx .ml.mb{font-size:calc(var(--mf)*1.22)}
+.mpage.hf.qx .ae{font-size:1.14em}
+.mpage.hf.qx .ae:not(.wq):not(.be){color:#4E6A3D;-webkit-text-stroke:0;text-shadow:none}
+body.dark .mpage.hf.qx .ae:not(.wq):not(.be){color:#A9C595}
 </style>
 </head>
 <body>
@@ -1740,7 +1757,7 @@ function vMus(r){
   if(r.hl&&!(r.rw&&r.rw!=='hafs')&&MUT){const n=mutScope({sc:'seg',blocks:r.hl.map(h=>({s:h[0],a:h[1],b:h[2]}))}).length;if(n){const c='<button class="mchip mtk" data-act="mutmus">'+ICON.mut+'المتشابه · '+AR(n)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
   if(S.mark&&!(r.rw&&r.rw!=='hafs')){const mp0=pgOf(S.mark.s,S.mark.a);if(mp0!==r.pg){const c='<button class="mchip mkb" data-act="markgo">'+ICBM+'تابع من حيث وقفتَ · '+D.N[S.mark.s-1]+' '+AR(S.mark.a)+'</button>';chips=chips?chips.replace(/<\/div>$/,c+'</div>'):'<div class="mchips">'+c+'</div>'}}
   const bar='<div class="mbar"><button class="mrw" data-act="musedsh"><small>المصحف</small><b>'+(isSh(r)?'الشمرلي':'مجمع الملك فهد')+'</b><i>▾</i></button>'+(isSh(r)?'':'<button class="mrw" data-act="musrw"><small>الرواية</small><b>'+(meta?meta[1]:'حفص عن عاصم')+'</b><i>▾</i></button>')+info+'</div>'+chips;
-  const shell=(inner,cls,pg,top)=>'<div class="mtg">'+x+bar+'</div><div class="musv"><div class="mpage '+cls+'" data-act="mtap" data-pg="'+pg+'"><div class="mtop"><span>'+(top||'')+'</span><span>'+(pg?'الجزء '+AR(isSh(r)&&!hasT?shJuz(pg):juzOf(pg)):'')+'</span></div>'+inner+'<div class="mfoot">'+(pg?AR(pg):'')+'</div></div><div class="mdk">'+mact+
+  const shell=(inner,cls,pg,top)=>'<div class="mtg">'+x+bar+'</div><div class="musv"><div class="mpage '+cls+'" data-act="mtap" data-pg="'+pg+'"><div class="mtop"><span>'+(pg?'الجزء '+JUZW[(isSh(r)&&!hasT?shJuz(pg):juzOf(pg))-1]:'')+'</span><span>'+(top||'')+'</span></div>'+inner+'<div class="mfoot">'+(pg?AR(pg):'')+'</div></div><div class="mdk">'+mact+
     '<div class="mnav"><button data-act="musgo" data-d="-1"'+(pg<=1?' disabled':'')+'>السابقة</button><button class="mpn" data-act="musidx">'+(pg?'صفحة '+AR(pg):'')+'</button><button data-act="musgo" data-d="1"'+(pg>=(isSh(r)?SHN:604)?' disabled':'')+'>التالية</button></div></div>'+
     '<div id="rwbar" class="rwbar"><button class="ib" data-act="rwx" aria-label="إيقاف">'+ICON.x+'</button><div class="rwi"><b id="rwl"></b><small id="rwt"></small></div><button class="ib" data-act="rwseek" data-d="-10" aria-label="رجوع عشر ثوانٍ">−١٠</button><button class="ib rwp" data-act="rwtog" aria-label="تشغيل أو إيقاف مؤقت" id="rwp">'+ICON.pause+'</button><button class="ib" data-act="rwseek" data-d="10" aria-label="تقديم عشر ثوانٍ">+١٠</button></div>';
   const wait=(msg)=>shell('<div class="mlines mwait"><div class="tload"><i class="tspin"></i>'+msg+'</div></div>','ld',r.pg||0,'');
@@ -1766,6 +1783,7 @@ function vMus(r){
   }
   return shell(body,cls,pg,top);
 }
+const JUZW=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون','الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون'];
 function musFit(){const pe=document.querySelector('#app .mpage');if(!pe||pe.classList.contains('ld')||pe.classList.contains('sh'))return;const box=pe.querySelector('.mlines');const L=[].slice.call(box.querySelectorAll('.ml:not(.mh):not(.mb):not(.me)'));if(!L.length)return;
   const rows=box.children.length||15;
   pe.classList.add('meas');box.style.setProperty('--mf','20px');let mx=0;const ks=(pe.getBoundingClientRect().width/pe.offsetWidth)||1;const ws=L.map(e=>{const w=e.getBoundingClientRect().width/ks;if(w>mx)mx=w;return w});pe.classList.remove('meas');
@@ -4016,7 +4034,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=187;
+const APPV=188;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
