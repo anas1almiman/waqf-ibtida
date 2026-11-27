@@ -2131,9 +2131,9 @@ function vHome(){
   if(isWird())x+='<div class="hh-next"><small>وِردك اليوم</small><b>الختمة</b><span>'+(S.wird.round>1?'الختمة '+AR(S.wird.round)+' · ':'')+'في '+AR(S.days)+' يومًا</span></div>';
   else x+='<div class="hh-next"><small>أقرب صلاة جهرية</small><b>'+PR[np.p].n+'</b><span>'+(np.t?clock(np.t)+' · '+until(np.t):'حدّد موقعك لتظهر المواقيت')+'</span>'+(planFor(np.day,np.p)?'<em class="hh-plan">في جدولك: '+planFor(np.day,np.p).title+'</em>':'')+'</div>';
   x+='</header>';
-  {const tab=adAuto(),dn=adDone(tab),n=ADK[tab].length;x+='<button class="adban" data-act="nav" data-v="adhkar"><span class="ai">'+(tab==='sabah'?ICON.sun||'☀':ICON.moon||'☾')+'</span><span class="at"><b>'+adTip()+'</b><small>'+(dn>=n?'أتممتَها اليوم، تقبّل الله':dn?'أنجزتَ '+AR(dn)+' من '+AR(n):'من الكتاب والسنة · ابدأ الآن')+'</small></span><span class="ac">'+ICON.back+'</span></button>';}
+  {const W=homeWin(),tab=W.tab;if(tab){const dn=adDone(tab),n=ADK[tab].length;x+='<button class="adban" data-act="nav" data-v="adhkar"><span class="ai">'+(tab==='sabah'?ICON.sun||'☀':ICON.moon||'☾')+'</span><span class="at"><b>'+adTip()+'</b><small>'+(dn>=n?'أتممتَها اليوم، تقبّل الله':dn?'أنجزتَ '+AR(dn)+' من '+AR(n):'من الكتاب والسنة · ابدأ الآن')+'</small></span><span class="ac">'+ICON.back+'</span></button>';}}
   if(S.mark)x+='<button class="mkban" data-act="markgo"><span class="mi">'+ICBM+'</span><span class="mt"><b>ابدأ من حيث وقفتَ</b><small>سورة '+D.N[S.mark.s-1]+' · الآية '+AR(S.mark.a)+' · صفحة '+AR(D.PG[S.mark.s-1][S.mark.a-1])+'</small></span><span class="ac">'+ICON.back+'</span></button>';
-  if(new Date().getDay()===5)x+='<div class="kahf"><div class="kh-top"><span class="kh-tag">يوم الجمعة</span><small>نحو ٣٠ دقيقة</small></div><div class="kh-main"><span class="kh-ic">'+(ICON.sun||'☀')+'</span><div><b>سورة الكهف</b><small>نور ما بين الجمعتين</small></div></div><p class="kh-h">«مَنْ قَرَأَ سُورَةَ الْكَهْفِ يَوْمَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ مَا بَيْنَ الْجُمُعَتَيْنِ»<small>رواه الحاكم والبيهقي، وصححه الألباني</small></p><div class="kh-b"><button class="kh-p" data-act="kahfplay">'+'استمع الآن'+'</button><button class="kh-r" data-act="kahfread">اقرأ</button></div></div>';
+  if(new Date().getDay()===5&&homeWin().kahf)x+='<div class="kahf"><div class="kh-top"><span class="kh-tag">يوم الجمعة</span><small>نحو ٣٠ دقيقة</small></div><div class="kh-main"><span class="kh-ic">'+(ICON.sun||'☀')+'</span><div><b>سورة الكهف</b><small>نور ما بين الجمعتين</small></div></div><p class="kh-h">«مَنْ قَرَأَ سُورَةَ الْكَهْفِ يَوْمَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ مَا بَيْنَ الْجُمُعَتَيْنِ»<small>رواه الحاكم والبيهقي، وصححه الألباني</small></p><div class="kh-b"><button class="kh-p" data-act="kahfplay">'+'استمع الآن'+'</button><button class="kh-r" data-act="kahfread">اقرأ</button></div></div>';
   if(isWird()){
     const w=wirdRange();
     x+=sect('الختمة')+'<div class="ptiles'+(ENTER?' stag':'')+'">'+wresCard()+'<button class="ptile next" data-act="nav" data-v="wird"><span class="pi">'+ICON.read+'</span><span class="pn"><b>وِرد اليوم</b><small>'+(w?'من سورة '+D.N[D.P[w[0]][0]-1]+' إلى سورة '+D.N[D.P[w[1]][0]-1]:'أتممت الختمة')+'</small></span></button></div>';
@@ -2342,6 +2342,10 @@ function vQibla(){
 /* ---- الأذكار: صباح ومساء من الكتاب والسنة ---- */
 const ADT=[['sabah','أذكار الصباح'],['masa','أذكار المساء'],['nawm','النوم'],['istiqaz','الاستيقاظ'],['salat','بعد الصلاة'],['munasabat','المناسبات']];
 const ADMAIN=['sabah','masa'];const ADG={adhkar:['sabah','masa'],adhkar2:['nawm','istiqaz'],adhkar3:['salat'],adhkar4:['munasabat']},ADGT={adhkar:'الأذكار',adhkar2:'أذكار النوم والاستيقاظ',adhkar3:'أذكار بعد الصلاة',adhkar4:'أذكار المناسبات'};
+function homeWin(){const n=new Date(),T=todayTimes(n),H=36e5;let f,d,m,i;
+  if(T){f=+T.fajr;d=+T.dhuhr;m=+T.maghrib;i=+T.isha}
+  else{const z=new Date(n);z.setHours(0,0,0,0);const q=h=>+z+h*H;f=q(5);d=q(12);m=q(18);i=q(19.5)}
+  const t=+n;return {tab:t>=f&&t<d-2*H?'sabah':(t>=m-H&&t<i?'masa':null),kahf:t>=f&&t<m}}
 const adAuto=()=>new Date().getHours()<12?'sabah':'masa';
 function adSt(tab){const k=String(dayKey());if(!S.adk||S.adk.k!==k)S.adk={k:k,t:{}};return S.adk.t[tab]||(S.adk.t[tab]={})}
 function adLeft(tab,it){const m=adSt(tab);return m[it.i]==null?it.c:m[it.i]}
@@ -4037,7 +4041,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=189;
+const APPV=190;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
