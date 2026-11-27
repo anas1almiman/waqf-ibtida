@@ -1096,7 +1096,7 @@ body.dark .mpage.hf.qx .ae:not(.wq):not(.be){color:#A9C595}
 body.dark .mpage.sh.sx{background:#fff}
 .mpage.sh.sx .mtop,.mpage.sh.sx .mfoot,.mpage.sh.sx::before,.mpage.sh.sx::after{display:none}
 .mpage.sh.sx .shw{position:relative;flex:none;width:min(100cqw,calc(100cqh*var(--ar)));aspect-ratio:var(--ar)}
-.mpage.sh.sx .shw.fr{background:url(sh2/frame.webp?v=2) center/100% 100% no-repeat}
+.mpage.sh.sx .shw.fr{background:url(sh2/frame.webp?v=3) center/100% 100% no-repeat}
 .mpage.sh.sx .shi{display:block;width:100%;height:100%;max-width:none;max-height:none;transform:none;object-fit:fill}
 .mlines.sho{position:absolute;inset:0;display:block;padding:0;margin:0;width:auto;height:auto;font-size:0}
 .mlines.sho .ay{position:absolute;display:block;border-radius:3px;mix-blend-mode:multiply;-webkit-tap-highlight-color:transparent}
@@ -1698,9 +1698,9 @@ function pgOf(s,a){const n=D.Q[s-1].length;a=Math.max(1,Math.min(a,n));return S.
 function mus2sh(pg){mlsInit();const m=MLS[Math.max(1,Math.min(604,pg))-1];return shPgOf(m[0],m[1])}
 function shAyat(p){const k0=SHS[p-1],k1=p<SHN?SHS[p]:115000,o=[];let s=Math.floor(k0/1000),a=k0%1000;for(let g=0;g<400;g++){const k=s*1000+a;if(k>=k1&&o.length)break;o.push([s,a]);a++;if(a>D.Q[s-1].length){s++;a=1}if(s>114)break}return o}
 const SHD=new Set(),SHP={};
-function shSrc(p){return 'sh2/'+pad3(p)+'.webp?v=2'}
+function shSrc(p){return 'sh2/'+pad3(p)+'.webp?v=3'}
 let SHR=null,SHRP=null;
-function shrLoad(){if(!SHRP)SHRP=Promise.all([fetch('sh2/r.json?v=2').then(r=>{if(!r.ok)throw new Error('http');return r.json()}),new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const f=()=>ok();if(i.decode)i.decode().then(f,f);else f()};i.onerror=()=>no(new Error('fr'));i.src='sh2/frame.webp?v=2'})]).then(a=>{SHR=a[0]},e=>{SHRP=null;throw e});return SHRP}
+function shrLoad(){if(!SHRP)SHRP=Promise.all([fetch('sh2/r.json?v=3').then(r=>{if(!r.ok)throw new Error('http');return r.json()}),new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const f=()=>ok();if(i.decode)i.decode().then(f,f);else f()};i.onerror=()=>no(new Error('fr'));i.src='sh2/frame.webp?v=3'})]).then(a=>{SHR=a[0]},e=>{SHRP=null;throw e});return SHRP}
 function shSA(p,k){const v=SHS[p-1];let s=Math.floor(v/1000),a=v%1000;for(let i=0;i<k;i++){a++;if(a>D.Q[s-1].length){s++;a=1}}return [s,a]}
 function shOv(p,hl){const R=SHR&&SHR.r[p];if(!R)return '';let h='';R.forEach(q=>{const sa=shSA(p,q[0]);if(sa[0]>114)return;h+='<span class="ay'+hlCls(hl,sa[0],sa[1])+bmCls(sa[0],sa[1])+'" data-act="ayt" data-s="'+sa[0]+'" data-a="'+sa[1]+'" style="left:'+q[1]/10+'%;top:'+q[2]/10+'%;width:'+(q[3]-q[1])/10+'%;height:'+(q[4]-q[2])/10+'%"></span>'});return h}
 function shReady(p){return SHD.has(p)}
@@ -4058,7 +4058,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=192;
+const APPV=193;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
