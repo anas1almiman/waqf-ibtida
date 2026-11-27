@@ -1075,17 +1075,19 @@ html[data-tbk="1"]::view-transition-new(tabbar){animation:none}
 /* ===== v188 mushaf page: flat, high-contrast, King Fahd style ===== */
 .mpage.hf{background:#F1EEDF;border:0;outline:0;border-radius:0;box-shadow:none;padding:6px 0 4px}
 body.dark .mpage.hf{background:#181816}
-.mpage.hf .mlines{color:#0A0A09;padding:0 5px}
+.mpage.hf .mlines{color:#0A0A09;padding:0 2px}
+.mpage.hf .mlines.cap{justify-content:center}
 body.dark .mpage.hf .mlines{color:#F3F1E8}
 .mpage.hf .mtop{padding:2px 14px 0;min-height:26px;align-items:center;font:700 17px 'KFGQPC Hafs','Amiri Quran','Amiri',serif;color:#0A0A09}
 body.dark .mpage.hf .mtop{color:#F3F1E8}
 .mpage.hf .mfoot{padding:2px 0 0;min-height:34px;align-items:center;font:700 24px 'Amiri',serif;color:#0A0A09}
 body.dark .mpage.hf .mfoot{color:#F3F1E8}
-.mpage.hf.qx .ml:not(.mh):not(.mb){-webkit-text-stroke:.22px currentColor}
+.mpage.hf.qx .ml.qx{word-spacing:-.25em}
+.mpage.hf.qx .ml.qx.c{word-spacing:-.04em}
 .mpage.hf.qx .ml.mh span{font-family:"KFGQPC Hafs","Amiri Quran","Amiri",serif;font-weight:700;font-size:calc(var(--mf)*1.1);line-height:1.5;color:#0A0A09;border:0;border-block:4px double rgba(78,106,61,.75);outline:0;border-radius:0;background:linear-gradient(90deg,transparent,rgba(78,106,61,.12) 20%,rgba(78,106,61,.12) 80%,transparent);margin:2px 6px}
 body.dark .mpage.hf.qx .ml.mh span{color:#F3F1E8;border-block-color:rgba(169,197,149,.7);background:linear-gradient(90deg,transparent,rgba(169,197,149,.12) 20%,rgba(169,197,149,.12) 80%,transparent)}
 .mpage.hf.qx .ml.mb{font-size:calc(var(--mf)*1.22)}
-.mpage.hf.qx .ae{font-size:1.14em}
+.mpage.hf.qx .ae{font-size:1.14em;margin-inline:.14em}
 .mpage.hf.qx .ae:not(.wq):not(.be){color:#4E6A3D;-webkit-text-stroke:0;text-shadow:none}
 body.dark .mpage.hf.qx .ae:not(.wq):not(.be){color:#A9C595}
 </style>
@@ -1790,7 +1792,8 @@ function musFit(){const pe=document.querySelector('#app .mpage');if(!pe||pe.clas
   const cs=getComputedStyle(box);const cw=box.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),ch=box.clientHeight;if(!mx||!cw)return;
   const p12=pe.classList.contains('p12'),qx=pe.classList.contains('qx');
   const rowH=ch/Math.max(rows,p12?9:15);const f=Math.min(20*cw/mx*(qx?0.995:0.985),rowH/(qx?1.62:1.78),p12?30:60);
-  box.style.setProperty('--mf',f.toFixed(2)+'px');box.style.setProperty('--mr',rowH.toFixed(2)+'px');
+  const rowC=qx&&!p12?Math.min(rowH,f*2.25):rowH;box.classList.toggle('cap',rowC<rowH-1);
+  box.style.setProperty('--mf',f.toFixed(2)+'px');box.style.setProperty('--mr',rowC.toFixed(2)+'px');
   L.forEach((e,i)=>e.classList.toggle('c',p12||ws[i]<mx*(qx?0.74:0.72)))}
 let MFL=[];
 function musFlipClean(){MFL.forEach(e=>{try{e.remove()}catch(_){}});MFL=[]}
@@ -4034,7 +4037,7 @@ let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();persist();qibStop()}else{if(hiddenAt&&Date.now()-hiddenAt>30000&&S.onb&&!SH&&cur().v==='home')render();hiddenAt=0}});
 window.addEventListener('pagehide',()=>{persist()});
 setInterval(()=>{if(S.onb&&cur().v==='home'&&!document.hidden&&!SH)render()},60000);
-const APPV=188;
+const APPV=189;
 async function updNow(){try{const ks=await caches.keys();await Promise.all(ks.filter(k=>/^maqati-v/.test(k)).map(k=>caches.delete(k)))}catch(e){}try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}persist();location.replace(location.pathname+'?v='+APPV+'_'+Date.now())}
 function updBar(v){if(document.getElementById('updbar'))return;const d=document.createElement('div');d.id='updbar';d.className='updbar';d.innerHTML='<span>نسخة أحدث متاحة (v'+v+')</span><button data-act="upd">تحديث الآن</button>';document.body.appendChild(d)}
 function updCheck(){try{fetch('sw.js?c='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(x=>{const m=/maqati-v(\d+)/.exec(x);if(m&&+m[1]>APPV)updBar(m[1])}).catch(()=>{})}catch(e){}}
